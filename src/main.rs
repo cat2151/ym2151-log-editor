@@ -14,7 +14,7 @@ use std::{env, io};
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Get filename from command line args
     let args: Vec<String> = env::args().collect();
-    
+
     // Setup terminal
     enable_raw_mode()?;
     let mut stdout = io::stdout();

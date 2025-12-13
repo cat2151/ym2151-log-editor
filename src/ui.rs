@@ -13,8 +13,8 @@ pub fn render(f: &mut Frame, app: &App) {
         .direction(Direction::Vertical)
         .constraints([
             Constraint::Length(3), // Header
-            Constraint::Min(0),     // Content
-            Constraint::Length(3),  // Footer
+            Constraint::Min(0),    // Content
+            Constraint::Length(3), // Footer
         ])
         .split(f.area());
 
@@ -45,7 +45,7 @@ fn render_header(f: &mut Frame, area: Rect, app: &App) {
 
 fn render_content(f: &mut Frame, area: Rect, app: &App) {
     let visible_height = area.height.saturating_sub(2) as usize; // Account for borders
-    
+
     // Calculate scroll offset to keep selected item visible
     let mut scroll_offset = app.scroll_offset;
     if app.selected_index >= scroll_offset + visible_height {
@@ -76,12 +76,7 @@ fn render_content(f: &mut Frame, area: Rect, app: &App) {
         })
         .collect();
 
-    let list = List::new(items)
-        .block(
-            Block::default()
-                .borders(Borders::ALL)
-                .title("Events")
-        );
+    let list = List::new(items).block(Block::default().borders(Borders::ALL).title("Events"));
 
     f.render_widget(list, area);
 }

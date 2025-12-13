@@ -116,7 +116,7 @@ impl App {
 
         let event = &self.log.events[index];
         let time_str = self.get_time_string(index);
-        
+
         if event.is_key_on() {
             format!("{}  KeyON  {}", time_str, event.data)
         } else {

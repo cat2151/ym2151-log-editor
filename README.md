@@ -2,6 +2,11 @@
 
 YM2151 event log editor with TUI interface. Written in Rust.
 
+<p align="left">
+  <a href="README.ja.md"><img src="https://img.shields.io/badge/🇯🇵-Japanese-red.svg" alt="Japanese"></a>
+  <a href="README.md"><img src="https://img.shields.io/badge/🇺🇸-English-blue.svg" alt="English"></a>
+</p>
+
 ## Overview
 
 A terminal-based JSON editor for YM2151 synthesizer event logs. This tool helps visualize and edit YM2151 event data, with special focus on timing adjustments and event inspection.

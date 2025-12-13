@@ -83,6 +83,16 @@ impl App {
         }
     }
 
+    /// Update scroll offset to keep selected item visible
+    pub fn update_scroll(&mut self, visible_height: usize) {
+        if self.selected_index >= self.scroll_offset + visible_height {
+            self.scroll_offset = self.selected_index.saturating_sub(visible_height - 1);
+        }
+        if self.selected_index < self.scroll_offset {
+            self.scroll_offset = self.selected_index;
+        }
+    }
+
     /// Get cumulative time for an event (delta from previous)
     pub fn get_cumulative_time(&self, index: usize) -> f64 {
         if index == 0 {

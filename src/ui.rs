@@ -8,7 +8,7 @@ use ratatui::{
 };
 
 /// Render the application UI
-pub fn render(f: &mut Frame, app: &App) {
+pub fn render(f: &mut Frame, app: &mut App) {
     let chunks = Layout::default()
         .direction(Direction::Vertical)
         .constraints([
@@ -43,24 +43,18 @@ fn render_header(f: &mut Frame, area: Rect, app: &App) {
     f.render_widget(header, area);
 }
 
-fn render_content(f: &mut Frame, area: Rect, app: &App) {
+fn render_content(f: &mut Frame, area: Rect, app: &mut App) {
     let visible_height = area.height.saturating_sub(2) as usize; // Account for borders
 
-    // Calculate scroll offset to keep selected item visible
-    let mut scroll_offset = app.scroll_offset;
-    if app.selected_index >= scroll_offset + visible_height {
-        scroll_offset = app.selected_index.saturating_sub(visible_height - 1);
-    }
-    if app.selected_index < scroll_offset {
-        scroll_offset = app.selected_index;
-    }
+    // Update scroll offset to keep selected item visible
+    app.update_scroll(visible_height);
 
     let items: Vec<ListItem> = app
         .log
         .events
         .iter()
         .enumerate()
-        .skip(scroll_offset)
+        .skip(app.scroll_offset)
         .take(visible_height)
         .map(|(i, _)| {
             let content = app.format_event(i);

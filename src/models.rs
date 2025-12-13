@@ -15,7 +15,7 @@ pub struct Ym2151Log {
 }
 
 impl Ym2151Event {
-    /// Check if this event is a KeyON event (data value 0x00 to 0xFF on register 0x08)
+    /// Check if this event is a KeyON event (register 0x08)
     pub fn is_key_on(&self) -> bool {
         self.addr.to_uppercase() == "08"
     }

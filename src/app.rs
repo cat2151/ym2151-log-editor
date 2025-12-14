@@ -251,11 +251,8 @@ impl App {
         };
 
         // Insert the new event at the selected position
-        if self.selected_index <= self.log.events.len() {
-            self.log.events.insert(self.selected_index, new_event);
-        } else {
-            self.log.events.push(new_event);
-        }
+        // insert() can handle index == len(), which appends to the end
+        self.log.events.insert(self.selected_index, new_event);
 
         // Keep the cursor on the newly inserted event (don't move selected_index)
         // Adjust scroll_offset if necessary to keep the new event visible

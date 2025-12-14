@@ -96,6 +96,10 @@ ym2151-log-editor path/to/file.json
 | Key | Action |
 |-----|--------|
 | ↑/↓ | Navigate through events |
+| / or ENTER | Insert new event before current line |
+| DELETE | Delete current event |
+| 0-9 | Set wait time (0-9ms, Cumulative mode only) |
+| P | Preview playback from start to current event |
 | T | Toggle time display mode |
 | S | Save current file |
 | Q/ESC | Quit application |
@@ -118,10 +122,10 @@ ym2151-log-editor path/to/file.json
 ## Future Enhancements (Not Yet Implemented)
 
 ### Phase 2: Editing Capabilities
-- [ ] Edit time values (increase/decrease with +/- keys)
-- [ ] Edit register address and data values
-- [ ] Insert new events
-- [ ] Delete events
+- [x] Insert new events (/ or ENTER key)
+- [x] Delete events (DELETE key)
+- [x] Edit time values (0-9 keys for wait time in Cumulative mode)
+- [ ] Edit register address and data values for inserted events
 - [ ] Undo/Redo functionality
 
 ### Phase 3: Advanced Features

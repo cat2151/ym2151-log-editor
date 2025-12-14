@@ -51,6 +51,10 @@ cargo run -- path/to/your/file.json
 | Key | Action |
 |-----|--------|
 | ↑/↓ | Navigate through events |
+| / or ENTER | Insert new event before current line |
+| DELETE | Delete current event |
+| 0-9 | Set wait time (0-9ms, Cumulative mode only) |
+| P | Preview playback from start to current event |
 | T | Toggle time display mode (Cumulative ↔ Timestamp) |
 | S | Save file |
 | Q or ESC | Quit application |
@@ -162,9 +166,7 @@ See [LICENSE](LICENSE) file for details.
 
 ## Future Enhancements
 
-- Edit time values (increase/decrease)
-- Edit register addresses and data values
-- Insert/delete events
+- Edit register addresses and data values for inserted events
 - Undo/redo functionality
 - Audio preview integration
 - Batch time scaling

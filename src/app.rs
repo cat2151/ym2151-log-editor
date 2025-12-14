@@ -228,6 +228,38 @@ impl App {
             self.scroll_offset = self.selected_index;
         }
     }
+
+    /// Insert a new event before the currently selected position
+    pub fn insert_event_before_selected(&mut self) {
+        // Calculate the timestamp for the new event
+        let new_time = if self.selected_index == 0 {
+            // Inserting before the first event: use time 0.0
+            0.0
+        } else if self.selected_index >= self.log.events.len() {
+            // Inserting after all events: use last event's time
+            self.log.events.last().map(|e| e.time).unwrap_or(0.0)
+        } else {
+            // Inserting between events: use previous event's time
+            self.log.events[self.selected_index - 1].time
+        };
+
+        // Create a new default event
+        let new_event = crate::models::Ym2151Event {
+            time: new_time,
+            addr: "00".to_string(),
+            data: "00".to_string(),
+        };
+
+        // Insert the new event at the selected position
+        // insert() can handle index == len(), which appends to the end
+        self.log.events.insert(self.selected_index, new_event);
+
+        // Keep the cursor on the newly inserted event (don't move selected_index)
+        // Adjust scroll_offset if necessary to keep the new event visible
+        if self.selected_index < self.scroll_offset {
+            self.scroll_offset = self.selected_index;
+        }
+    }
 }
 
 impl Default for App {
@@ -506,5 +538,166 @@ mod tests {
         // Try to move down (should stay at 0)
         app.move_down();
         assert_eq!(app.selected_index, 0);
+    }
+
+    #[test]
+    fn test_insert_event_before_selected_at_start() {
+        let mut app = App::new();
+        app.log.events = vec![
+            Ym2151Event {
+                time: 0.01,
+                addr: "20".to_string(),
+                data: "4F".to_string(),
+            },
+            Ym2151Event {
+                time: 0.02,
+                addr: "40".to_string(),
+                data: "16".to_string(),
+            },
+        ];
+
+        // Insert before first event
+        app.selected_index = 0;
+        app.insert_event_before_selected();
+
+        // Verify event count increased
+        assert_eq!(app.log.events.len(), 3);
+
+        // Verify new event inserted at position 0
+        assert_eq!(app.log.events[0].addr, "00");
+        assert_eq!(app.log.events[0].data, "00");
+        assert!((app.log.events[0].time - 0.0).abs() < 0.0001);
+
+        // Verify original events shifted
+        assert_eq!(app.log.events[1].addr, "20");
+        assert_eq!(app.log.events[2].addr, "40");
+
+        // Verify selected_index stayed on the new event
+        assert_eq!(app.selected_index, 0);
+    }
+
+    #[test]
+    fn test_insert_event_before_selected_in_middle() {
+        let mut app = App::new();
+        app.log.events = vec![
+            Ym2151Event {
+                time: 0.0,
+                addr: "20".to_string(),
+                data: "4F".to_string(),
+            },
+            Ym2151Event {
+                time: 0.01,
+                addr: "40".to_string(),
+                data: "16".to_string(),
+            },
+            Ym2151Event {
+                time: 0.02,
+                addr: "60".to_string(),
+                data: "14".to_string(),
+            },
+        ];
+
+        // Insert before middle event (index 1)
+        app.selected_index = 1;
+        app.insert_event_before_selected();
+
+        // Verify event count increased
+        assert_eq!(app.log.events.len(), 4);
+
+        // Verify new event inserted at position 1 with time from previous event
+        assert_eq!(app.log.events[1].addr, "00");
+        assert_eq!(app.log.events[1].data, "00");
+        assert!((app.log.events[1].time - 0.0).abs() < 0.0001);
+
+        // Verify original events
+        assert_eq!(app.log.events[0].addr, "20");
+        assert_eq!(app.log.events[2].addr, "40");
+        assert_eq!(app.log.events[3].addr, "60");
+
+        // Verify selected_index stayed on the new event
+        assert_eq!(app.selected_index, 1);
+    }
+
+    #[test]
+    fn test_insert_event_before_selected_at_end() {
+        let mut app = App::new();
+        app.log.events = vec![
+            Ym2151Event {
+                time: 0.0,
+                addr: "20".to_string(),
+                data: "4F".to_string(),
+            },
+            Ym2151Event {
+                time: 0.01,
+                addr: "40".to_string(),
+                data: "16".to_string(),
+            },
+        ];
+
+        // Move cursor to empty line after last event
+        app.selected_index = 2;
+        app.insert_event_before_selected();
+
+        // Verify event count increased
+        assert_eq!(app.log.events.len(), 3);
+
+        // Verify new event inserted at position 2 with time from last event
+        assert_eq!(app.log.events[2].addr, "00");
+        assert_eq!(app.log.events[2].data, "00");
+        assert!((app.log.events[2].time - 0.01).abs() < 0.0001);
+
+        // Verify original events unchanged
+        assert_eq!(app.log.events[0].addr, "20");
+        assert_eq!(app.log.events[1].addr, "40");
+
+        // Verify selected_index stayed at 2 (now pointing to the new event)
+        assert_eq!(app.selected_index, 2);
+    }
+
+    #[test]
+    fn test_insert_event_before_selected_empty_list() {
+        let mut app = App::new();
+        app.log.events = vec![];
+
+        // Insert into empty list
+        app.selected_index = 0;
+        app.insert_event_before_selected();
+
+        // Verify event count increased
+        assert_eq!(app.log.events.len(), 1);
+
+        // Verify new event created with time 0.0
+        assert_eq!(app.log.events[0].addr, "00");
+        assert_eq!(app.log.events[0].data, "00");
+        assert!((app.log.events[0].time - 0.0).abs() < 0.0001);
+
+        // Verify selected_index is still 0
+        assert_eq!(app.selected_index, 0);
+    }
+
+    #[test]
+    fn test_insert_event_scroll_adjustment() {
+        let mut app = App::new();
+        app.log.events = vec![
+            Ym2151Event {
+                time: 0.0,
+                addr: "20".to_string(),
+                data: "4F".to_string(),
+            },
+            Ym2151Event {
+                time: 0.01,
+                addr: "40".to_string(),
+                data: "16".to_string(),
+            },
+        ];
+
+        // Set scroll_offset ahead of selected_index
+        app.selected_index = 0;
+        app.scroll_offset = 1;
+
+        app.insert_event_before_selected();
+
+        // Verify scroll_offset was adjusted to keep new event visible
+        assert_eq!(app.scroll_offset, 0);
     }
 }

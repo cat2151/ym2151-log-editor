@@ -109,6 +109,12 @@ fn run_app<B: ratatui::backend::Backend>(
                     KeyCode::Delete => {
                         app.delete_selected_event();
                     }
+                    KeyCode::Char('/') => {
+                        app.insert_event_before_selected();
+                    }
+                    KeyCode::Enter => {
+                        app.insert_event_before_selected();
+                    }
                     _ => {}
                 }
             }

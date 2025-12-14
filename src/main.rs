@@ -4,7 +4,7 @@ mod ui;
 
 use app::App;
 use crossterm::{
-    event::{self, DisableMouseCapture, EnableMouseCapture, Event, KeyCode},
+    event::{self, DisableMouseCapture, EnableMouseCapture, Event, KeyCode, KeyEventKind},
     execute,
     terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
 };
@@ -66,26 +66,30 @@ fn run_app<B: ratatui::backend::Backend>(
         terminal.draw(|f| ui::render(f, app))?;
 
         if let Event::Key(key) = event::read()? {
-            match key.code {
-                KeyCode::Char('q') | KeyCode::Char('Q') | KeyCode::Esc => {
-                    app.should_quit = true;
-                }
-                KeyCode::Char('t') | KeyCode::Char('T') => {
-                    app.toggle_time_mode();
-                }
-                KeyCode::Char('s') | KeyCode::Char('S') => {
-                    if let Err(e) = app.save_file() {
-                        // In a real app, you'd want to show this error in the UI
-                        eprintln!("Error saving file: {}", e);
+            // Only process key press events, not release events
+            // This prevents double-triggering on Windows
+            if key.kind == KeyEventKind::Press {
+                match key.code {
+                    KeyCode::Char('q') | KeyCode::Char('Q') | KeyCode::Esc => {
+                        app.should_quit = true;
                     }
+                    KeyCode::Char('t') | KeyCode::Char('T') => {
+                        app.toggle_time_mode();
+                    }
+                    KeyCode::Char('s') | KeyCode::Char('S') => {
+                        if let Err(e) = app.save_file() {
+                            // In a real app, you'd want to show this error in the UI
+                            eprintln!("Error saving file: {}", e);
+                        }
+                    }
+                    KeyCode::Up => {
+                        app.move_up();
+                    }
+                    KeyCode::Down => {
+                        app.move_down();
+                    }
+                    _ => {}
                 }
-                KeyCode::Up => {
-                    app.move_up();
-                }
-                KeyCode::Down => {
-                    app.move_down();
-                }
-                _ => {}
             }
         }
 

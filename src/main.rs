@@ -15,6 +15,16 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Get filename from command line args
     let args: Vec<String> = env::args().collect();
 
+    // Initialize server on Windows
+    #[cfg(windows)]
+    {
+        ym2151_log_play_server::client::init_client(false); // false = not verbose
+        if let Err(e) = ym2151_log_play_server::client::ensure_server_ready("cat-play-mml") {
+            eprintln!("⚠️  Warning: Failed to ensure server is ready: {}", e);
+            eprintln!("   Preview playback may not be available.");
+        }
+    }
+
     // Setup terminal
     enable_raw_mode()?;
     let mut stdout = io::stdout();
@@ -81,6 +91,9 @@ fn run_app<B: ratatui::backend::Backend>(
                             // In a real app, you'd want to show this error in the UI
                             eprintln!("Error saving file: {}", e);
                         }
+                    }
+                    KeyCode::Char('p') | KeyCode::Char('P') => {
+                        app.preview_current_event();
                     }
                     KeyCode::Up => {
                         app.move_up();

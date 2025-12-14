@@ -142,7 +142,10 @@ impl App {
         }
 
         // Create a log containing events from start to current selection (inclusive)
-        let end_index = (self.selected_index + 1).min(self.log.events.len());
+        let end_index = self
+            .selected_index
+            .saturating_add(1)
+            .min(self.log.events.len());
         let preview_events = self.log.events[0..end_index].to_vec();
         let preview_log = crate::models::Ym2151Log {
             events: preview_events,

@@ -168,9 +168,9 @@ impl App {
     /// Only works in Cumulative display mode
     /// 
     /// # Arguments
-    /// * `milliseconds` - The wait time in milliseconds (typically 1-10).
+    /// * `milliseconds` - The wait time in milliseconds (typically 0-9).
     ///   Values are used as-is without validation. Common usage:
-    ///   1-9 for 1-9ms, 10 for 10ms (mapped from keys 1-0).
+    ///   0-9ms (mapped from keys 0-9).
     pub fn set_wait_time_ms(&mut self, milliseconds: u32) {
         // Only allow modification in Cumulative mode
         if self.time_mode != TimeDisplayMode::Cumulative {
@@ -308,5 +308,39 @@ mod tests {
         
         // Second event should also be adjusted (was 0.01, delta = +0.003)
         assert!((app.log.events[1].time - 0.013).abs() < 0.0001);
+    }
+
+    #[test]
+    fn test_set_wait_time_ms_zero() {
+        let mut app = App::new();
+        app.time_mode = TimeDisplayMode::Cumulative;
+        
+        app.log.events = vec![
+            Ym2151Event {
+                time: 0.0,
+                addr: "20".to_string(),
+                data: "4F".to_string(),
+            },
+            Ym2151Event {
+                time: 0.01,
+                addr: "40".to_string(),
+                data: "16".to_string(),
+            },
+            Ym2151Event {
+                time: 0.02,
+                addr: "60".to_string(),
+                data: "14".to_string(),
+            },
+        ];
+        
+        // Select event 1 and set wait time to 0ms
+        app.selected_index = 1;
+        app.set_wait_time_ms(0);
+        
+        // Verify event 1 now has timestamp 0.0 (same as previous event)
+        assert!((app.log.events[1].time - 0.0).abs() < 0.0001);
+        
+        // Verify event 2 was also adjusted (should be 0.01, was 0.02, delta = -0.01)
+        assert!((app.log.events[2].time - 0.01).abs() < 0.0001);
     }
 }

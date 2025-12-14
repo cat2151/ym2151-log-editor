@@ -96,11 +96,8 @@ fn run_app<B: ratatui::backend::Backend>(
                         app.preview_current_event();
                     }
                     KeyCode::Char(c @ '0'..='9') => {
-                        // Map '1'-'9' to 1-9ms, '0' to 10ms
-                        let milliseconds = match c {
-                            '0' => 10,
-                            c => c.to_digit(10).unwrap(),
-                        };
+                        // Map '0'-'9' to 0-9ms
+                        let milliseconds = c.to_digit(10).unwrap();
                         app.set_wait_time_ms(milliseconds);
                     }
                     KeyCode::Up => {

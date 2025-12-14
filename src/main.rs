@@ -106,6 +106,9 @@ fn run_app<B: ratatui::backend::Backend>(
                     KeyCode::Down => {
                         app.move_down();
                     }
+                    KeyCode::Delete => {
+                        app.delete_selected_event();
+                    }
                     _ => {}
                 }
             }

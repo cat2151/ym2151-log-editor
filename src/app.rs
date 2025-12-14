@@ -166,7 +166,7 @@ impl App {
 
     /// Set wait time (cumulative time) for the selected event in milliseconds
     /// Only works in Cumulative display mode
-    /// 
+    ///
     /// # Arguments
     /// * `milliseconds` - The wait time in milliseconds (typically 0-9).
     ///   Values are used as-is without validation. Common usage:
@@ -206,6 +206,27 @@ impl App {
             self.log.events[i].time += time_delta;
         }
     }
+
+    /// Delete the currently selected event
+    pub fn delete_selected_event(&mut self) {
+        // Check if we have events and a valid selection
+        if self.log.events.is_empty() || self.selected_index >= self.log.events.len() {
+            return;
+        }
+
+        // Remove the selected event
+        self.log.events.remove(self.selected_index);
+
+        // Adjust selected_index if it's now out of bounds
+        if !self.log.events.is_empty() && self.selected_index >= self.log.events.len() {
+            self.selected_index = self.log.events.len() - 1;
+        }
+
+        // Adjust scroll_offset if necessary
+        if self.scroll_offset > self.selected_index {
+            self.scroll_offset = self.selected_index;
+        }
+    }
 }
 
 impl Default for App {
@@ -223,7 +244,7 @@ mod tests {
     fn test_set_wait_time_ms() {
         let mut app = App::new();
         app.time_mode = TimeDisplayMode::Cumulative;
-        
+
         // Create test events
         app.log.events = vec![
             Ym2151Event {
@@ -242,14 +263,14 @@ mod tests {
                 data: "14".to_string(),
             },
         ];
-        
+
         // Select event 1 and set wait time to 5ms
         app.selected_index = 1;
         app.set_wait_time_ms(5);
-        
+
         // Verify event 1 now has timestamp 0.005 (0.0 + 0.005)
         assert!((app.log.events[1].time - 0.005).abs() < 0.0001);
-        
+
         // Verify event 2 was also adjusted (should be 0.015, was 0.02, delta = -0.005)
         assert!((app.log.events[2].time - 0.015).abs() < 0.0001);
     }
@@ -258,7 +279,7 @@ mod tests {
     fn test_set_wait_time_ms_timestamp_mode() {
         let mut app = App::new();
         app.time_mode = TimeDisplayMode::Timestamp;
-        
+
         app.log.events = vec![
             Ym2151Event {
                 time: 0.0,
@@ -271,13 +292,13 @@ mod tests {
                 data: "16".to_string(),
             },
         ];
-        
+
         app.selected_index = 1;
         let original_time = app.log.events[1].time;
-        
+
         // Should not modify in Timestamp mode
         app.set_wait_time_ms(5);
-        
+
         assert_eq!(app.log.events[1].time, original_time);
     }
 
@@ -285,7 +306,7 @@ mod tests {
     fn test_set_wait_time_ms_first_event() {
         let mut app = App::new();
         app.time_mode = TimeDisplayMode::Cumulative;
-        
+
         app.log.events = vec![
             Ym2151Event {
                 time: 0.0,
@@ -298,14 +319,14 @@ mod tests {
                 data: "16".to_string(),
             },
         ];
-        
+
         // Select first event and set wait time to 3ms
         app.selected_index = 0;
         app.set_wait_time_ms(3);
-        
+
         // First event should be at 0.003
         assert!((app.log.events[0].time - 0.003).abs() < 0.0001);
-        
+
         // Second event should also be adjusted (was 0.01, delta = +0.003)
         assert!((app.log.events[1].time - 0.013).abs() < 0.0001);
     }
@@ -314,7 +335,7 @@ mod tests {
     fn test_set_wait_time_ms_zero() {
         let mut app = App::new();
         app.time_mode = TimeDisplayMode::Cumulative;
-        
+
         app.log.events = vec![
             Ym2151Event {
                 time: 0.0,
@@ -332,15 +353,111 @@ mod tests {
                 data: "14".to_string(),
             },
         ];
-        
+
         // Select event 1 and set wait time to 0ms
         app.selected_index = 1;
         app.set_wait_time_ms(0);
-        
+
         // Verify event 1 now has timestamp 0.0 (same as previous event)
         assert!((app.log.events[1].time - 0.0).abs() < 0.0001);
-        
+
         // Verify event 2 was also adjusted (should be 0.01, was 0.02, delta = -0.01)
         assert!((app.log.events[2].time - 0.01).abs() < 0.0001);
+    }
+
+    #[test]
+    fn test_delete_selected_event() {
+        let mut app = App::new();
+        app.log.events = vec![
+            Ym2151Event {
+                time: 0.0,
+                addr: "20".to_string(),
+                data: "4F".to_string(),
+            },
+            Ym2151Event {
+                time: 0.01,
+                addr: "40".to_string(),
+                data: "16".to_string(),
+            },
+            Ym2151Event {
+                time: 0.02,
+                addr: "60".to_string(),
+                data: "14".to_string(),
+            },
+        ];
+
+        // Select middle event and delete it
+        app.selected_index = 1;
+        app.delete_selected_event();
+
+        // Verify event count decreased
+        assert_eq!(app.log.events.len(), 2);
+
+        // Verify the correct event was deleted (remaining events should be index 0 and 2)
+        assert_eq!(app.log.events[0].addr, "20");
+        assert_eq!(app.log.events[1].addr, "60");
+
+        // Verify selected_index is still valid
+        assert_eq!(app.selected_index, 1);
+    }
+
+    #[test]
+    fn test_delete_last_event() {
+        let mut app = App::new();
+        app.log.events = vec![
+            Ym2151Event {
+                time: 0.0,
+                addr: "20".to_string(),
+                data: "4F".to_string(),
+            },
+            Ym2151Event {
+                time: 0.01,
+                addr: "40".to_string(),
+                data: "16".to_string(),
+            },
+        ];
+
+        // Select last event and delete it
+        app.selected_index = 1;
+        app.delete_selected_event();
+
+        // Verify event count decreased
+        assert_eq!(app.log.events.len(), 1);
+
+        // Verify selected_index was adjusted to last valid index
+        assert_eq!(app.selected_index, 0);
+    }
+
+    #[test]
+    fn test_delete_single_event() {
+        let mut app = App::new();
+        app.log.events = vec![Ym2151Event {
+            time: 0.0,
+            addr: "20".to_string(),
+            data: "4F".to_string(),
+        }];
+
+        // Select the only event and delete it
+        app.selected_index = 0;
+        app.delete_selected_event();
+
+        // Verify all events are deleted
+        assert_eq!(app.log.events.len(), 0);
+
+        // selected_index should remain 0 (though there are no events)
+        assert_eq!(app.selected_index, 0);
+    }
+
+    #[test]
+    fn test_delete_empty_list() {
+        let mut app = App::new();
+        app.log.events = vec![];
+
+        // Try to delete from empty list (should not panic)
+        app.selected_index = 0;
+        app.delete_selected_event();
+
+        // Verify still empty
+        assert_eq!(app.log.events.len(), 0);
     }
 }

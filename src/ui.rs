@@ -82,6 +82,7 @@ fn render_footer(f: &mut Frame, area: Rect, app: &App) {
         vec![
             Span::raw("↑/↓: Navigate | "),
             Span::raw("1-0: Set Wait(ms) | "),
+            Span::raw("/|ENTER: Insert | "),
             Span::raw("DEL: Delete | "),
             Span::raw("P: Preview | "),
             Span::raw("T: Toggle Time Mode | "),
@@ -91,6 +92,7 @@ fn render_footer(f: &mut Frame, area: Rect, app: &App) {
     } else {
         vec![
             Span::raw("↑/↓: Navigate | "),
+            Span::raw("/|ENTER: Insert | "),
             Span::raw("DEL: Delete | "),
             Span::raw("P: Preview | "),
             Span::raw("T: Toggle Time Mode | "),

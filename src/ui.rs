@@ -75,14 +75,25 @@ fn render_content(f: &mut Frame, area: Rect, app: &mut App) {
     f.render_widget(list, area);
 }
 
-fn render_footer(f: &mut Frame, area: Rect, _app: &App) {
-    let footer_text = vec![
-        Span::raw("↑/↓: Navigate | "),
-        Span::raw("P: Preview | "),
-        Span::raw("T: Toggle Time Mode | "),
-        Span::raw("S: Save | "),
-        Span::raw("Q/ESC: Quit"),
-    ];
+fn render_footer(f: &mut Frame, area: Rect, app: &App) {
+    let footer_text = if app.time_mode == TimeDisplayMode::Cumulative {
+        vec![
+            Span::raw("↑/↓: Navigate | "),
+            Span::raw("1-0: Set Wait(ms) | "),
+            Span::raw("P: Preview | "),
+            Span::raw("T: Toggle Time | "),
+            Span::raw("S: Save | "),
+            Span::raw("Q/ESC: Quit"),
+        ]
+    } else {
+        vec![
+            Span::raw("↑/↓: Navigate | "),
+            Span::raw("P: Preview | "),
+            Span::raw("T: Toggle Time Mode | "),
+            Span::raw("S: Save | "),
+            Span::raw("Q/ESC: Quit"),
+        ]
+    };
 
     let footer = Paragraph::new(Line::from(footer_text))
         .block(Block::default().borders(Borders::ALL))

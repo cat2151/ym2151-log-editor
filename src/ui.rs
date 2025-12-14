@@ -81,7 +81,7 @@ fn render_footer(f: &mut Frame, area: Rect, app: &App) {
             Span::raw("↑/↓: Navigate | "),
             Span::raw("1-0: Set Wait(ms) | "),
             Span::raw("P: Preview | "),
-            Span::raw("T: Toggle Time | "),
+            Span::raw("T: Toggle Time Mode | "),
             Span::raw("S: Save | "),
             Span::raw("Q/ESC: Quit"),
         ]

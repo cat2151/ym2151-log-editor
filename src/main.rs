@@ -95,35 +95,13 @@ fn run_app<B: ratatui::backend::Backend>(
                     KeyCode::Char('p') | KeyCode::Char('P') => {
                         app.preview_current_event();
                     }
-                    KeyCode::Char('1') => {
-                        app.set_wait_time_ms(1);
-                    }
-                    KeyCode::Char('2') => {
-                        app.set_wait_time_ms(2);
-                    }
-                    KeyCode::Char('3') => {
-                        app.set_wait_time_ms(3);
-                    }
-                    KeyCode::Char('4') => {
-                        app.set_wait_time_ms(4);
-                    }
-                    KeyCode::Char('5') => {
-                        app.set_wait_time_ms(5);
-                    }
-                    KeyCode::Char('6') => {
-                        app.set_wait_time_ms(6);
-                    }
-                    KeyCode::Char('7') => {
-                        app.set_wait_time_ms(7);
-                    }
-                    KeyCode::Char('8') => {
-                        app.set_wait_time_ms(8);
-                    }
-                    KeyCode::Char('9') => {
-                        app.set_wait_time_ms(9);
-                    }
-                    KeyCode::Char('0') => {
-                        app.set_wait_time_ms(10);
+                    KeyCode::Char(c @ '0'..='9') => {
+                        // Map '1'-'9' to 1-9ms, '0' to 10ms
+                        let milliseconds = match c {
+                            '0' => 10,
+                            c => c.to_digit(10).unwrap(),
+                        };
+                        app.set_wait_time_ms(milliseconds);
                     }
                     KeyCode::Up => {
                         app.move_up();

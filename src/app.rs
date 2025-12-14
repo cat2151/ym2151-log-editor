@@ -166,7 +166,11 @@ impl App {
 
     /// Set wait time (cumulative time) for the selected event in milliseconds
     /// Only works in Cumulative display mode
-    /// milliseconds: 1-10 (mapped from keys 1-0)
+    /// 
+    /// # Arguments
+    /// * `milliseconds` - The wait time in milliseconds (typically 1-10).
+    ///   Values are used as-is without validation. Common usage:
+    ///   1-9 for 1-9ms, 10 for 10ms (mapped from keys 1-0).
     pub fn set_wait_time_ms(&mut self, milliseconds: u32) {
         // Only allow modification in Cumulative mode
         if self.time_mode != TimeDisplayMode::Cumulative {

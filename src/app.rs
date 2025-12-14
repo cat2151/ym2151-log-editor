@@ -133,6 +133,36 @@ impl App {
             format!("{}  {}  {}", time_str, event.addr, event.data)
         }
     }
+
+    /// Preview current event by playing events from start up to selected position
+    #[cfg(windows)]
+    pub fn preview_current_event(&self) {
+        if self.log.events.is_empty() {
+            return;
+        }
+
+        // Create a log containing events from start to current selection (inclusive)
+        let end_index = self
+            .selected_index
+            .saturating_add(1)
+            .min(self.log.events.len());
+        let preview_events = self.log.events[0..end_index].to_vec();
+        let preview_log = crate::models::Ym2151Log {
+            events: preview_events,
+        };
+
+        // Convert to JSON and send to server
+        if let Ok(json_string) = serde_json::to_string(&preview_log) {
+            if let Err(e) = ym2151_log_play_server::client::send_json(&json_string) {
+                eprintln!("Preview playback error: {}", e);
+            }
+        }
+    }
+
+    #[cfg(not(windows))]
+    pub fn preview_current_event(&self) {
+        // No-op on non-Windows platforms
+    }
 }
 
 impl Default for App {

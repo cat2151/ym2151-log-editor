@@ -78,6 +78,7 @@ fn render_content(f: &mut Frame, area: Rect, app: &mut App) {
 fn render_footer(f: &mut Frame, area: Rect, _app: &App) {
     let footer_text = vec![
         Span::raw("↑/↓: Navigate | "),
+        Span::raw("P: Preview | "),
         Span::raw("T: Toggle Time Mode | "),
         Span::raw("S: Save | "),
         Span::raw("Q/ESC: Quit"),

@@ -78,7 +78,8 @@ impl App {
 
     /// Move selection down
     pub fn move_down(&mut self) {
-        if self.selected_index < self.log.events.len().saturating_sub(1) {
+        // Allow cursor to move to one position beyond the last event (for future insertion)
+        if self.selected_index < self.log.events.len() {
             self.selected_index += 1;
         }
     }
@@ -459,5 +460,51 @@ mod tests {
 
         // Verify still empty
         assert_eq!(app.log.events.len(), 0);
+    }
+
+    #[test]
+    fn test_move_down_to_empty_line() {
+        let mut app = App::new();
+        app.log.events = vec![
+            Ym2151Event {
+                time: 0.0,
+                addr: "20".to_string(),
+                data: "4F".to_string(),
+            },
+            Ym2151Event {
+                time: 0.01,
+                addr: "40".to_string(),
+                data: "16".to_string(),
+            },
+        ];
+
+        // Start at first event
+        app.selected_index = 0;
+
+        // Move down to second event
+        app.move_down();
+        assert_eq!(app.selected_index, 1);
+
+        // Move down to empty line (one beyond last event)
+        app.move_down();
+        assert_eq!(app.selected_index, 2);
+        assert_eq!(app.selected_index, app.log.events.len());
+
+        // Try to move down again (should stay at empty line)
+        app.move_down();
+        assert_eq!(app.selected_index, 2);
+    }
+
+    #[test]
+    fn test_move_down_empty_log() {
+        let mut app = App::new();
+        app.log.events = vec![];
+
+        // Start at index 0 (empty)
+        app.selected_index = 0;
+
+        // Try to move down (should stay at 0)
+        app.move_down();
+        assert_eq!(app.selected_index, 0);
     }
 }

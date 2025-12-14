@@ -49,15 +49,17 @@ fn render_content(f: &mut Frame, area: Rect, app: &mut App) {
     // Update scroll offset to keep selected item visible
     app.update_scroll(visible_height);
 
-    let items: Vec<ListItem> = app
-        .log
-        .events
-        .iter()
-        .enumerate()
-        .skip(app.scroll_offset)
-        .take(visible_height)
-        .map(|(i, _)| {
-            let content = app.format_event(i);
+    // Create list items for events, plus one empty line at the end
+    let total_lines = app.log.events.len() + 1; // +1 for empty line after last event
+    let items: Vec<ListItem> = (app.scroll_offset
+        ..total_lines.min(app.scroll_offset + visible_height))
+        .map(|i| {
+            let content = if i < app.log.events.len() {
+                app.format_event(i)
+            } else {
+                // Empty line for cursor positioning beyond last event
+                String::new()
+            };
             let style = if i == app.selected_index {
                 Style::default()
                     .fg(Color::Black)

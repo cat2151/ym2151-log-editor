@@ -173,3 +173,12 @@ cargo run -- test_data/sample.json
 - イベントフィルタリングと検索
 
 完全なロードマップについては[IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md)を参照してください。
+
+## projectが目指すもの
+- waitの最低限のedit
+- eventの最低限のedit
+- eventの最低限の可視化
+
+## projectが目指さないもの（スコープ外）
+- 高機能。高度な可視化。8chの並列表示。DAWのevent editorにある全ての機能以上のものを実現。万能の音楽エディタ。
+- eventをqueryすることで実現できる高度なedit。noteだけ、指定eventだけ、等をfilterしてeditし、かつevent増減でもevent間の依存関係を崩さないインテリジェントな自動event依存関係認識。

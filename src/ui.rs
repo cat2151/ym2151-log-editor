@@ -1,4 +1,5 @@
-use crate::app::{App, TimeDisplayMode};
+use crate::app::App;
+use crate::time_display::TimeDisplayMode;
 use ratatui::{
     layout::{Constraint, Direction, Layout, Rect},
     style::{Color, Modifier, Style},
@@ -51,8 +52,8 @@ fn render_content(f: &mut Frame, area: Rect, app: &mut App) {
 
     // Create list items for events, plus one empty line at the end
     let total_lines = app.log.events.len() + 1; // +1 for empty line after last event
-    let items: Vec<ListItem> = (app.scroll_offset
-        ..total_lines.min(app.scroll_offset + visible_height))
+    let items: Vec<ListItem> = (app.scroll_offset()
+        ..total_lines.min(app.scroll_offset() + visible_height))
         .map(|i| {
             let content = if i < app.log.events.len() {
                 app.format_event(i)
@@ -60,7 +61,7 @@ fn render_content(f: &mut Frame, area: Rect, app: &mut App) {
                 // Empty line for cursor positioning beyond last event
                 String::new()
             };
-            let style = if i == app.selected_index {
+            let style = if i == app.selected_index() {
                 Style::default()
                     .fg(Color::Black)
                     .bg(Color::White)

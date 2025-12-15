@@ -1,13 +1,6 @@
 use crate::models::Ym2151Log;
-
-/// Display mode for time values
-#[derive(Debug, Clone, Copy, PartialEq)]
-pub enum TimeDisplayMode {
-    /// Display cumulative time (delta from previous event)
-    Cumulative,
-    /// Display absolute timestamp
-    Timestamp,
-}
+use crate::navigation::NavigationState;
+use crate::time_display::TimeDisplayMode;
 
 /// Application state
 pub struct App {
@@ -15,14 +8,12 @@ pub struct App {
     pub log: Ym2151Log,
     /// Current file path (if any)
     pub file_path: Option<String>,
-    /// Current scroll position
-    pub scroll_offset: usize,
+    /// Navigation state (scroll and selection)
+    pub navigation: NavigationState,
     /// Time display mode
     pub time_mode: TimeDisplayMode,
     /// Whether the app should quit
     pub should_quit: bool,
-    /// Selected event index
-    pub selected_index: usize,
 }
 
 impl App {
@@ -30,28 +21,24 @@ impl App {
         Self {
             log: Ym2151Log { events: vec![] },
             file_path: None,
-            scroll_offset: 0,
+            navigation: NavigationState::new(),
             time_mode: TimeDisplayMode::Cumulative,
             should_quit: false,
-            selected_index: 0,
         }
     }
 
     /// Load a JSON file
     pub fn load_file(&mut self, path: &str) -> Result<(), Box<dyn std::error::Error>> {
-        let content = std::fs::read_to_string(path)?;
-        self.log = serde_json::from_str(&content)?;
+        self.log = crate::file_io::load_file(path)?;
         self.file_path = Some(path.to_string());
-        self.selected_index = 0;
-        self.scroll_offset = 0;
+        self.navigation.reset();
         Ok(())
     }
 
     /// Save the current log to file
     pub fn save_file(&self) -> Result<(), Box<dyn std::error::Error>> {
         if let Some(path) = &self.file_path {
-            let content = serde_json::to_string_pretty(&self.log)?;
-            std::fs::write(path, content)?;
+            crate::file_io::save_file(path, &self.log)?;
             Ok(())
         } else {
             Err("No file path set".into())
@@ -60,109 +47,37 @@ impl App {
 
     /// Toggle time display mode
     pub fn toggle_time_mode(&mut self) {
-        self.time_mode = match self.time_mode {
-            TimeDisplayMode::Cumulative => TimeDisplayMode::Timestamp,
-            TimeDisplayMode::Timestamp => TimeDisplayMode::Cumulative,
-        };
+        self.time_mode.toggle();
     }
 
     /// Move selection up
     pub fn move_up(&mut self) {
-        if self.selected_index > 0 {
-            self.selected_index -= 1;
-            if self.selected_index < self.scroll_offset {
-                self.scroll_offset = self.selected_index;
-            }
-        }
+        self.navigation.move_up();
     }
 
     /// Move selection down
     pub fn move_down(&mut self) {
-        // Allow cursor to move to one position beyond the last event (for future insertion)
-        if self.selected_index < self.log.events.len() {
-            self.selected_index += 1;
-        }
+        self.navigation.move_down(self.log.events.len());
     }
 
     /// Update scroll offset to keep selected item visible
     pub fn update_scroll(&mut self, visible_height: usize) {
-        if self.selected_index >= self.scroll_offset + visible_height {
-            self.scroll_offset = self.selected_index.saturating_sub(visible_height - 1);
-        }
-        if self.selected_index < self.scroll_offset {
-            self.scroll_offset = self.selected_index;
-        }
-    }
-
-    /// Get cumulative time for an event (delta from previous)
-    pub fn get_cumulative_time(&self, index: usize) -> f64 {
-        if index == 0 {
-            self.log.events[0].time
-        } else if index < self.log.events.len() {
-            self.log.events[index].time - self.log.events[index - 1].time
-        } else {
-            0.0
-        }
+        self.navigation.update_scroll(visible_height);
     }
 
     /// Get formatted time string for an event
     pub fn get_time_string(&self, index: usize) -> String {
-        if index >= self.log.events.len() {
-            return String::from("0.000000");
-        }
-
-        let time = match self.time_mode {
-            TimeDisplayMode::Timestamp => self.log.events[index].time,
-            TimeDisplayMode::Cumulative => self.get_cumulative_time(index),
-        };
-
-        format!("{:.6}", time)
+        crate::time_display::get_time_string(&self.log, index, self.time_mode)
     }
 
     /// Format event for display
     pub fn format_event(&self, index: usize) -> String {
-        if index >= self.log.events.len() {
-            return String::new();
-        }
-
-        let event = &self.log.events[index];
-        let time_str = self.get_time_string(index);
-
-        if event.is_key_on() {
-            format!("{}  KeyON  {}", time_str, event.data)
-        } else {
-            format!("{}  {}  {}", time_str, event.addr, event.data)
-        }
+        crate::time_display::format_event(&self.log, index, self.time_mode)
     }
 
-    /// Preview current event by playing events from start up to selected position
-    #[cfg(windows)]
+    /// Preview current event by playing events from start to selected position
     pub fn preview_current_event(&self) {
-        if self.log.events.is_empty() {
-            return;
-        }
-
-        // Create a log containing events from start to current selection (inclusive)
-        let end_index = self
-            .selected_index
-            .saturating_add(1)
-            .min(self.log.events.len());
-        let preview_events = self.log.events[0..end_index].to_vec();
-        let preview_log = crate::models::Ym2151Log {
-            events: preview_events,
-        };
-
-        // Convert to JSON and send to server
-        if let Ok(json_string) = serde_json::to_string(&preview_log) {
-            if let Err(e) = ym2151_log_play_server::client::send_json(&json_string) {
-                eprintln!("Preview playback error: {}", e);
-            }
-        }
-    }
-
-    #[cfg(not(windows))]
-    pub fn preview_current_event(&self) {
-        // No-op on non-Windows platforms
+        crate::preview::preview_current_event(&self.log, self.navigation.selected_index);
     }
 
     /// Set wait time (cumulative time) for the selected event in milliseconds
@@ -173,92 +88,33 @@ impl App {
     ///   Values are used as-is without validation. Common usage:
     ///   0-9ms (mapped from keys 0-9).
     pub fn set_wait_time_ms(&mut self, milliseconds: u32) {
-        // Only allow modification in Cumulative mode
-        if self.time_mode != TimeDisplayMode::Cumulative {
-            return;
-        }
-
-        // Check if we have events and a valid selection
-        if self.log.events.is_empty() || self.selected_index >= self.log.events.len() {
-            return;
-        }
-
-        // Convert milliseconds to seconds
-        let new_wait_time = (milliseconds as f64) / 1000.0;
-
-        // Calculate the new absolute timestamp for the selected event
-        let new_timestamp = if self.selected_index == 0 {
-            // First event: set absolute time
-            new_wait_time
-        } else {
-            // Other events: add wait time to previous event's timestamp
-            self.log.events[self.selected_index - 1].time + new_wait_time
-        };
-
-        // Calculate the time delta (how much we're changing)
-        let old_timestamp = self.log.events[self.selected_index].time;
-        let time_delta = new_timestamp - old_timestamp;
-
-        // Update the selected event's timestamp
-        self.log.events[self.selected_index].time = new_timestamp;
-
-        // Adjust all subsequent events' timestamps by the same delta
-        for i in (self.selected_index + 1)..self.log.events.len() {
-            self.log.events[i].time += time_delta;
-        }
+        crate::event_editor::set_wait_time_ms(
+            &mut self.log,
+            self.navigation.selected_index,
+            milliseconds,
+            self.time_mode,
+        );
     }
 
     /// Delete the currently selected event
     pub fn delete_selected_event(&mut self) {
-        // Check if we have events and a valid selection
-        if self.log.events.is_empty() || self.selected_index >= self.log.events.len() {
-            return;
-        }
-
-        // Remove the selected event
-        self.log.events.remove(self.selected_index);
-
-        // Adjust selected_index if it's now out of bounds
-        if !self.log.events.is_empty() && self.selected_index >= self.log.events.len() {
-            self.selected_index = self.log.events.len() - 1;
-        }
-
-        // Adjust scroll_offset if necessary
-        if self.scroll_offset > self.selected_index {
-            self.scroll_offset = self.selected_index;
-        }
+        crate::event_editor::delete_event(&mut self.log, self.navigation.selected_index);
+        self.navigation.adjust_after_delete(self.log.events.len());
     }
 
     /// Insert a new event before the currently selected position
     pub fn insert_event_before_selected(&mut self) {
-        // Calculate the timestamp for the new event
-        let new_time = if self.selected_index == 0 {
-            // Inserting before the first event: use time 0.0
-            0.0
-        } else if self.selected_index >= self.log.events.len() {
-            // Inserting after all events: use last event's time
-            self.log.events.last().map(|e| e.time).unwrap_or(0.0)
-        } else {
-            // Inserting between events: use previous event's time
-            self.log.events[self.selected_index - 1].time
-        };
+        crate::event_editor::insert_event_before(&mut self.log, self.navigation.selected_index);
+        self.navigation.adjust_after_insert();
+    }
 
-        // Create a new default event
-        let new_event = crate::models::Ym2151Event {
-            time: new_time,
-            addr: "00".to_string(),
-            data: "00".to_string(),
-        };
+    // Accessor methods for backward compatibility with UI code
+    pub fn selected_index(&self) -> usize {
+        self.navigation.selected_index
+    }
 
-        // Insert the new event at the selected position
-        // insert() can handle index == len(), which appends to the end
-        self.log.events.insert(self.selected_index, new_event);
-
-        // Keep the cursor on the newly inserted event (don't move selected_index)
-        // Adjust scroll_offset if necessary to keep the new event visible
-        if self.selected_index < self.scroll_offset {
-            self.scroll_offset = self.selected_index;
-        }
+    pub fn scroll_offset(&self) -> usize {
+        self.navigation.scroll_offset
     }
 }
 
@@ -298,7 +154,7 @@ mod tests {
         ];
 
         // Select event 1 and set wait time to 5ms
-        app.selected_index = 1;
+        app.navigation.selected_index = 1;
         app.set_wait_time_ms(5);
 
         // Verify event 1 now has timestamp 0.005 (0.0 + 0.005)
@@ -326,7 +182,7 @@ mod tests {
             },
         ];
 
-        app.selected_index = 1;
+        app.navigation.selected_index = 1;
         let original_time = app.log.events[1].time;
 
         // Should not modify in Timestamp mode
@@ -354,7 +210,7 @@ mod tests {
         ];
 
         // Select first event and set wait time to 3ms
-        app.selected_index = 0;
+        app.navigation.selected_index = 0;
         app.set_wait_time_ms(3);
 
         // First event should be at 0.003
@@ -388,7 +244,7 @@ mod tests {
         ];
 
         // Select event 1 and set wait time to 0ms
-        app.selected_index = 1;
+        app.navigation.selected_index = 1;
         app.set_wait_time_ms(0);
 
         // Verify event 1 now has timestamp 0.0 (same as previous event)
@@ -420,7 +276,7 @@ mod tests {
         ];
 
         // Select middle event and delete it
-        app.selected_index = 1;
+        app.navigation.selected_index = 1;
         app.delete_selected_event();
 
         // Verify event count decreased
@@ -431,7 +287,7 @@ mod tests {
         assert_eq!(app.log.events[1].addr, "60");
 
         // Verify selected_index is still valid
-        assert_eq!(app.selected_index, 1);
+        assert_eq!(app.navigation.selected_index, 1);
     }
 
     #[test]
@@ -451,14 +307,14 @@ mod tests {
         ];
 
         // Select last event and delete it
-        app.selected_index = 1;
+        app.navigation.selected_index = 1;
         app.delete_selected_event();
 
         // Verify event count decreased
         assert_eq!(app.log.events.len(), 1);
 
         // Verify selected_index was adjusted to last valid index
-        assert_eq!(app.selected_index, 0);
+        assert_eq!(app.navigation.selected_index, 0);
     }
 
     #[test]
@@ -471,14 +327,14 @@ mod tests {
         }];
 
         // Select the only event and delete it
-        app.selected_index = 0;
+        app.navigation.selected_index = 0;
         app.delete_selected_event();
 
         // Verify all events are deleted
         assert_eq!(app.log.events.len(), 0);
 
         // selected_index should remain 0 (though there are no events)
-        assert_eq!(app.selected_index, 0);
+        assert_eq!(app.navigation.selected_index, 0);
     }
 
     #[test]
@@ -487,7 +343,7 @@ mod tests {
         app.log.events = vec![];
 
         // Try to delete from empty list (should not panic)
-        app.selected_index = 0;
+        app.navigation.selected_index = 0;
         app.delete_selected_event();
 
         // Verify still empty
@@ -511,20 +367,20 @@ mod tests {
         ];
 
         // Start at first event
-        app.selected_index = 0;
+        app.navigation.selected_index = 0;
 
         // Move down to second event
         app.move_down();
-        assert_eq!(app.selected_index, 1);
+        assert_eq!(app.navigation.selected_index, 1);
 
         // Move down to empty line (one beyond last event)
         app.move_down();
-        assert_eq!(app.selected_index, 2);
-        assert_eq!(app.selected_index, app.log.events.len());
+        assert_eq!(app.navigation.selected_index, 2);
+        assert_eq!(app.navigation.selected_index, app.log.events.len());
 
         // Try to move down again (should stay at empty line)
         app.move_down();
-        assert_eq!(app.selected_index, 2);
+        assert_eq!(app.navigation.selected_index, 2);
     }
 
     #[test]
@@ -533,11 +389,11 @@ mod tests {
         app.log.events = vec![];
 
         // Start at index 0 (empty)
-        app.selected_index = 0;
+        app.navigation.selected_index = 0;
 
         // Try to move down (should stay at 0)
         app.move_down();
-        assert_eq!(app.selected_index, 0);
+        assert_eq!(app.navigation.selected_index, 0);
     }
 
     #[test]
@@ -557,7 +413,7 @@ mod tests {
         ];
 
         // Insert before first event
-        app.selected_index = 0;
+        app.navigation.selected_index = 0;
         app.insert_event_before_selected();
 
         // Verify event count increased
@@ -573,7 +429,7 @@ mod tests {
         assert_eq!(app.log.events[2].addr, "40");
 
         // Verify selected_index stayed on the new event
-        assert_eq!(app.selected_index, 0);
+        assert_eq!(app.navigation.selected_index, 0);
     }
 
     #[test]
@@ -598,7 +454,7 @@ mod tests {
         ];
 
         // Insert before middle event (index 1)
-        app.selected_index = 1;
+        app.navigation.selected_index = 1;
         app.insert_event_before_selected();
 
         // Verify event count increased
@@ -615,7 +471,7 @@ mod tests {
         assert_eq!(app.log.events[3].addr, "60");
 
         // Verify selected_index stayed on the new event
-        assert_eq!(app.selected_index, 1);
+        assert_eq!(app.navigation.selected_index, 1);
     }
 
     #[test]
@@ -635,7 +491,7 @@ mod tests {
         ];
 
         // Move cursor to empty line after last event
-        app.selected_index = 2;
+        app.navigation.selected_index = 2;
         app.insert_event_before_selected();
 
         // Verify event count increased
@@ -651,7 +507,7 @@ mod tests {
         assert_eq!(app.log.events[1].addr, "40");
 
         // Verify selected_index stayed at 2 (now pointing to the new event)
-        assert_eq!(app.selected_index, 2);
+        assert_eq!(app.navigation.selected_index, 2);
     }
 
     #[test]
@@ -660,7 +516,7 @@ mod tests {
         app.log.events = vec![];
 
         // Insert into empty list
-        app.selected_index = 0;
+        app.navigation.selected_index = 0;
         app.insert_event_before_selected();
 
         // Verify event count increased
@@ -672,7 +528,7 @@ mod tests {
         assert!((app.log.events[0].time - 0.0).abs() < 0.0001);
 
         // Verify selected_index is still 0
-        assert_eq!(app.selected_index, 0);
+        assert_eq!(app.navigation.selected_index, 0);
     }
 
     #[test]
@@ -692,12 +548,12 @@ mod tests {
         ];
 
         // Set scroll_offset ahead of selected_index
-        app.selected_index = 0;
-        app.scroll_offset = 1;
+        app.navigation.selected_index = 0;
+        app.navigation.scroll_offset = 1;
 
         app.insert_event_before_selected();
 
         // Verify scroll_offset was adjusted to keep new event visible
-        assert_eq!(app.scroll_offset, 0);
+        assert_eq!(app.navigation.scroll_offset, 0);
     }
 }

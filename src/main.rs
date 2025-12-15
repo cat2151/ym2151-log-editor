@@ -1,5 +1,10 @@
 mod app;
+mod event_editor;
+mod file_io;
 mod models;
+mod navigation;
+mod preview;
+mod time_display;
 mod ui;
 
 use app::App;

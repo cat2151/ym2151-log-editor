@@ -9,23 +9,23 @@ YM2151 event log editor (TUI interface). Written in Rust.
 
 ## Overview
 
-This is a terminal-based JSON editor for YM2151 synthesizer event logs. It assists with visualizing and editing YM2151 event data, with a particular focus on timing adjustment and event inspection.
+A terminal-based JSON editor for YM2151 synthesizer event logs. It assists in visualizing and editing YM2151 event data, with a particular focus on timing adjustments and event inspection.
 
 ## Features
 
--   **JSON Visualization**: Displays YM2151 event logs in a readable format
--   **KeyON Display**: Events for register 0x08 are displayed as "KeyON" for better readability
--   **Time Display Modes**: Switch between cumulative time (wait) and absolute timestamp
-    -   Cumulative Mode: Displays delta time between events (convenient for editing)
-    -   Timestamp Mode: Displays absolute time from the start (internal storage format)
--   **Navigation**: Browse events using arrow keys
--   **File Operations**: Load and save JSON files
+-   **JSON Visualization**: Displays YM2151 event logs in an easy-to-read format.
+-   **KeyON Display**: Events for register 0x08 are displayed as "KeyON" for better readability.
+-   **Time Display Modes**: Switch between cumulative time (wait) and absolute timestamp.
+    -   Cumulative Mode: Shows delta time between events (convenient for editing).
+    -   Timestamp Mode: Shows absolute time from the start (internal storage format).
+-   **Navigation**: Browse events using arrow keys.
+-   **File Operations**: Load and save JSON files.
 
 ## Quick Start
 
 ### Installation
 
-Rust 1.70 or later is required.
+Requires Rust 1.70 or later.
 
 ```bash
 # Clone the repository
@@ -35,29 +35,29 @@ cd ym2151-log-editor
 # Build
 cargo build --release
 
-# Run specifying a JSON file
+# Run with a specified JSON file
 cargo run -- path/to/your/file.json
 ```
 
 ### Usage
 
 ```bash
-# Launch the editor with a specified file
+# Start the editor with a specified file
 ./target/release/ym2151-log-editor your_log.json
 ```
 
-### Keyboard Shortcuts
+### Keyboard Operations
 
-| Key       | Action                                        |
-| :-------- | :-------------------------------------------- |
-| ↑/↓       | Move between events                           |
-| / or ENTER | Insert a new event before the current line    |
-| DELETE    | Delete the current event                      |
-| 0-9       | Set wait time (0-9 milliseconds, cumulative mode only) |
-| P         | Preview playback from start to current event  |
-| T         | Toggle time display mode (Cumulative ↔ Timestamp) |
-| S         | Save file                                     |
-| Q or ESC  | Exit application                              |
+| Key | Action |
+|-----|-----|
+| ↑/↓ | Move between events |
+| / or ENTER | Insert a new event before the current line |
+| DELETE | Delete the current event |
+| 0-9 | Set wait time (0-9 milliseconds, cumulative mode only) |
+| P | Preview playback from start to current event |
+| T | Toggle time display mode (Cumulative ↔ Timestamp) |
+| S | Save file |
+| Q or ESC | Exit application |
 
 ## JSON Format
 
@@ -87,17 +87,17 @@ The editor handles YM2151 event logs in JSON format:
 ## Time Display Modes
 
 ### Cumulative Mode (Default)
-Displays the wait time (delta) from the previous event. This is useful for editing timing, allowing you to view and adjust delays between events.
+Displays the wait time (delta) from the previous event. This is useful for editing timing, allowing you to check and adjust delays between events.
 
 Example:
 ```
 0.000000  20  4F    ← First event (time 0)
-0.010000  40  16    ← 10ms after previous
-0.010000  KeyON  78 ← 10ms after previous
+0.010000  40  16    ← 10ms after the previous
+0.010000  KeyON  78 ← 10ms after the previous
 ```
 
 ### Timestamp Mode
-Displays the absolute time from the start. This is the internal format used when saving files.
+Displays the absolute time from the start. This is the internal format used when saving the file.
 
 Example:
 ```
@@ -113,7 +113,7 @@ Press the **T** key to switch between these modes.
 Events for register 0x08 (KeyON/KeyOFF register) are displayed as "KeyON" instead of "08" to improve readability:
 
 ```
-0.010000  KeyON  78  ← Easily identify KeyON/KeyOFF events
+0.010000  KeyON  78  ← Easily identify KeyON/OFF events
 0.500000  KeyON  00
 ```
 
@@ -126,7 +126,7 @@ src/
 ├── main.rs       - Entry point and event loop
 ├── app.rs        - Application state and logic
 ├── models.rs     - Data structures (Ym2151Event, Ym2151Log)
-└── ui.rs         - UI rendering
+└── ui.rs         - UI drawing
 ```
 
 ### Build
@@ -146,7 +146,7 @@ cargo run -- test_data/sample.json
 
 ## Documentation
 
-Refer to [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) for detailed implementation plans and future roadmap.
+Refer to [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) for detailed implementation plans and the future roadmap.
 
 ## Dependencies
 
@@ -157,8 +157,8 @@ Refer to [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) for detailed implement
 
 ## Related Projects
 
--   [ym2151-tone-editor](https://github.com/cat2151/ym2151-tone-editor) - YM2151 Tone Editor (Reference Implementation)
--   [ym2151-log-play-server](https://github.com/cat2151/ym2151-log-play-server) - YM2151 Log Playback Server
+-   [ym2151-tone-editor](https://github.com/cat2151/ym2151-tone-editor) - YM2151 tone editor (reference implementation)
+-   [ym2151-log-play-server](https://github.com/cat2151/ym2151-log-play-server) - YM2151 log playback server
 
 ## License
 
@@ -167,18 +167,22 @@ See the [LICENSE](LICENSE) file for details.
 ## Future Enhancements
 
 -   Editing register address and data values for inserted events
--   Undo/Redo functionality
+-   Undo/redo functionality
 -   Audio preview integration
 -   Batch time scaling
--   Event filtering and search
+-   Event filtering and searching
 
-Refer to [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) for the complete roadmap.
+See [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) for the complete roadmap.
 
 ## Project Goals
--   Minimum editing of wait times
--   Minimum editing of events
--   Minimum visualization of events
+-   Minimal wait time editing
+-   Minimal event editing
+-   Minimal event visualization
 
-## Out of Scope
--   High-level functionality. Advanced visualization. 8-channel parallel display. Achieving more than all features found in a DAW's event editor. A universal music editor.
--   Advanced editing achievable by querying events. Editing only notes, or only specific events, filtered in a way that intelligent, automatic event dependency recognition prevents breaking inter-event dependencies even when events are added or removed.
+## Out of Scope (Not Project Goals)
+-   Advanced features.
+    -   Event insertion via MML input.
+    -   Advanced visualization. Parallel display of 8 channels. Implementing all features found in a DAW's event editor and more.
+    -   DAW functionality. Piano roll display and editing. Staff notation display and editing. Data automation display and editing. Event insertion via MIDI IN.
+    -   Advanced querying. Sophisticated editing through event querying, such as filtering and editing only notes or specific events, and intelligently recognizing event dependencies to prevent breakage even with event additions/deletions.
+    -   Decompilation. Intelligent reverse conversion of event content into SMF or MML. 100% accurate calculation of BPM, measure, beat, and tick from time data.

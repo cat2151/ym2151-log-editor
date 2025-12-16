@@ -180,5 +180,9 @@ cargo run -- test_data/sample.json
 - eventの最低限の可視化
 
 ## projectが目指さないもの（スコープ外）
-- 高機能。高度な可視化。8chの並列表示。DAWのevent editorにある全ての機能以上のものを実現。万能の音楽エディタ。
-- eventをqueryすることで実現できる高度なedit。noteだけ、指定eventだけ、等をfilterしてeditし、かつevent増減でもevent間の依存関係を崩さないインテリジェントな自動event依存関係認識。
+- 高機能。
+  - MML入力によるevent挿入。
+  - 高度な可視化。8chの並列表示。DAWのevent editorにある全ての機能以上のものを実現。
+  - DAW機能。ピアノロール表示と編集。五線譜表示と編集。dataのオートメーション表示と編集。MIDI INによるevent挿入。
+  - query。eventをqueryすることで実現できる高度なedit。noteだけ、指定eventだけ、等をfilterしてeditし、かつevent増減でもevent間の依存関係を崩さない高度にインテリジェントな自動event依存関係認識。
+  - 逆コンパイル。event内容を解析し、SMFやMMLへの高度にインテリジェントな逆変換。timeからBPMとmeasure、beat、tickを算出し、その成功率100%。

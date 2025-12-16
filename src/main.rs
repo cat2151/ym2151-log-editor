@@ -7,6 +7,9 @@ mod preview;
 mod time_display;
 mod ui;
 
+#[cfg(test)]
+mod tests;
+
 use app::App;
 use crossterm::{
     event::{self, DisableMouseCapture, EnableMouseCapture, Event, KeyCode, KeyEventKind},

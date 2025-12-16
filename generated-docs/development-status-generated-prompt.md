@@ -1,4 +1,4 @@
-Last updated: 2025-12-16
+Last updated: 2025-12-17
 
 # 開発状況生成プロンプト（開発者向け）
 
@@ -208,35 +208,64 @@ Last updated: 2025-12-16
 - README.md
 - generated-docs/project-overview-generated-prompt.md
 - googled947dc864c270e07.html
+- issue-notes/19.md
+- issue-notes/20.md
+- issue-notes/21.md
 - src/app.rs
+- src/event_editor.rs
+- src/file_io.rs
 - src/main.rs
 - src/models.rs
+- src/navigation.rs
+- src/preview.rs
+- src/time_display.rs
 - src/ui.rs
 - test_data/minimal.json
 - test_data/sample.json
 
 ## 現在のオープンIssues
-## [Issue #16](../issue-notes/16.md): Refactor app.rs into single-responsibility modules
-The `app.rs` module violated the Single Responsibility Principle by handling application state, file I/O, navigation, time calculations, event editing, and preview functionality in a single 690-line file.
+## [Issue #21](../issue-notes/21.md): リファクタリング。app.rs の test は src/tests/ に切り出し、app.rs をコンパクトにして、今後の機能追加時のハルシネーションのリスクを下げる
+[issue-notes/21.md](https://github.com/cat2151/ym2151-log-editor/blob/main/issue-notes/21.md)
 
-## Changes
-
-Split `app.rs` into focused modules:
-
-- **`file_io.rs`** - JSON serialization (loa...
+...
 ラベル: 
---- issue-notes/16.md の内容 ---
+--- issue-notes/21.md の内容 ---
 
 ```markdown
+# issue リファクタリング。app.rs の test は src/tests/ に切り出し、app.rs をコンパクトにして、今後の機能追加時のハルシネーションのリスクを下げる #21
+[issues #21](https://github.com/cat2151/ym2151-log-editor/issues/21)
+
+
 
 ```
 
-## [Issue #15](../issue-notes/15.md): app.rs をリファクタリングし、単一責任の原則に従って分割する
+## [Issue #20](../issue-notes/20.md): preview演奏機能は、カーソル位置までの演奏ではなく、JSON全体を演奏とする
+[issue-notes/20.md](https://github.com/cat2151/ym2151-log-editor/blob/main/issue-notes/20.md)
 
+...
 ラベル: 
---- issue-notes/15.md の内容 ---
+--- issue-notes/20.md の内容 ---
 
 ```markdown
+# issue preview演奏機能は、カーソル位置までの演奏ではなく、JSON全体を演奏とする #20
+[issues #20](https://github.com/cat2151/ym2151-log-editor/issues/20)
+
+
+
+```
+
+## [Issue #19](../issue-notes/19.md): addr 0x08 KEYON表示について、dataのbit3,4,5,6が0であれば、KEYOFF表示とする
+[issue-notes/19.md](https://github.com/cat2151/ym2151-log-editor/blob/main/issue-notes/19.md)
+
+...
+ラベル: 
+--- issue-notes/19.md の内容 ---
+
+```markdown
+# issue addr 0x08 KEYON表示について、dataのbit3,4,5,6が0であれば、KEYOFF表示とする #19
+[issues #19](https://github.com/cat2151/ym2151-log-editor/issues/19)
+
+
 
 ```
 
@@ -250,219 +279,52 @@ Split `app.rs` into focused modules:
 ```
 
 ## ドキュメントで言及されているファイルの内容
-### .github/actions-tmp/issue-notes/15.md
+### .github/actions-tmp/issue-notes/19.md
 ```md
 {% raw %}
-# issue project_summary scripts cjs を分解し、できるだけ1ファイル200行未満にし、agentによるメンテをしやすくする #15
-[issues #15](https://github.com/cat2151/github-actions/issues/15)
+# issue project-summary の development-status 生成時、issue-notes/ 配下のmdファイルの内容を参照させる #19
+[issues #19](https://github.com/cat2151/github-actions/issues/19)
+
+# 何が困るの？
+- issue解決に向けての次の一手の内容が実態に即していないことが多い。
+
+# 対策案
+- issue-notes/ 配下のmdファイルの内容を参照させる
+
+# 備考
+- さらにmd内に書かれているfileも、project内をcjsに検索させて添付させると、よりGeminiの生成品質が向上する可能性がある。
+    - [issues #20](https://github.com/cat2151/github-actions/issues/20)
+- さらにproject overviewでGeminiがまとめたmdも、Geminiに与えると、よりGeminiの生成品質が向上する可能性がある。
+    - [issues #21](https://github.com/cat2151/github-actions/issues/21)
+- さらに、Geminiに与えたpromptをfileにしてcommit pushしておくと、デバッグに役立つ可能性がある。
+    - [issues #22](https://github.com/cat2151/github-actions/issues/22)
+
+# close条件
+- issues #22 がcloseされること。
+- commitされたpromptを確認し、issue-notes/ 配下のmdファイルがpromptに添付されていること、が確認できること。
 
 # 状況
-- agentに、最初の小さな一歩のAgent実行プロンプトを実行させた
-- 結果、以下を得た：
-    - project_summary_cjs_analysis.md
-- どうする？
-    - 次の一手をagentに生成させてみる（翌日の日次バッチで自動生成させる）
-- 結果
-    - 生成させたpromptをレビューした
-    - promptを修正した
-    - agentに投げた
-    - 結果、GitUtils.cjsを切り出しできた
-    - それをリファクタリングミスがないかチェックさせた
-    - agentによるチェック結果は合格だった
-- どうする？
-    - 次の一手をagentに生成させてみる（翌日の日次バッチで自動生成させる）
-- 結果
-    - 生成させたpromptをレビューした
-        - promptの対象ファイルから project_summary_cjs_analysis.md が漏れていることがわかったので修正した
-    - promptを修正した
-    - agentに投げた
-    - 結果、FileSystemUtils.cjsを切り出しできた
-    - それをリファクタリングミスがないかチェックさせた
-    - agentによるチェック結果は合格だった
-- どうする？
-    - 次の一手をagentに生成させてみる（翌日の日次バッチで自動生成させる）
-- 結果
-    - 生成させたpromptをレビューした
-    - 今回は低品質、NG、と判断した
-    - 判断基準は、project_summary_cjs_analysis.md と乖離してしまっている点。今回はハルシネーションを含んだplanである、と判断した
-    - 人力でpromptを書き、planさせ、plan結果をレビューし、agentに投げた
-    - 結果、CodeAnalyzer.cjsとProjectAnalyzer.cjsを切り出しできた
-- どうする？
-    - 次の一手をagentに生成させてみる（翌日の日次バッチで自動生成させる）
-    - 備考、課題、Geminiに生成させているdocumentは2つある。かなり位置づけが違うものである。
-        - projectのソースファイル分析。
-        - projectのissues分析。
-        - この2つについて、class, cjs, yml まで分割をするかを、あとで検討する。
-        - おそらく、class分割どまりとし、ソースファイル分析結果をissues分析の参考資料としてGeminiのcontextに与える改善をする、がよい、と想定しておく。
-- 課題、エラーで落ちた。昨日は落ちてない。
-    - 原因、昨日のagentのリファクタリング時に、ハルシネーションで、
-        - codeが破壊されていた
-        - run メソッドが削除されていた
-        - 一つ前のrevisionにはrun メソッドがあった
-        - ほかにもcode破壊があったのかは不明、調査省略、明日の日次バッチをtestと調査として利用するつもり
-- どうする？
-    - 単純に一つ前のrevisionからrun メソッドを復活させ、明日の日次バッチをtestと調査として利用する
-- 再発防止策は？
-    - ノーアイデア。昨日それなりにagentにチェックをさせたはずだが根本的な大きなミスが発生していた。
-    - 構文チェックは通っていたが、問題を検知できなかった。
-    - チェックが機能していない、あるいは機能として不足している。
-    - 分析。変更量が大きかったぶんミスのリスクが増えていた。
-    - 対策案。もっと小さく一歩ずつ変更させる。
-    - 対策案。リファクタリング時、いきなりメソッド削除をさせない。
-        - まず全cjsの全メソッドのlistをさせる。
-        - のち、削除対象の重複メソッドのlistをさせる。
-        - そして削除planをさせる。
-        - のち、削除させる。
-        - さらに削除後のメソッドlistをさせる。
-        - そして削除しすぎていないかを削除前後のlist比較でチェックさせる。
-        - これでrunまで削除してしまうのを防止できるかもしれない。
-        - これは人力からみると、おかしな話である。人力なら1つずつ移動をするだけであり、ミスのしようがない。
-        - LLMの典型的なハルシネーション問題の一つである、と認識する
-- 結果は？
-    - test green
-    - run メソッドの人力復活は成功した
-    - 日次バッチで生成した次の一手のpromptを投げた
-    - リファクタリング成功した。ProjectSummaryGenerator を切り出した
-- どうする？
-    - 次の一手をagentに生成させてみる（agentに投げるpromptを、翌日の日次バッチで自動生成させる）
-- 結果
-    - 先に、2つのdocument生成を、1つずつ生成できるよう疎結合にリファクタリング、をしたほうがよさそう
-    - agentにそれを投げた
-    - 成功した、と判断する
-    - 課題、`BaseSummaryGenerator.cjs` は、baseの機能と、`ProjectOverviewGenerator.cjs`専用の機能とが混ざっている。
-        - baseに集約すべきは、`ProjectSummaryCoordinator.cjs`と`ProjectOverviewGenerator.cjs`とが必ずどちらも使う機能、である、と考える。
-        - 対策、明日以降それをagentに投げる
-    - `project_summary_cjs_analysis.md` は削除とする。役目が完了した、と判断する。リファクタリング前のソース構造の分析documentであり、今は存在しているとわかりづらくなる。シンプル優先のため削除とする。
-- どうする？
-    - 次の一手をagentに生成させてみる（agentに投げるpromptを、翌日の日次バッチで自動生成させる）
-- 結果
-    - test green
-    - `BaseSummaryGenerator.cjs` を切り出したのは成功した、と判断する
-    - `BaseSummaryGenerator.cjs` を2分割するため、agentにplanさせた
-    - レビューした
-    - agentに2分割させた
-    - レビューした。OKと判断する
-- どうする？
-    - 次の一手をagentに生成させてみる（agentに投げるpromptを、翌日の日次バッチで自動生成させる）
-- 結果
-    - test green
-    - `BaseSummaryGenerator.cjs` を2分割は成功した、と判断する
-    - issue track機能構造をリファクタリングし、以下にする
-        - development status generator : baseを継承する
-        - issue tracker : 汎用関数群
-    - agentに実施させた
-    - レビューした。OKと判断する
-- どうする？
-    - 次の一手をagentに生成させてみる（agentに投げるpromptを、翌日の日次バッチで自動生成させる）
-- 結果
-    - test green
-    - DevelopmentStatusGeneratorとissue trackerのリファクタリングは成功した、と判断する
-    - ProjectOverview生成機能のリファクタリングをする
-    - agentに実施させた
-    - レビューした。OKと判断する
-- どうする？
-    - 次の一手をagentに生成させてみる（agentに投げるpromptを、翌日の日次バッチで自動生成させる）
-- 結果
-    - test green
-    - ProjectOverview生成機能のリファクタリングは成功した、と判断する
-    - 課題、overviewと、developmentStatusとが混在し、dirが読みづらい。
-    - 対策、shared/、overview/、development/、の3つのdirに切り分ける
-    - agentに分析、planさせ、レビューし、planさせ、実施させた
-    - レビューした。OKと判断する
-- どうする？
-    - 次の一手をagentに生成させてみる（agentに投げるpromptを、翌日の日次バッチで自動生成させる）
-- 結果
-    - test green
-    - shared/、overview/、development/、の3つのdirに切り分けるリファクタリングは成功した、と判断する
-    - agentに、agentがメンテしやすいか？の観点からレビューさせた
-    - 詳細は割愛
-        - `> 最優先で取り組むべきは 設定管理の一元化 と エラーハンドリングの統一 です。これにより、Agentにとって予測可能で理解しやすいコードベースになります。`
-        - それは別issueで、設定変更をマストでやるので、OKと判断する
-- これでagentによるメンテは十分しやすくなった、と判断する
-- closeとする
+- 課題、実装したがtestができていない
+- 対策、issues #22 が実装されれば、testができる
+- 対策、issues #22 のcloseを待つ
+
+# 状況
+- issues #22 がcloseされた
+- testできるようになった
+- commitされたpromptを確認した。issue-notes/ 配下のmdファイルがpromptに添付されていること、が確認できた
+
+# closeする
 
 {% endraw %}
 ```
 
-### .github/actions-tmp/issue-notes/16.md
+### issue-notes/19.md
 ```md
 {% raw %}
-# issue issue-note / project-summary / translate / callgraph をtonejs-mml-to-jsonから呼び出す #16
-[issues #16](https://github.com/cat2151/github-actions/issues/16)
+# issue addr 0x08 KEYON表示について、dataのbit3,4,5,6が0であれば、KEYOFF表示とする #19
+[issues #19](https://github.com/cat2151/ym2151-log-editor/issues/19)
 
-# これまでの課題
-- issue-note / project-summary / translate / callgraph は、github-actions リポジトリ上ではtest greenである。
-- だが他のリポジトリにおいて動作するか？が可視化不足である。
 
-# 対策
-- issue-note / project-summary / translate / callgraph をtonejs-mml-to-jsonから呼び出す
-- 詳しく
-    - まず、現状、tonejs-mml-to-json でその4つのworkflowがどうなっているか、このmdに可視化する
-    - 例えば、既に呼び出している、呼び出していない、tonejs-mml-to-jsonにある古いworkflowを呼び出している
-
-# 調査結果
-- まず、現状、tonejs-mml-to-json でその4つのworkflowがどうなっているか、このmdに可視化する
-    - 結果：
-        - issue-note
-            - tonejs-mml-to-jsonにある古いworkflowを呼び出している
-        - project-summary
-            - tonejs-mml-to-jsonにある古いworkflowを呼び出している
-        - translate
-            - tonejs-mml-to-jsonにある古いworkflowを呼び出している
-        - callgraph
-            - tonejs-mml-to-jsonにある古いworkflowを呼び出している
-
-# どうする？
-- issue-note
-    - github-actions リポジトリにある、call-issue-note.yml をcpして使うようにする、まず単純cpして動くかを確認する
-- project-summary
-    - github-actions リポジトリにある、call-daily-project-summary.yml をcpして使うようにする、まず単純cpして動くかを確認する
-- translate
-    - github-actions リポジトリにある、call-translate-readme.yml をcpして使うようにする、まず単純cpして動くかを確認する
-- callgraph
-    - github-actions リポジトリにある、call-callgraph.yml をcpして使うようにする、まず単純cpして動くかを確認する
-
-# 状況
-- issue-note
-    - tonejs-mml-to-jsonリポジトリにて、test green
-    - issue-noteについては当issueのタスクは完了した、と判断する
-- project-summary
-    - tonejs-mml-to-jsonリポジトリにて、test green
-    - project-summaryについては当issueのタスクは完了した、と判断する
-
-# 状況
-- translate
-    - github-actions リポジトリにある、call-translate-readme.yml をcpして使うようにする、まず単純cpして動くかを確認する
-        - 状況
-            - 単純cpした
-            - ソース机上レビューした。OK
-            - トリガーはREADME.ja.mdのcommit
-            - testは省略とする
-            - もし今後README.ja.mdのcommit時にうまく動作しないとしても、そのとき対処すればOK、と判断する
-    - translateについては当issueのタスクは完了した、と判断する
-
-# どうする？
-- callgraph
-    - github-actions リポジトリにある、call-callgraph.yml をcpして使うようにする、まず単純cpして動くかを確認する
-
-# 結果
-- callgraph
-    - tonejs-mml-to-jsonリポジトリにて、test red
-    - logをみても情報不足なため、まずloggerを修正する
-    - 結果、わかった、運用ミス、対象srcの指定の考慮漏れ
-    - どうする？
-        - 対象srcを指定する。tonejs-mml-to-jsonリポジトリにて進める
-    - 結果
-        - test green
-    - callgraphについては当issueのタスクは完了した、と判断する
-
-# 状況
-- github-actions以外のリポジトリとして、
-    - tonejs-mml-to-jsonリポジトリにおいて、
-        - issue-note / project-summary / translate / callgraph がtest greenとなった。
-        - closeできる、と判断する。
-
-# closeとする
 
 {% endraw %}
 ```
@@ -642,19 +504,188 @@ jobs:
 {% endraw %}
 ```
 
+### .github/actions-tmp/issue-notes/20.md
+```md
+{% raw %}
+# issue project-summary の development-status 生成時、issue-notes/ 配下のmdにファイル名が書いてあれば、そのファイル内容もpromptに添付、を試す #20
+[issues #20](https://github.com/cat2151/github-actions/issues/20)
+
+# 何が困るの？
+- Geminiに次の一手を生成させるとき、cjsの内容も添付したほうが、生成品質が改善できる可能性がある。
+
+# 案
+## outputのimage
+- promptが言及するfilename、について、そのfileの内容もすべてpromptに含める。
+    - 軸は、projectのfilename一覧である。
+        - 一覧それぞれのfilenameについて、promptで言及されているものをfile内容埋め込み、とする。
+- 方向性
+    - シンプルで明確なルール、曖昧さのないルールで、メンテを楽にすることを優先する
+    - 余分なファイルが出てしまうが割り切ってOKとし、欠落リスクを減らせることを優先する
+- 備考
+    - 曖昧でメンテが必要な「documentからのfilename抽出」をやめ、
+        - かわりに、逆に、「今のprojectにあるfileすべてのうち、promptで言及されているもの」を軸とする
+## 実現方法の案
+- project全体について、filenameと、filepath配列（複数ありうる）、のmapを取得する。そういう関数Aをまず実装する。
+    - filepathは、agentが扱えるよう、github上のworkの絶対pathではなく、projectRootからの相対パス表記とする。
+- そして、そのfilenameにmatchするfilepath配列について、filepathとファイル内容を記したmarkdown文字列を返却、という関数Bを実装する。
+- さらに、Geminiにわたすpromptについて、前述の関数Aのfilenameそれぞれについて、prompt内を検索し、filenameが存在する場合は、そのfilenameについて、関数Bを用いてmarkdown文字列を取得する。そうして得られたmarkdown文字列群を返却する、という関数Cを実装する。
+- さらに、promptの末尾に書いてあるプレースホルダー「`${file_contents}`」を、関数Cの結果で置き換える、という関数Dを実装する。
+- 実際には、Geminiにわたすpromptのプレースホルダー展開は、2回にわたる必要がある。1回目でissues-note内容をpromptに埋め込む。2回目でそのpromptに対して関数Dを適用する。
+## 備忘
+- 上記は、agentにplanさせてレビューし、context不足と感じたら上記をメンテ、というサイクルで書いた。
+
+# どうする？
+- 上記をagentに投げる。documentやtestについてのplanもしてくるかもしれないがそこは時間の都合で省略して実施させるつもり。
+- 投げた、実装させた、レビューして人力リファクタリングした
+- testする
+
+# 結果
+- バグ
+    - この20.mdにあるプレースホルダーが置換されてしまっている
+    - issue-notesで言及されていないfileまで添付されてしまっている
+- 分析
+    - この20.mdにあるプレースホルダーが置換されてしまっている
+        - 原因
+            - 20.mdにあるプレースホルダーまで置換対象としてしまっていたため。
+            - prompt全体のプレースホルダーを置換対象としてしまっていたため。
+            - issue-notesを埋め込んだあとでの、プレースホルダー処理だったので、
+                - 20.md が置換対象となってしまったため。
+        - 対策案
+            - プレースホルダーはすべて、「行頭と行末で囲まれている」ときだけ置換対象とする。
+                - つまり文中やcode中のプレースホルダーは置換対象外とする。
+            - さらに、2つ以上プレースホルダーが出たら想定外なので早期エラー終了させ、検知させる。
+    - issue-notesで言及されていないfileまで添付されてしまっている
+        - 原因
+            - promptに、既にprojectの全file listが書き込まれたあとなので、
+                - issue-noteで言及されていなくても、
+                - promptの全file listを対象に検索してしまっている
+        - 対策案の候補
+            - プレースホルダー置換の順番を変更し、全file listは最後に置換する
+            - file添付の対象を変更し、promptでなく、issue-notesとする
+                - これが範囲が絞られているので安全である、と考える
+        - 備忘
+            - 全fileの対象は、リモートリポジトリ側のfileなので、secretsの心配はないし、実際に検索して確認済み
+
+# どうする？
+- agent半分、人力が半分（agentがハルシネーションでソース破壊したので、関数切り分けしたり、リファクタリングしたり）。
+- で実装した。
+- testする
+
+# 結果
+- test green
+
+# closeとする
+
+{% endraw %}
+```
+
+### issue-notes/20.md
+```md
+{% raw %}
+# issue preview演奏機能は、カーソル位置までの演奏ではなく、JSON全体を演奏とする #20
+[issues #20](https://github.com/cat2151/ym2151-log-editor/issues/20)
+
+
+
+{% endraw %}
+```
+
+### .github/actions-tmp/issue-notes/21.md
+```md
+{% raw %}
+# issue project-summary の development-status 生成時、project-overviewが生成済みのproject-overview.mdもpromptに添付、を試す #21
+[issues #21](https://github.com/cat2151/github-actions/issues/21)
+
+# 何が困るの？
+- project-overview.mdがpromptに添付されていたほうが、Geminiの生成品質が改善できる可能性がある。
+    - メリットは、ファイル一覧、関数一覧、をGeminiにわたせること
+
+# 検討事項
+- 課題、その一覧に付記されている「ファイルや関数の要約」は、Geminiが「ファイル名や関数名を元に生成しただけ」で、「ファイル内容や関数内容を参照せずに生成した」可能性が高い
+    - 対策、project-overview.mdに依存しない。
+        - 方法、新規関数をagentに実装させる
+            - 新規関数で、ファイル一覧と関数一覧を生成する
+        - 根拠、そのほうが、シンプルに目的を達成できる可能性が高そう。
+        - 根拠、project-overview.mdだと、不具合として.github 配下のymlがlistに含まれておらず、ymlに関するissue、に関する生成、をするとき不具合の可能性がありそう。そういった、別機能の不具合に影響されがち。
+- 課題、早期に実施したほうが毎日好影響が出る可能性がある
+    - 対策、上記検討事項の対処は後回しにして、先に実装してみる
+    - agentに投げる
+- 課題、ProjectSummaryCoordinator をみたところ、並列処理されている
+    - なので、project-overview.mdを参照したいときに、まだ生成されていない、という可能性が高い
+    - 対策、前述の、新規関数で、ファイル一覧と関数一覧を生成させる
+
+# agentに投げるための整理
+- 編集対象ファイル
+    - prompt
+        - .github_automation/project_summary/prompts/development-status-prompt.md
+        - 編集内容
+            - projectのファイル一覧を埋め込む用の、プレースホルダーを追加する
+    - source
+        - .github_automation/project_summary/scripts/development/DevelopmentStatusGenerator.cjs
+        - 編集内容
+            - projectのファイル一覧を生成する関数、を実装し、
+            - それを前述のプレースホルダーに埋め込む
+
+# agentに投げて実装させた
+
+# test結果
+- 以下が不要
+    - .git/
+    - node_modules/
+
+# どうする？
+- agentに上記を変更させた
+- testする
+
+# 結果
+- test greenとなった
+
+# まとめ
+- issueのtitleからは仕様変更した。
+    - projectのfile一覧をpromptに含める、とした。
+    - そのほうがpromptとして、よい生成結果が期待できる、と判断した。
+- test greenとなった
+
+# closeとする
+
+{% endraw %}
+```
+
+### issue-notes/21.md
+```md
+{% raw %}
+# issue リファクタリング。app.rs の test は src/tests/ に切り出し、app.rs をコンパクトにして、今後の機能追加時のハルシネーションのリスクを下げる #21
+[issues #21](https://github.com/cat2151/ym2151-log-editor/issues/21)
+
+
+
+{% endraw %}
+```
+
+### .github/actions-tmp/issue-notes/9.md
+```md
+{% raw %}
+# issue 関数コールグラフhtmlビジュアライズが0件なので、原因を可視化する #9
+[issues #9](https://github.com/cat2151/github-actions/issues/9)
+
+# agentに修正させたり、人力で修正したりした
+- agentがハルシネーションし、いろいろ根の深いバグにつながる、エラー隠蔽などを仕込んでいたため、検知が遅れた
+- 詳しくはcommit logを参照のこと
+- WSL + actの環境を少し変更、act起動時のコマンドライン引数を変更し、generated-docsをmountする（ほかはデフォルト挙動であるcpだけにする）ことで、デバッグ情報をコンテナ外に出力できるようにし、デバッグを効率化した
+
+# test green
+
+# closeとする
+
+{% endraw %}
+```
+
 ### src/app.rs
 ```rs
 {% raw %}
 use crate::models::Ym2151Log;
-
-/// Display mode for time values
-#[derive(Debug, Clone, Copy, PartialEq)]
-pub enum TimeDisplayMode {
-    /// Display cumulative time (delta from previous event)
-    Cumulative,
-    /// Display absolute timestamp
-    Timestamp,
-}
+use crate::navigation::NavigationState;
+use crate::time_display::TimeDisplayMode;
 
 /// Application state
 pub struct App {
@@ -662,14 +693,12 @@ pub struct App {
     pub log: Ym2151Log,
     /// Current file path (if any)
     pub file_path: Option<String>,
-    /// Current scroll position
-    pub scroll_offset: usize,
+    /// Navigation state (scroll and selection)
+    pub navigation: NavigationState,
     /// Time display mode
     pub time_mode: TimeDisplayMode,
     /// Whether the app should quit
     pub should_quit: bool,
-    /// Selected event index
-    pub selected_index: usize,
 }
 
 impl App {
@@ -677,28 +706,24 @@ impl App {
         Self {
             log: Ym2151Log { events: vec![] },
             file_path: None,
-            scroll_offset: 0,
+            navigation: NavigationState::new(),
             time_mode: TimeDisplayMode::Cumulative,
             should_quit: false,
-            selected_index: 0,
         }
     }
 
     /// Load a JSON file
     pub fn load_file(&mut self, path: &str) -> Result<(), Box<dyn std::error::Error>> {
-        let content = std::fs::read_to_string(path)?;
-        self.log = serde_json::from_str(&content)?;
+        self.log = crate::file_io::load_file(path)?;
         self.file_path = Some(path.to_string());
-        self.selected_index = 0;
-        self.scroll_offset = 0;
+        self.navigation.reset();
         Ok(())
     }
 
     /// Save the current log to file
     pub fn save_file(&self) -> Result<(), Box<dyn std::error::Error>> {
         if let Some(path) = &self.file_path {
-            let content = serde_json::to_string_pretty(&self.log)?;
-            std::fs::write(path, content)?;
+            crate::file_io::save_file(path, &self.log)?;
             Ok(())
         } else {
             Err("No file path set".into())
@@ -707,109 +732,32 @@ impl App {
 
     /// Toggle time display mode
     pub fn toggle_time_mode(&mut self) {
-        self.time_mode = match self.time_mode {
-            TimeDisplayMode::Cumulative => TimeDisplayMode::Timestamp,
-            TimeDisplayMode::Timestamp => TimeDisplayMode::Cumulative,
-        };
+        self.time_mode.toggle();
     }
 
     /// Move selection up
     pub fn move_up(&mut self) {
-        if self.selected_index > 0 {
-            self.selected_index -= 1;
-            if self.selected_index < self.scroll_offset {
-                self.scroll_offset = self.selected_index;
-            }
-        }
+        self.navigation.move_up();
     }
 
     /// Move selection down
     pub fn move_down(&mut self) {
-        // Allow cursor to move to one position beyond the last event (for future insertion)
-        if self.selected_index < self.log.events.len() {
-            self.selected_index += 1;
-        }
+        self.navigation.move_down(self.log.events.len());
     }
 
     /// Update scroll offset to keep selected item visible
     pub fn update_scroll(&mut self, visible_height: usize) {
-        if self.selected_index >= self.scroll_offset + visible_height {
-            self.scroll_offset = self.selected_index.saturating_sub(visible_height - 1);
-        }
-        if self.selected_index < self.scroll_offset {
-            self.scroll_offset = self.selected_index;
-        }
-    }
-
-    /// Get cumulative time for an event (delta from previous)
-    pub fn get_cumulative_time(&self, index: usize) -> f64 {
-        if index == 0 {
-            self.log.events[0].time
-        } else if index < self.log.events.len() {
-            self.log.events[index].time - self.log.events[index - 1].time
-        } else {
-            0.0
-        }
-    }
-
-    /// Get formatted time string for an event
-    pub fn get_time_string(&self, index: usize) -> String {
-        if index >= self.log.events.len() {
-            return String::from("0.000000");
-        }
-
-        let time = match self.time_mode {
-            TimeDisplayMode::Timestamp => self.log.events[index].time,
-            TimeDisplayMode::Cumulative => self.get_cumulative_time(index),
-        };
-
-        format!("{:.6}", time)
+        self.navigation.update_scroll(visible_height);
     }
 
     /// Format event for display
     pub fn format_event(&self, index: usize) -> String {
-        if index >= self.log.events.len() {
-            return String::new();
-        }
-
-        let event = &self.log.events[index];
-        let time_str = self.get_time_string(index);
-
-        if event.is_key_on() {
-            format!("{}  KeyON  {}", time_str, event.data)
-        } else {
-            format!("{}  {}  {}", time_str, event.addr, event.data)
-        }
+        crate::time_display::format_event(&self.log, index, self.time_mode)
     }
 
-    /// Preview current event by playing events from start up to selected position
-    #[cfg(windows)]
+    /// Preview current event by playing events from start to selected position
     pub fn preview_current_event(&self) {
-        if self.log.events.is_empty() {
-            return;
-        }
-
-        // Create a log containing events from start to current selection (inclusive)
-        let end_index = self
-            .selected_index
-            .saturating_add(1)
-            .min(self.log.events.len());
-        let preview_events = self.log.events[0..end_index].to_vec();
-        let preview_log = crate::models::Ym2151Log {
-            events: preview_events,
-        };
-
-        // Convert to JSON and send to server
-        if let Ok(json_string) = serde_json::to_string(&preview_log) {
-            if let Err(e) = ym2151_log_play_server::client::send_json(&json_string) {
-                eprintln!("Preview playback error: {}", e);
-            }
-        }
-    }
-
-    #[cfg(not(windows))]
-    pub fn preview_current_event(&self) {
-        // No-op on non-Windows platforms
+        crate::preview::preview_current_event(&self.log, self.navigation.selected_index);
     }
 
     /// Set wait time (cumulative time) for the selected event in milliseconds
@@ -820,92 +768,33 @@ impl App {
     ///   Values are used as-is without validation. Common usage:
     ///   0-9ms (mapped from keys 0-9).
     pub fn set_wait_time_ms(&mut self, milliseconds: u32) {
-        // Only allow modification in Cumulative mode
-        if self.time_mode != TimeDisplayMode::Cumulative {
-            return;
-        }
-
-        // Check if we have events and a valid selection
-        if self.log.events.is_empty() || self.selected_index >= self.log.events.len() {
-            return;
-        }
-
-        // Convert milliseconds to seconds
-        let new_wait_time = (milliseconds as f64) / 1000.0;
-
-        // Calculate the new absolute timestamp for the selected event
-        let new_timestamp = if self.selected_index == 0 {
-            // First event: set absolute time
-            new_wait_time
-        } else {
-            // Other events: add wait time to previous event's timestamp
-            self.log.events[self.selected_index - 1].time + new_wait_time
-        };
-
-        // Calculate the time delta (how much we're changing)
-        let old_timestamp = self.log.events[self.selected_index].time;
-        let time_delta = new_timestamp - old_timestamp;
-
-        // Update the selected event's timestamp
-        self.log.events[self.selected_index].time = new_timestamp;
-
-        // Adjust all subsequent events' timestamps by the same delta
-        for i in (self.selected_index + 1)..self.log.events.len() {
-            self.log.events[i].time += time_delta;
-        }
+        crate::event_editor::set_wait_time_ms(
+            &mut self.log,
+            self.navigation.selected_index,
+            milliseconds,
+            self.time_mode,
+        );
     }
 
     /// Delete the currently selected event
     pub fn delete_selected_event(&mut self) {
-        // Check if we have events and a valid selection
-        if self.log.events.is_empty() || self.selected_index >= self.log.events.len() {
-            return;
-        }
-
-        // Remove the selected event
-        self.log.events.remove(self.selected_index);
-
-        // Adjust selected_index if it's now out of bounds
-        if !self.log.events.is_empty() && self.selected_index >= self.log.events.len() {
-            self.selected_index = self.log.events.len() - 1;
-        }
-
-        // Adjust scroll_offset if necessary
-        if self.scroll_offset > self.selected_index {
-            self.scroll_offset = self.selected_index;
-        }
+        crate::event_editor::delete_event(&mut self.log, self.navigation.selected_index);
+        self.navigation.adjust_after_delete(self.log.events.len());
     }
 
     /// Insert a new event before the currently selected position
     pub fn insert_event_before_selected(&mut self) {
-        // Calculate the timestamp for the new event
-        let new_time = if self.selected_index == 0 {
-            // Inserting before the first event: use time 0.0
-            0.0
-        } else if self.selected_index >= self.log.events.len() {
-            // Inserting after all events: use last event's time
-            self.log.events.last().map(|e| e.time).unwrap_or(0.0)
-        } else {
-            // Inserting between events: use previous event's time
-            self.log.events[self.selected_index - 1].time
-        };
+        crate::event_editor::insert_event_before(&mut self.log, self.navigation.selected_index);
+        self.navigation.adjust_after_insert();
+    }
 
-        // Create a new default event
-        let new_event = crate::models::Ym2151Event {
-            time: new_time,
-            addr: "00".to_string(),
-            data: "00".to_string(),
-        };
+    // Accessor methods for backward compatibility with UI code
+    pub fn selected_index(&self) -> usize {
+        self.navigation.selected_index
+    }
 
-        // Insert the new event at the selected position
-        // insert() can handle index == len(), which appends to the end
-        self.log.events.insert(self.selected_index, new_event);
-
-        // Keep the cursor on the newly inserted event (don't move selected_index)
-        // Adjust scroll_offset if necessary to keep the new event visible
-        if self.selected_index < self.scroll_offset {
-            self.scroll_offset = self.selected_index;
-        }
+    pub fn scroll_offset(&self) -> usize {
+        self.navigation.scroll_offset
     }
 }
 
@@ -945,7 +834,7 @@ mod tests {
         ];
 
         // Select event 1 and set wait time to 5ms
-        app.selected_index = 1;
+        app.navigation.selected_index = 1;
         app.set_wait_time_ms(5);
 
         // Verify event 1 now has timestamp 0.005 (0.0 + 0.005)
@@ -973,7 +862,7 @@ mod tests {
             },
         ];
 
-        app.selected_index = 1;
+        app.navigation.selected_index = 1;
         let original_time = app.log.events[1].time;
 
         // Should not modify in Timestamp mode
@@ -1001,7 +890,7 @@ mod tests {
         ];
 
         // Select first event and set wait time to 3ms
-        app.selected_index = 0;
+        app.navigation.selected_index = 0;
         app.set_wait_time_ms(3);
 
         // First event should be at 0.003
@@ -1035,7 +924,7 @@ mod tests {
         ];
 
         // Select event 1 and set wait time to 0ms
-        app.selected_index = 1;
+        app.navigation.selected_index = 1;
         app.set_wait_time_ms(0);
 
         // Verify event 1 now has timestamp 0.0 (same as previous event)
@@ -1067,7 +956,7 @@ mod tests {
         ];
 
         // Select middle event and delete it
-        app.selected_index = 1;
+        app.navigation.selected_index = 1;
         app.delete_selected_event();
 
         // Verify event count decreased
@@ -1078,7 +967,7 @@ mod tests {
         assert_eq!(app.log.events[1].addr, "60");
 
         // Verify selected_index is still valid
-        assert_eq!(app.selected_index, 1);
+        assert_eq!(app.navigation.selected_index, 1);
     }
 
     #[test]
@@ -1098,14 +987,14 @@ mod tests {
         ];
 
         // Select last event and delete it
-        app.selected_index = 1;
+        app.navigation.selected_index = 1;
         app.delete_selected_event();
 
         // Verify event count decreased
         assert_eq!(app.log.events.len(), 1);
 
         // Verify selected_index was adjusted to last valid index
-        assert_eq!(app.selected_index, 0);
+        assert_eq!(app.navigation.selected_index, 0);
     }
 
     #[test]
@@ -1118,14 +1007,14 @@ mod tests {
         }];
 
         // Select the only event and delete it
-        app.selected_index = 0;
+        app.navigation.selected_index = 0;
         app.delete_selected_event();
 
         // Verify all events are deleted
         assert_eq!(app.log.events.len(), 0);
 
         // selected_index should remain 0 (though there are no events)
-        assert_eq!(app.selected_index, 0);
+        assert_eq!(app.navigation.selected_index, 0);
     }
 
     #[test]
@@ -1134,7 +1023,7 @@ mod tests {
         app.log.events = vec![];
 
         // Try to delete from empty list (should not panic)
-        app.selected_index = 0;
+        app.navigation.selected_index = 0;
         app.delete_selected_event();
 
         // Verify still empty
@@ -1158,20 +1047,20 @@ mod tests {
         ];
 
         // Start at first event
-        app.selected_index = 0;
+        app.navigation.selected_index = 0;
 
         // Move down to second event
         app.move_down();
-        assert_eq!(app.selected_index, 1);
+        assert_eq!(app.navigation.selected_index, 1);
 
         // Move down to empty line (one beyond last event)
         app.move_down();
-        assert_eq!(app.selected_index, 2);
-        assert_eq!(app.selected_index, app.log.events.len());
+        assert_eq!(app.navigation.selected_index, 2);
+        assert_eq!(app.navigation.selected_index, app.log.events.len());
 
         // Try to move down again (should stay at empty line)
         app.move_down();
-        assert_eq!(app.selected_index, 2);
+        assert_eq!(app.navigation.selected_index, 2);
     }
 
     #[test]
@@ -1180,11 +1069,11 @@ mod tests {
         app.log.events = vec![];
 
         // Start at index 0 (empty)
-        app.selected_index = 0;
+        app.navigation.selected_index = 0;
 
         // Try to move down (should stay at 0)
         app.move_down();
-        assert_eq!(app.selected_index, 0);
+        assert_eq!(app.navigation.selected_index, 0);
     }
 
     #[test]
@@ -1204,7 +1093,7 @@ mod tests {
         ];
 
         // Insert before first event
-        app.selected_index = 0;
+        app.navigation.selected_index = 0;
         app.insert_event_before_selected();
 
         // Verify event count increased
@@ -1220,7 +1109,7 @@ mod tests {
         assert_eq!(app.log.events[2].addr, "40");
 
         // Verify selected_index stayed on the new event
-        assert_eq!(app.selected_index, 0);
+        assert_eq!(app.navigation.selected_index, 0);
     }
 
     #[test]
@@ -1245,7 +1134,7 @@ mod tests {
         ];
 
         // Insert before middle event (index 1)
-        app.selected_index = 1;
+        app.navigation.selected_index = 1;
         app.insert_event_before_selected();
 
         // Verify event count increased
@@ -1262,7 +1151,7 @@ mod tests {
         assert_eq!(app.log.events[3].addr, "60");
 
         // Verify selected_index stayed on the new event
-        assert_eq!(app.selected_index, 1);
+        assert_eq!(app.navigation.selected_index, 1);
     }
 
     #[test]
@@ -1282,7 +1171,7 @@ mod tests {
         ];
 
         // Move cursor to empty line after last event
-        app.selected_index = 2;
+        app.navigation.selected_index = 2;
         app.insert_event_before_selected();
 
         // Verify event count increased
@@ -1298,7 +1187,7 @@ mod tests {
         assert_eq!(app.log.events[1].addr, "40");
 
         // Verify selected_index stayed at 2 (now pointing to the new event)
-        assert_eq!(app.selected_index, 2);
+        assert_eq!(app.navigation.selected_index, 2);
     }
 
     #[test]
@@ -1307,7 +1196,7 @@ mod tests {
         app.log.events = vec![];
 
         // Insert into empty list
-        app.selected_index = 0;
+        app.navigation.selected_index = 0;
         app.insert_event_before_selected();
 
         // Verify event count increased
@@ -1319,7 +1208,7 @@ mod tests {
         assert!((app.log.events[0].time - 0.0).abs() < 0.0001);
 
         // Verify selected_index is still 0
-        assert_eq!(app.selected_index, 0);
+        assert_eq!(app.navigation.selected_index, 0);
     }
 
     #[test]
@@ -1339,13 +1228,13 @@ mod tests {
         ];
 
         // Set scroll_offset ahead of selected_index
-        app.selected_index = 0;
-        app.scroll_offset = 1;
+        app.navigation.selected_index = 0;
+        app.navigation.scroll_offset = 1;
 
         app.insert_event_before_selected();
 
         // Verify scroll_offset was adjusted to keep new event visible
-        assert_eq!(app.scroll_offset, 0);
+        assert_eq!(app.navigation.scroll_offset, 0);
     }
 }
 
@@ -1354,33 +1243,25 @@ mod tests {
 
 ## 最近の変更（過去7日間）
 ### コミット履歴:
-d1d8865 他project同様のCI設定
-8e7406a google検索にindexさせる用
-02ba847 Merge pull request #14 from cat2151/copilot/insert-event-before-line
-ee43789 Simplify insert logic based on code review feedback
-bb137d5 Update documentation for event insertion feature
-02fee96 Implement event insertion feature with SLASH and ENTER keys
-10ba63c Initial plan
-926a400 Merge pull request #13 from cat2151/copilot/enable-cursor-movement-to-empty-line
-dba3ec7 Enable cursor movement to empty line after last event
-abed846 Initial plan
+20c60d2 Auto-translate README.ja.md to README.md [auto]
+f068d1a Clarify project scope and non-goals in README
+f9ecb83 Add issue note for #21 [auto]
+f6b9943 Add issue note for #20 [auto]
+260ea45 Add issue note for #19 [auto]
+160460f Update business logic implementation instructions
+8c0d888 Update linting instructions and checklist
+9c66816 Update Windows compatibility check instructions
+3000225 Merge pull request #18 from cat2151/copilot/fix-windows-gnu-cross-compilation
+12aa0b5 Remove unused get_time_string method to fix Windows GNU cross-compilation
 
 ### 変更されたファイル:
-.github/workflows/call-daily-project-summary.yml
-.github/workflows/call-issue-note.yml
-.github/workflows/call-rust-windows-check.yml
-.github/workflows/call-translate-readme.yml
-Cargo.lock
-Cargo.toml
-IMPLEMENTATION_PLAN.md
+.github/copilot-instructions.md
 README.ja.md
 README.md
-googled947dc864c270e07.html
-src/app.rs
-src/main.rs
-src/ui.rs
-test_data/minimal.json
+issue-notes/19.md
+issue-notes/20.md
+issue-notes/21.md
 
 
 ---
-Generated at: 2025-12-16 07:04:33 JST
+Generated at: 2025-12-17 07:04:30 JST

@@ -1,4 +1,4 @@
-Last updated: 2025-12-16
+Last updated: 2025-12-17
 
 
 # プロジェクト概要生成プロンプト（来訪者向け）
@@ -237,6 +237,20 @@ cargo run -- test_data/sample.json
 
 完全なロードマップについては[IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md)を参照してください。
 
+## projectが目指すもの
+- waitの最低限のedit
+- eventの最低限のedit
+- eventの最低限の可視化
+
+## projectが目指さないもの（スコープ外）
+- 高機能。
+  - MML入力によるevent挿入。
+  - 高度な可視化。8chの並列表示。DAWのevent editorにある全ての機能以上のものを実現。
+  - DAW機能。ピアノロール表示と編集。五線譜表示と編集。dataのオートメーション表示と編集。MIDI INによるevent挿入。
+  - query。eventをqueryすることで実現できる高度なedit。noteだけ、指定eventだけ、等をfilterしてeditし、かつevent増減でもevent間の依存関係を崩さない高度にインテリジェントな自動event依存関係認識。
+  - 逆コンパイル。event内容を解析し、SMFやMMLへの高度にインテリジェントな逆変換。timeからBPMとmeasure、beat、tickを算出し、その成功率100%。
+
+
 依存関係:
 {}
 
@@ -250,10 +264,19 @@ cargo run -- test_data/sample.json
 📖 README.md
 📁 generated-docs/
 🌐 googled947dc864c270e07.html
+📁 issue-notes/
+  📖 19.md
+  📖 20.md
+  📖 21.md
 📁 src/
   📄 app.rs
+  📄 event_editor.rs
+  📄 file_io.rs
   📄 main.rs
   📄 models.rs
+  📄 navigation.rs
+  📄 preview.rs
+  📄 time_display.rs
   📄 ui.rs
 📁 test_data/
   📊 minimal.json
@@ -272,6 +295,9 @@ IMPLEMENTATION_PLAN.md
 README.ja.md
 README.md
 googled947dc864c270e07.html
+issue-notes/19.md
+issue-notes/20.md
+issue-notes/21.md
 test_data/minimal.json
 test_data/sample.json
 
@@ -285,4 +311,4 @@ test_data/sample.json
 
 
 ---
-Generated at: 2025-12-16 07:04:33 JST
+Generated at: 2025-12-17 07:04:30 JST

@@ -66,16 +66,13 @@
 コミット前に必ずリンターを実行:
 
 ```bash
-# rustfmtでコードをフォーマット
+# コード自動修正
+cargo fix --all-targets --allow-dirty
+
+# コードをフォーマット
 cargo fmt
 
-# ファイルを変更せずにフォーマットをチェック
-cargo fmt -- --check
-
-# Clippyでコード品質をチェック
-cargo clippy --all-targets
-
-# 警告をエラーとして扱うClippy (CI用)
+# リンターでコード品質をチェック（警告をエラーとして扱う）
 cargo clippy --all-targets -- -D warnings
 ```
 
@@ -84,7 +81,7 @@ cargo clippy --all-targets -- -D warnings
 コミットまたはコードレビュー要求前に:
 
 1. **コードフォーマット**: `cargo fmt` を実行して一貫したフォーマットを確保
-2. **リンティング問題修正**: `cargo clippy` を実行して警告に対処
+2. **リンティング問題修正**: `cargo clippy --all-targets -- -D warnings` を実行して警告に対処
 3. **ビルド成功**: `cargo build` (または `cargo build --release`) を実行
 4. **テスト実行**: `cargo test` を実行して全テストが通ることを確認
 5. **Windows互換性チェック**: Windows向けクロスコンパイルチェックを実行
@@ -104,3 +101,5 @@ cargo clippy --all-targets -- -D warnings
   - 作業報告は、プルリクエストのコメントに書く。document作成禁止
     - DRY原則に準拠し、「codeやbuild scriptと同じことを、documentに書いたせいで、そのdocumentが陳腐化してハルシネーションやuserレビューコスト増大や混乱ほか様々なトラブル原因になる」を防止する
     - なおissue-notes/は、userがissueごとの意図を記録する用途で使う
+- 日本語
+  - PRコメントは日本語で書く

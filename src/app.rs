@@ -65,11 +65,6 @@ impl App {
         self.navigation.update_scroll(visible_height);
     }
 
-    /// Get formatted time string for an event
-    pub fn get_time_string(&self, index: usize) -> String {
-        crate::time_display::get_time_string(&self.log, index, self.time_mode)
-    }
-
     /// Format event for display
     pub fn format_event(&self, index: usize) -> String {
         crate::time_display::format_event(&self.log, index, self.time_mode)

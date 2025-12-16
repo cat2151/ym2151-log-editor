@@ -89,8 +89,11 @@ cargo clippy --all-targets -- -D warnings
 4. **テスト実行**: `cargo test` を実行して全テストが通ることを確認
 5. **Windows互換性チェック**: Windows向けクロスコンパイルチェックを実行
   ```bash
-  # Windows GNUターゲットを追加 (初回のみ)
+  # Windows GNUターゲットを追加
   rustup target add x86_64-pc-windows-gnu
+
+  # 警告をエラーとして扱う
+  export RUSTFLAGS="-D warnings"
 
   # Windows向けにコンパイルチェック
   cargo check --all-targets --target x86_64-pc-windows-gnu

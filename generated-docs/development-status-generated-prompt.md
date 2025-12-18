@@ -1,4 +1,4 @@
-Last updated: 2025-12-17
+Last updated: 2025-12-19
 
 # 開発状況生成プロンプト（開発者向け）
 
@@ -218,24 +218,24 @@ Last updated: 2025-12-17
 - src/models.rs
 - src/navigation.rs
 - src/preview.rs
+- src/tests/app_tests.rs
+- src/tests/mod.rs
 - src/time_display.rs
 - src/ui.rs
 - test_data/minimal.json
 - test_data/sample.json
 
 ## 現在のオープンIssues
-## [Issue #21](../issue-notes/21.md): リファクタリング。app.rs の test は src/tests/ に切り出し、app.rs をコンパクトにして、今後の機能追加時のハルシネーションのリスクを下げる
-[issue-notes/21.md](https://github.com/cat2151/ym2151-log-editor/blob/main/issue-notes/21.md)
+## [Issue #23](../issue-notes/23.md): Windows GNU cross-compilation check failed
+Windows GNU cross-compilation check failed in scheduled run.
 
-...
-ラベル: 
---- issue-notes/21.md の内容 ---
+Please investigate the build errors and ensure all dependencies are compatible with Windows.
+
+Workflow run: https://github.com/cat2151/ym2151-log-editor/actions/runs/20340786044...
+ラベル: bug, windows-build
+--- issue-notes/23.md の内容 ---
 
 ```markdown
-# issue リファクタリング。app.rs の test は src/tests/ に切り出し、app.rs をコンパクトにして、今後の機能追加時のハルシネーションのリスクを下げる #21
-[issues #21](https://github.com/cat2151/ym2151-log-editor/issues/21)
-
-
 
 ```
 
@@ -590,74 +590,107 @@ jobs:
 {% endraw %}
 ```
 
-### .github/actions-tmp/issue-notes/21.md
+### .github/actions-tmp/issue-notes/23.md
 ```md
 {% raw %}
-# issue project-summary の development-status 生成時、project-overviewが生成済みのproject-overview.mdもpromptに添付、を試す #21
-[issues #21](https://github.com/cat2151/github-actions/issues/21)
+# issue issue 17が再発してしまっている #23
+[issues #23](https://github.com/cat2151/github-actions/issues/23)
 
-# 何が困るの？
-- project-overview.mdがpromptに添付されていたほうが、Geminiの生成品質が改善できる可能性がある。
-    - メリットは、ファイル一覧、関数一覧、をGeminiにわたせること
-
-# 検討事項
-- 課題、その一覧に付記されている「ファイルや関数の要約」は、Geminiが「ファイル名や関数名を元に生成しただけ」で、「ファイル内容や関数内容を参照せずに生成した」可能性が高い
-    - 対策、project-overview.mdに依存しない。
-        - 方法、新規関数をagentに実装させる
-            - 新規関数で、ファイル一覧と関数一覧を生成する
-        - 根拠、そのほうが、シンプルに目的を達成できる可能性が高そう。
-        - 根拠、project-overview.mdだと、不具合として.github 配下のymlがlistに含まれておらず、ymlに関するissue、に関する生成、をするとき不具合の可能性がありそう。そういった、別機能の不具合に影響されがち。
-- 課題、早期に実施したほうが毎日好影響が出る可能性がある
-    - 対策、上記検討事項の対処は後回しにして、先に実装してみる
-    - agentに投げる
-- 課題、ProjectSummaryCoordinator をみたところ、並列処理されている
-    - なので、project-overview.mdを参照したいときに、まだ生成されていない、という可能性が高い
-    - 対策、前述の、新規関数で、ファイル一覧と関数一覧を生成させる
-
-# agentに投げるための整理
-- 編集対象ファイル
-    - prompt
-        - .github_automation/project_summary/prompts/development-status-prompt.md
-        - 編集内容
-            - projectのファイル一覧を埋め込む用の、プレースホルダーを追加する
-    - source
-        - .github_automation/project_summary/scripts/development/DevelopmentStatusGenerator.cjs
-        - 編集内容
-            - projectのファイル一覧を生成する関数、を実装し、
-            - それを前述のプレースホルダーに埋め込む
-
-# agentに投げて実装させた
-
-# test結果
-- 以下が不要
-    - .git/
-    - node_modules/
+# 症状は？
+- issue 17と同じ
 
 # どうする？
-- agentに上記を変更させた
-- testする
+- development-status-generated-prompt.md を確認する
+- 結果
+    - >Issue番号を記載する際は、必ず [Issue #番号](issue-notes/番号.md) の形式でMarkdownリンクとして記載してください。
+    - 仮説、これが残っており、ほかの ../ 指定と競合し、どちらかがランダムで選ばれていた
+    - 対策、ここを ../ 指定にする
 
 # 結果
-- test greenとなった
-
-# まとめ
-- issueのtitleからは仕様変更した。
-    - projectのfile一覧をpromptに含める、とした。
-    - そのほうがpromptとして、よい生成結果が期待できる、と判断した。
-- test greenとなった
+- test green
 
 # closeとする
 
 {% endraw %}
 ```
 
-### issue-notes/21.md
+### .github/actions-tmp/issue-notes/3.md
 ```md
 {% raw %}
-# issue リファクタリング。app.rs の test は src/tests/ に切り出し、app.rs をコンパクトにして、今後の機能追加時のハルシネーションのリスクを下げる #21
-[issues #21](https://github.com/cat2151/ym2151-log-editor/issues/21)
+# issue GitHub Actions「issue note生成」を共通ワークフロー化する #3
+[issues #3](https://github.com/cat2151/github-actions/issues/3)
 
+- 前提
+  - userは、translateのworkflowを共通ワークフロー化し、動くようにしたので、共通ワークフロー化の知識がある
+  - よって、今回は、promptでplanさせ、そのplanをuserがレビューし、planの改善を指示できるので、ハルシネーションのリスクを下げることができる
 
+- prompt
+```
+あなたはGitHub Actionsと共通ワークフローのスペシャリストです。
+このymlはまだ共通ワークフロー化されず、
+呼び出し元からコピーされたままの状態です。
+このymlファイル名のまま、
+中身を共通ワークフロー化してください。
+呼び出し元ymlは別途書きますので気にしないでください。
+まずplanしてください
+```
+
+- plan 生成結果
+```
+共通ワークフロー化のためのplanは以下の通りです。
+
+1. 目的
+現在の issue-note.yml を「共通ワークフロー」として再設計し、他リポジトリや他ワークフローから workflow_call で呼び出せるようにする。
+2. 主な変更点
+on: トリガーを workflow_call に変更（直接イベントで起動しない）。
+必要な入力（inputs）やシークレット（secrets）を workflow_call セクションで定義。
+github.event.issue などのイベント依存部分を、inputs経由で受け取る形に修正。
+既存の処理（issueノート生成、コミット、issue body更新）はそのまま活かすが、パラメータ化する。
+3. 具体的な修正内容
+on: issues: → on: workflow_call: に変更。
+inputs で必要な値（例: issue_title, issue_number, issue_body, issue_url など）を受け取る。
+スクリプト内の ${{ github.event.issue.xxx }} を ${{ inputs.xxx }} に置換。
+github-script ステップも同様にinputsを参照。
+必要に応じて secrets も workflow_call で受け取れるようにする。
+4. ファイル名・配置
+ファイル名はそのまま issue-note.yml。
+配置場所は workflows でOK（共通ワークフローとしてもこの場所で良い）。
+5. 呼び出し元への影響
+呼び出し元ワークフローで uses: <repo>/.github/workflows/issue-note.yml@main のように参照し、inputsを渡す形になる。
+このplanで進めます。次に、実際の共通ワークフロー化のためのyml修正案を作成しますか？
+```
+
+- userがplanレビューし、OKを出した
+- agentに生成結果ymlをレビューさせた、OKとなった
+  - userはこのレビューは認知負荷が高いのでskipとする（単純な細かい間違い探し作業になるので、それはagentに任せた）
+-  エラー。呼び出し元ymlのエラーがあり修正。共通ワークフローのエラー指摘があり、共通ワークフロー側の修正が必要となった
+```
+原因の分析：
+
+呼び出し元（tonejs-mml-to-jsonのissue-note.yml）は、reusable workflow（cat2151/github-actions/.github/workflows/issue-note.yml@main）をusesで呼び出し、inputsをwithで渡しています。
+共通ワークフロー（reusable workflow）は inputs を workflow_call で受け取り、各ステップで ${{ inputs.xxx }} で参照しています。
+しかし、エラーが発生したのは actions/github-script@v7 の script 内です。
+エラーの本質的な原因：
+
+actions/github-script の script: で ${{ inputs.issue_number }} のような式を直接 JavaScript テンプレートリテラル内で使っていますが、これはサポートされていません。
+script: の中は JavaScript であり、YAMLの ${{ ... }} は展開されません（または意図通りに展開されません）。
+そのため、inputs 変数は script 内の JavaScript で未定義となり、ReferenceError になります。
+正しい書き方：
+
+actions/github-script の script: でワークフローの inputs を使いたい場合は、with: で input を environment 変数や script の引数として渡し、JavaScript で process.env から取得するか、github-script の input 機能を使う必要があります。
+例（修正版）：
+
+このように、inputs の値を env で渡し、script 内では process.env で参照してください。
+
+まとめ：
+
+actions/github-script の script 内で ${{ inputs.xxx }} を直接使うと ReferenceError になる
+env: で値を渡し、process.env で参照するのが正しい
+修正が必要です。修正版のワークフローが必要な場合はお知らせください。
+```
+
+- test green
+- closeとする
 
 {% endraw %}
 ```
@@ -680,588 +713,34 @@ jobs:
 {% endraw %}
 ```
 
-### src/app.rs
-```rs
-{% raw %}
-use crate::models::Ym2151Log;
-use crate::navigation::NavigationState;
-use crate::time_display::TimeDisplayMode;
-
-/// Application state
-pub struct App {
-    /// The loaded YM2151 log data
-    pub log: Ym2151Log,
-    /// Current file path (if any)
-    pub file_path: Option<String>,
-    /// Navigation state (scroll and selection)
-    pub navigation: NavigationState,
-    /// Time display mode
-    pub time_mode: TimeDisplayMode,
-    /// Whether the app should quit
-    pub should_quit: bool,
-}
-
-impl App {
-    pub fn new() -> Self {
-        Self {
-            log: Ym2151Log { events: vec![] },
-            file_path: None,
-            navigation: NavigationState::new(),
-            time_mode: TimeDisplayMode::Cumulative,
-            should_quit: false,
-        }
-    }
-
-    /// Load a JSON file
-    pub fn load_file(&mut self, path: &str) -> Result<(), Box<dyn std::error::Error>> {
-        self.log = crate::file_io::load_file(path)?;
-        self.file_path = Some(path.to_string());
-        self.navigation.reset();
-        Ok(())
-    }
-
-    /// Save the current log to file
-    pub fn save_file(&self) -> Result<(), Box<dyn std::error::Error>> {
-        if let Some(path) = &self.file_path {
-            crate::file_io::save_file(path, &self.log)?;
-            Ok(())
-        } else {
-            Err("No file path set".into())
-        }
-    }
-
-    /// Toggle time display mode
-    pub fn toggle_time_mode(&mut self) {
-        self.time_mode.toggle();
-    }
-
-    /// Move selection up
-    pub fn move_up(&mut self) {
-        self.navigation.move_up();
-    }
-
-    /// Move selection down
-    pub fn move_down(&mut self) {
-        self.navigation.move_down(self.log.events.len());
-    }
-
-    /// Update scroll offset to keep selected item visible
-    pub fn update_scroll(&mut self, visible_height: usize) {
-        self.navigation.update_scroll(visible_height);
-    }
-
-    /// Format event for display
-    pub fn format_event(&self, index: usize) -> String {
-        crate::time_display::format_event(&self.log, index, self.time_mode)
-    }
-
-    /// Preview current event by playing events from start to selected position
-    pub fn preview_current_event(&self) {
-        crate::preview::preview_current_event(&self.log, self.navigation.selected_index);
-    }
-
-    /// Set wait time (cumulative time) for the selected event in milliseconds
-    /// Only works in Cumulative display mode
-    ///
-    /// # Arguments
-    /// * `milliseconds` - The wait time in milliseconds (typically 0-9).
-    ///   Values are used as-is without validation. Common usage:
-    ///   0-9ms (mapped from keys 0-9).
-    pub fn set_wait_time_ms(&mut self, milliseconds: u32) {
-        crate::event_editor::set_wait_time_ms(
-            &mut self.log,
-            self.navigation.selected_index,
-            milliseconds,
-            self.time_mode,
-        );
-    }
-
-    /// Delete the currently selected event
-    pub fn delete_selected_event(&mut self) {
-        crate::event_editor::delete_event(&mut self.log, self.navigation.selected_index);
-        self.navigation.adjust_after_delete(self.log.events.len());
-    }
-
-    /// Insert a new event before the currently selected position
-    pub fn insert_event_before_selected(&mut self) {
-        crate::event_editor::insert_event_before(&mut self.log, self.navigation.selected_index);
-        self.navigation.adjust_after_insert();
-    }
-
-    // Accessor methods for backward compatibility with UI code
-    pub fn selected_index(&self) -> usize {
-        self.navigation.selected_index
-    }
-
-    pub fn scroll_offset(&self) -> usize {
-        self.navigation.scroll_offset
-    }
-}
-
-impl Default for App {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use crate::models::Ym2151Event;
-
-    #[test]
-    fn test_set_wait_time_ms() {
-        let mut app = App::new();
-        app.time_mode = TimeDisplayMode::Cumulative;
-
-        // Create test events
-        app.log.events = vec![
-            Ym2151Event {
-                time: 0.0,
-                addr: "20".to_string(),
-                data: "4F".to_string(),
-            },
-            Ym2151Event {
-                time: 0.01,
-                addr: "40".to_string(),
-                data: "16".to_string(),
-            },
-            Ym2151Event {
-                time: 0.02,
-                addr: "60".to_string(),
-                data: "14".to_string(),
-            },
-        ];
-
-        // Select event 1 and set wait time to 5ms
-        app.navigation.selected_index = 1;
-        app.set_wait_time_ms(5);
-
-        // Verify event 1 now has timestamp 0.005 (0.0 + 0.005)
-        assert!((app.log.events[1].time - 0.005).abs() < 0.0001);
-
-        // Verify event 2 was also adjusted (should be 0.015, was 0.02, delta = -0.005)
-        assert!((app.log.events[2].time - 0.015).abs() < 0.0001);
-    }
-
-    #[test]
-    fn test_set_wait_time_ms_timestamp_mode() {
-        let mut app = App::new();
-        app.time_mode = TimeDisplayMode::Timestamp;
-
-        app.log.events = vec![
-            Ym2151Event {
-                time: 0.0,
-                addr: "20".to_string(),
-                data: "4F".to_string(),
-            },
-            Ym2151Event {
-                time: 0.01,
-                addr: "40".to_string(),
-                data: "16".to_string(),
-            },
-        ];
-
-        app.navigation.selected_index = 1;
-        let original_time = app.log.events[1].time;
-
-        // Should not modify in Timestamp mode
-        app.set_wait_time_ms(5);
-
-        assert_eq!(app.log.events[1].time, original_time);
-    }
-
-    #[test]
-    fn test_set_wait_time_ms_first_event() {
-        let mut app = App::new();
-        app.time_mode = TimeDisplayMode::Cumulative;
-
-        app.log.events = vec![
-            Ym2151Event {
-                time: 0.0,
-                addr: "20".to_string(),
-                data: "4F".to_string(),
-            },
-            Ym2151Event {
-                time: 0.01,
-                addr: "40".to_string(),
-                data: "16".to_string(),
-            },
-        ];
-
-        // Select first event and set wait time to 3ms
-        app.navigation.selected_index = 0;
-        app.set_wait_time_ms(3);
-
-        // First event should be at 0.003
-        assert!((app.log.events[0].time - 0.003).abs() < 0.0001);
-
-        // Second event should also be adjusted (was 0.01, delta = +0.003)
-        assert!((app.log.events[1].time - 0.013).abs() < 0.0001);
-    }
-
-    #[test]
-    fn test_set_wait_time_ms_zero() {
-        let mut app = App::new();
-        app.time_mode = TimeDisplayMode::Cumulative;
-
-        app.log.events = vec![
-            Ym2151Event {
-                time: 0.0,
-                addr: "20".to_string(),
-                data: "4F".to_string(),
-            },
-            Ym2151Event {
-                time: 0.01,
-                addr: "40".to_string(),
-                data: "16".to_string(),
-            },
-            Ym2151Event {
-                time: 0.02,
-                addr: "60".to_string(),
-                data: "14".to_string(),
-            },
-        ];
-
-        // Select event 1 and set wait time to 0ms
-        app.navigation.selected_index = 1;
-        app.set_wait_time_ms(0);
-
-        // Verify event 1 now has timestamp 0.0 (same as previous event)
-        assert!((app.log.events[1].time - 0.0).abs() < 0.0001);
-
-        // Verify event 2 was also adjusted (should be 0.01, was 0.02, delta = -0.01)
-        assert!((app.log.events[2].time - 0.01).abs() < 0.0001);
-    }
-
-    #[test]
-    fn test_delete_selected_event() {
-        let mut app = App::new();
-        app.log.events = vec![
-            Ym2151Event {
-                time: 0.0,
-                addr: "20".to_string(),
-                data: "4F".to_string(),
-            },
-            Ym2151Event {
-                time: 0.01,
-                addr: "40".to_string(),
-                data: "16".to_string(),
-            },
-            Ym2151Event {
-                time: 0.02,
-                addr: "60".to_string(),
-                data: "14".to_string(),
-            },
-        ];
-
-        // Select middle event and delete it
-        app.navigation.selected_index = 1;
-        app.delete_selected_event();
-
-        // Verify event count decreased
-        assert_eq!(app.log.events.len(), 2);
-
-        // Verify the correct event was deleted (remaining events should be index 0 and 2)
-        assert_eq!(app.log.events[0].addr, "20");
-        assert_eq!(app.log.events[1].addr, "60");
-
-        // Verify selected_index is still valid
-        assert_eq!(app.navigation.selected_index, 1);
-    }
-
-    #[test]
-    fn test_delete_last_event() {
-        let mut app = App::new();
-        app.log.events = vec![
-            Ym2151Event {
-                time: 0.0,
-                addr: "20".to_string(),
-                data: "4F".to_string(),
-            },
-            Ym2151Event {
-                time: 0.01,
-                addr: "40".to_string(),
-                data: "16".to_string(),
-            },
-        ];
-
-        // Select last event and delete it
-        app.navigation.selected_index = 1;
-        app.delete_selected_event();
-
-        // Verify event count decreased
-        assert_eq!(app.log.events.len(), 1);
-
-        // Verify selected_index was adjusted to last valid index
-        assert_eq!(app.navigation.selected_index, 0);
-    }
-
-    #[test]
-    fn test_delete_single_event() {
-        let mut app = App::new();
-        app.log.events = vec![Ym2151Event {
-            time: 0.0,
-            addr: "20".to_string(),
-            data: "4F".to_string(),
-        }];
-
-        // Select the only event and delete it
-        app.navigation.selected_index = 0;
-        app.delete_selected_event();
-
-        // Verify all events are deleted
-        assert_eq!(app.log.events.len(), 0);
-
-        // selected_index should remain 0 (though there are no events)
-        assert_eq!(app.navigation.selected_index, 0);
-    }
-
-    #[test]
-    fn test_delete_empty_list() {
-        let mut app = App::new();
-        app.log.events = vec![];
-
-        // Try to delete from empty list (should not panic)
-        app.navigation.selected_index = 0;
-        app.delete_selected_event();
-
-        // Verify still empty
-        assert_eq!(app.log.events.len(), 0);
-    }
-
-    #[test]
-    fn test_move_down_to_empty_line() {
-        let mut app = App::new();
-        app.log.events = vec![
-            Ym2151Event {
-                time: 0.0,
-                addr: "20".to_string(),
-                data: "4F".to_string(),
-            },
-            Ym2151Event {
-                time: 0.01,
-                addr: "40".to_string(),
-                data: "16".to_string(),
-            },
-        ];
-
-        // Start at first event
-        app.navigation.selected_index = 0;
-
-        // Move down to second event
-        app.move_down();
-        assert_eq!(app.navigation.selected_index, 1);
-
-        // Move down to empty line (one beyond last event)
-        app.move_down();
-        assert_eq!(app.navigation.selected_index, 2);
-        assert_eq!(app.navigation.selected_index, app.log.events.len());
-
-        // Try to move down again (should stay at empty line)
-        app.move_down();
-        assert_eq!(app.navigation.selected_index, 2);
-    }
-
-    #[test]
-    fn test_move_down_empty_log() {
-        let mut app = App::new();
-        app.log.events = vec![];
-
-        // Start at index 0 (empty)
-        app.navigation.selected_index = 0;
-
-        // Try to move down (should stay at 0)
-        app.move_down();
-        assert_eq!(app.navigation.selected_index, 0);
-    }
-
-    #[test]
-    fn test_insert_event_before_selected_at_start() {
-        let mut app = App::new();
-        app.log.events = vec![
-            Ym2151Event {
-                time: 0.01,
-                addr: "20".to_string(),
-                data: "4F".to_string(),
-            },
-            Ym2151Event {
-                time: 0.02,
-                addr: "40".to_string(),
-                data: "16".to_string(),
-            },
-        ];
-
-        // Insert before first event
-        app.navigation.selected_index = 0;
-        app.insert_event_before_selected();
-
-        // Verify event count increased
-        assert_eq!(app.log.events.len(), 3);
-
-        // Verify new event inserted at position 0
-        assert_eq!(app.log.events[0].addr, "00");
-        assert_eq!(app.log.events[0].data, "00");
-        assert!((app.log.events[0].time - 0.0).abs() < 0.0001);
-
-        // Verify original events shifted
-        assert_eq!(app.log.events[1].addr, "20");
-        assert_eq!(app.log.events[2].addr, "40");
-
-        // Verify selected_index stayed on the new event
-        assert_eq!(app.navigation.selected_index, 0);
-    }
-
-    #[test]
-    fn test_insert_event_before_selected_in_middle() {
-        let mut app = App::new();
-        app.log.events = vec![
-            Ym2151Event {
-                time: 0.0,
-                addr: "20".to_string(),
-                data: "4F".to_string(),
-            },
-            Ym2151Event {
-                time: 0.01,
-                addr: "40".to_string(),
-                data: "16".to_string(),
-            },
-            Ym2151Event {
-                time: 0.02,
-                addr: "60".to_string(),
-                data: "14".to_string(),
-            },
-        ];
-
-        // Insert before middle event (index 1)
-        app.navigation.selected_index = 1;
-        app.insert_event_before_selected();
-
-        // Verify event count increased
-        assert_eq!(app.log.events.len(), 4);
-
-        // Verify new event inserted at position 1 with time from previous event
-        assert_eq!(app.log.events[1].addr, "00");
-        assert_eq!(app.log.events[1].data, "00");
-        assert!((app.log.events[1].time - 0.0).abs() < 0.0001);
-
-        // Verify original events
-        assert_eq!(app.log.events[0].addr, "20");
-        assert_eq!(app.log.events[2].addr, "40");
-        assert_eq!(app.log.events[3].addr, "60");
-
-        // Verify selected_index stayed on the new event
-        assert_eq!(app.navigation.selected_index, 1);
-    }
-
-    #[test]
-    fn test_insert_event_before_selected_at_end() {
-        let mut app = App::new();
-        app.log.events = vec![
-            Ym2151Event {
-                time: 0.0,
-                addr: "20".to_string(),
-                data: "4F".to_string(),
-            },
-            Ym2151Event {
-                time: 0.01,
-                addr: "40".to_string(),
-                data: "16".to_string(),
-            },
-        ];
-
-        // Move cursor to empty line after last event
-        app.navigation.selected_index = 2;
-        app.insert_event_before_selected();
-
-        // Verify event count increased
-        assert_eq!(app.log.events.len(), 3);
-
-        // Verify new event inserted at position 2 with time from last event
-        assert_eq!(app.log.events[2].addr, "00");
-        assert_eq!(app.log.events[2].data, "00");
-        assert!((app.log.events[2].time - 0.01).abs() < 0.0001);
-
-        // Verify original events unchanged
-        assert_eq!(app.log.events[0].addr, "20");
-        assert_eq!(app.log.events[1].addr, "40");
-
-        // Verify selected_index stayed at 2 (now pointing to the new event)
-        assert_eq!(app.navigation.selected_index, 2);
-    }
-
-    #[test]
-    fn test_insert_event_before_selected_empty_list() {
-        let mut app = App::new();
-        app.log.events = vec![];
-
-        // Insert into empty list
-        app.navigation.selected_index = 0;
-        app.insert_event_before_selected();
-
-        // Verify event count increased
-        assert_eq!(app.log.events.len(), 1);
-
-        // Verify new event created with time 0.0
-        assert_eq!(app.log.events[0].addr, "00");
-        assert_eq!(app.log.events[0].data, "00");
-        assert!((app.log.events[0].time - 0.0).abs() < 0.0001);
-
-        // Verify selected_index is still 0
-        assert_eq!(app.navigation.selected_index, 0);
-    }
-
-    #[test]
-    fn test_insert_event_scroll_adjustment() {
-        let mut app = App::new();
-        app.log.events = vec![
-            Ym2151Event {
-                time: 0.0,
-                addr: "20".to_string(),
-                data: "4F".to_string(),
-            },
-            Ym2151Event {
-                time: 0.01,
-                addr: "40".to_string(),
-                data: "16".to_string(),
-            },
-        ];
-
-        // Set scroll_offset ahead of selected_index
-        app.navigation.selected_index = 0;
-        app.navigation.scroll_offset = 1;
-
-        app.insert_event_before_selected();
-
-        // Verify scroll_offset was adjusted to keep new event visible
-        assert_eq!(app.navigation.scroll_offset, 0);
-    }
-}
-
-{% endraw %}
-```
-
 ## 最近の変更（過去7日間）
 ### コミット履歴:
+839b4e3 Merge pull request #22 from cat2151/copilot/refactor-app-rs-tests
+53816b3 Refactor: Move app.rs tests to src/tests/app_tests.rs
+b94b2d3 Initial plan
+d5434f9 Update project summaries (overview & development status) [auto]
 20c60d2 Auto-translate README.ja.md to README.md [auto]
 f068d1a Clarify project scope and non-goals in README
 f9ecb83 Add issue note for #21 [auto]
 f6b9943 Add issue note for #20 [auto]
 260ea45 Add issue note for #19 [auto]
 160460f Update business logic implementation instructions
-8c0d888 Update linting instructions and checklist
-9c66816 Update Windows compatibility check instructions
-3000225 Merge pull request #18 from cat2151/copilot/fix-windows-gnu-cross-compilation
-12aa0b5 Remove unused get_time_string method to fix Windows GNU cross-compilation
 
 ### 変更されたファイル:
-.github/copilot-instructions.md
 README.ja.md
 README.md
+generated-docs/development-status-generated-prompt.md
+generated-docs/development-status.md
+generated-docs/project-overview-generated-prompt.md
+generated-docs/project-overview.md
 issue-notes/19.md
 issue-notes/20.md
 issue-notes/21.md
+src/app.rs
+src/main.rs
+src/tests/app_tests.rs
+src/tests/mod.rs
 
 
 ---
-Generated at: 2025-12-17 07:04:30 JST
+Generated at: 2025-12-19 07:04:26 JST

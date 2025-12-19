@@ -70,7 +70,7 @@ impl App {
         crate::time_display::format_event(&self.log, index, self.time_mode)
     }
 
-    /// Preview current event by playing events from start to selected position
+    /// Preview playback by playing all events in the log
     pub fn preview_current_event(&self) {
         crate::preview::preview_current_event(&self.log, self.navigation.selected_index);
     }

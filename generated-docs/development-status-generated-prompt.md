@@ -1,4 +1,4 @@
-Last updated: 2025-12-19
+Last updated: 2025-12-21
 
 # 開発状況生成プロンプト（開発者向け）
 
@@ -226,31 +226,17 @@ Last updated: 2025-12-19
 - test_data/sample.json
 
 ## 現在のオープンIssues
-## [Issue #23](../issue-notes/23.md): Windows GNU cross-compilation check failed
-Windows GNU cross-compilation check failed in scheduled run.
+## [Issue #25](../issue-notes/25.md): Distinguish KEYOFF from KEYON for YM2151 register 0x08
+YM2151 register 0x08 controls both key-on and key-off operations. Previously, all 0x08 events displayed as "KeyON" regardless of the data value.
 
-Please investigate the build errors and ensure all dependencies are compatible with Windows.
+## Changes
 
-Workflow run: https://github.com/cat2151/ym2151-log-editor/actions/runs/20340786044...
-ラベル: bug, windows-build
---- issue-notes/23.md の内容 ---
-
-```markdown
-
-```
-
-## [Issue #20](../issue-notes/20.md): preview演奏機能は、カーソル位置までの演奏ではなく、JSON全体を演奏とする
-[issue-notes/20.md](https://github.com/cat2151/ym2151-log-editor/blob/main/issue-notes/20.md)
-
-...
+- **models.rs**: Added `is_key_off()` method that checks if bits 3-6 (mask 0x78) are all zero in the data field
+- **time_display.rs**: Display...
 ラベル: 
---- issue-notes/20.md の内容 ---
+--- issue-notes/25.md の内容 ---
 
 ```markdown
-# issue preview演奏機能は、カーソル位置までの演奏ではなく、JSON全体を演奏とする #20
-[issues #20](https://github.com/cat2151/ym2151-log-editor/issues/20)
-
-
 
 ```
 
@@ -504,193 +490,30 @@ jobs:
 {% endraw %}
 ```
 
-### .github/actions-tmp/issue-notes/20.md
+### .github/actions-tmp/issue-notes/25.md
 ```md
 {% raw %}
-# issue project-summary の development-status 生成時、issue-notes/ 配下のmdにファイル名が書いてあれば、そのファイル内容もpromptに添付、を試す #20
-[issues #20](https://github.com/cat2151/github-actions/issues/20)
+# issue project summaryを他projectからcallしたところ、issue-notes参照ディレクトリ誤りが発覚した #25
+[issues #25](https://github.com/cat2151/github-actions/issues/25)
 
-# 何が困るの？
-- Geminiに次の一手を生成させるとき、cjsの内容も添付したほうが、生成品質が改善できる可能性がある。
-
-# 案
-## outputのimage
-- promptが言及するfilename、について、そのfileの内容もすべてpromptに含める。
-    - 軸は、projectのfilename一覧である。
-        - 一覧それぞれのfilenameについて、promptで言及されているものをfile内容埋め込み、とする。
-- 方向性
-    - シンプルで明確なルール、曖昧さのないルールで、メンテを楽にすることを優先する
-    - 余分なファイルが出てしまうが割り切ってOKとし、欠落リスクを減らせることを優先する
-- 備考
-    - 曖昧でメンテが必要な「documentからのfilename抽出」をやめ、
-        - かわりに、逆に、「今のprojectにあるfileすべてのうち、promptで言及されているもの」を軸とする
-## 実現方法の案
-- project全体について、filenameと、filepath配列（複数ありうる）、のmapを取得する。そういう関数Aをまず実装する。
-    - filepathは、agentが扱えるよう、github上のworkの絶対pathではなく、projectRootからの相対パス表記とする。
-- そして、そのfilenameにmatchするfilepath配列について、filepathとファイル内容を記したmarkdown文字列を返却、という関数Bを実装する。
-- さらに、Geminiにわたすpromptについて、前述の関数Aのfilenameそれぞれについて、prompt内を検索し、filenameが存在する場合は、そのfilenameについて、関数Bを用いてmarkdown文字列を取得する。そうして得られたmarkdown文字列群を返却する、という関数Cを実装する。
-- さらに、promptの末尾に書いてあるプレースホルダー「`${file_contents}`」を、関数Cの結果で置き換える、という関数Dを実装する。
-- 実際には、Geminiにわたすpromptのプレースホルダー展開は、2回にわたる必要がある。1回目でissues-note内容をpromptに埋め込む。2回目でそのpromptに対して関数Dを適用する。
-## 備忘
-- 上記は、agentにplanさせてレビューし、context不足と感じたら上記をメンテ、というサイクルで書いた。
+# 事象
+- `Issueノートが存在しません: /home/runner/work/tonejs-mml-to-json/tonejs-mml-to-json/.github/actions-tmp/issue-notes/6.md`
 
 # どうする？
-- 上記をagentに投げる。documentやtestについてのplanもしてくるかもしれないがそこは時間の都合で省略して実施させるつもり。
-- 投げた、実装させた、レビューして人力リファクタリングした
-- testする
-
-# 結果
-- バグ
-    - この20.mdにあるプレースホルダーが置換されてしまっている
-    - issue-notesで言及されていないfileまで添付されてしまっている
-- 分析
-    - この20.mdにあるプレースホルダーが置換されてしまっている
-        - 原因
-            - 20.mdにあるプレースホルダーまで置換対象としてしまっていたため。
-            - prompt全体のプレースホルダーを置換対象としてしまっていたため。
-            - issue-notesを埋め込んだあとでの、プレースホルダー処理だったので、
-                - 20.md が置換対象となってしまったため。
-        - 対策案
-            - プレースホルダーはすべて、「行頭と行末で囲まれている」ときだけ置換対象とする。
-                - つまり文中やcode中のプレースホルダーは置換対象外とする。
-            - さらに、2つ以上プレースホルダーが出たら想定外なので早期エラー終了させ、検知させる。
-    - issue-notesで言及されていないfileまで添付されてしまっている
-        - 原因
-            - promptに、既にprojectの全file listが書き込まれたあとなので、
-                - issue-noteで言及されていなくても、
-                - promptの全file listを対象に検索してしまっている
-        - 対策案の候補
-            - プレースホルダー置換の順番を変更し、全file listは最後に置換する
-            - file添付の対象を変更し、promptでなく、issue-notesとする
-                - これが範囲が絞られているので安全である、と考える
-        - 備忘
-            - 全fileの対象は、リモートリポジトリ側のfileなので、secretsの心配はないし、実際に検索して確認済み
-
-# どうする？
-- agent半分、人力が半分（agentがハルシネーションでソース破壊したので、関数切り分けしたり、リファクタリングしたり）。
-- で実装した。
-- testする
-
-# 結果
-- test green
-
-# closeとする
-
-{% endraw %}
-```
-
-### issue-notes/20.md
-```md
-{% raw %}
-# issue preview演奏機能は、カーソル位置までの演奏ではなく、JSON全体を演奏とする #20
-[issues #20](https://github.com/cat2151/ym2151-log-editor/issues/20)
-
-
-
-{% endraw %}
-```
-
-### .github/actions-tmp/issue-notes/23.md
-```md
-{% raw %}
-# issue issue 17が再発してしまっている #23
-[issues #23](https://github.com/cat2151/github-actions/issues/23)
-
-# 症状は？
-- issue 17と同じ
-
-# どうする？
-- development-status-generated-prompt.md を確認する
+- 当該処理のディレクトリ部分を確認する
+- 日次バッチでGeminiに確認させてみる
 - 結果
-    - >Issue番号を記載する際は、必ず [Issue #番号](issue-notes/番号.md) の形式でMarkdownリンクとして記載してください。
-    - 仮説、これが残っており、ほかの ../ 指定と競合し、どちらかがランダムで選ばれていた
-    - 対策、ここを ../ 指定にする
+    - Geminiに確認させてpromptを生成させ、agentに投げた
+    - 結果、projectRootの扱いの誤り、と判明
+        - 共通workflow側のdirを引数でわたしてしまっていた
+        - target repository側のdirを引数でわたすべき
+- 修正したつもり
+- 次の日次バッチで動作確認させるつもり
 
 # 結果
 - test green
 
 # closeとする
-
-{% endraw %}
-```
-
-### .github/actions-tmp/issue-notes/3.md
-```md
-{% raw %}
-# issue GitHub Actions「issue note生成」を共通ワークフロー化する #3
-[issues #3](https://github.com/cat2151/github-actions/issues/3)
-
-- 前提
-  - userは、translateのworkflowを共通ワークフロー化し、動くようにしたので、共通ワークフロー化の知識がある
-  - よって、今回は、promptでplanさせ、そのplanをuserがレビューし、planの改善を指示できるので、ハルシネーションのリスクを下げることができる
-
-- prompt
-```
-あなたはGitHub Actionsと共通ワークフローのスペシャリストです。
-このymlはまだ共通ワークフロー化されず、
-呼び出し元からコピーされたままの状態です。
-このymlファイル名のまま、
-中身を共通ワークフロー化してください。
-呼び出し元ymlは別途書きますので気にしないでください。
-まずplanしてください
-```
-
-- plan 生成結果
-```
-共通ワークフロー化のためのplanは以下の通りです。
-
-1. 目的
-現在の issue-note.yml を「共通ワークフロー」として再設計し、他リポジトリや他ワークフローから workflow_call で呼び出せるようにする。
-2. 主な変更点
-on: トリガーを workflow_call に変更（直接イベントで起動しない）。
-必要な入力（inputs）やシークレット（secrets）を workflow_call セクションで定義。
-github.event.issue などのイベント依存部分を、inputs経由で受け取る形に修正。
-既存の処理（issueノート生成、コミット、issue body更新）はそのまま活かすが、パラメータ化する。
-3. 具体的な修正内容
-on: issues: → on: workflow_call: に変更。
-inputs で必要な値（例: issue_title, issue_number, issue_body, issue_url など）を受け取る。
-スクリプト内の ${{ github.event.issue.xxx }} を ${{ inputs.xxx }} に置換。
-github-script ステップも同様にinputsを参照。
-必要に応じて secrets も workflow_call で受け取れるようにする。
-4. ファイル名・配置
-ファイル名はそのまま issue-note.yml。
-配置場所は workflows でOK（共通ワークフローとしてもこの場所で良い）。
-5. 呼び出し元への影響
-呼び出し元ワークフローで uses: <repo>/.github/workflows/issue-note.yml@main のように参照し、inputsを渡す形になる。
-このplanで進めます。次に、実際の共通ワークフロー化のためのyml修正案を作成しますか？
-```
-
-- userがplanレビューし、OKを出した
-- agentに生成結果ymlをレビューさせた、OKとなった
-  - userはこのレビューは認知負荷が高いのでskipとする（単純な細かい間違い探し作業になるので、それはagentに任せた）
--  エラー。呼び出し元ymlのエラーがあり修正。共通ワークフローのエラー指摘があり、共通ワークフロー側の修正が必要となった
-```
-原因の分析：
-
-呼び出し元（tonejs-mml-to-jsonのissue-note.yml）は、reusable workflow（cat2151/github-actions/.github/workflows/issue-note.yml@main）をusesで呼び出し、inputsをwithで渡しています。
-共通ワークフロー（reusable workflow）は inputs を workflow_call で受け取り、各ステップで ${{ inputs.xxx }} で参照しています。
-しかし、エラーが発生したのは actions/github-script@v7 の script 内です。
-エラーの本質的な原因：
-
-actions/github-script の script: で ${{ inputs.issue_number }} のような式を直接 JavaScript テンプレートリテラル内で使っていますが、これはサポートされていません。
-script: の中は JavaScript であり、YAMLの ${{ ... }} は展開されません（または意図通りに展開されません）。
-そのため、inputs 変数は script 内の JavaScript で未定義となり、ReferenceError になります。
-正しい書き方：
-
-actions/github-script の script: でワークフローの inputs を使いたい場合は、with: で input を environment 変数や script の引数として渡し、JavaScript で process.env から取得するか、github-script の input 機能を使う必要があります。
-例（修正版）：
-
-このように、inputs の値を env で渡し、script 内では process.env で参照してください。
-
-まとめ：
-
-actions/github-script の script 内で ${{ inputs.xxx }} を直接使うと ReferenceError になる
-env: で値を渡し、process.env で参照するのが正しい
-修正が必要です。修正版のワークフローが必要な場合はお知らせください。
-```
-
-- test green
-- closeとする
 
 {% endraw %}
 ```
@@ -713,18 +536,115 @@ env: で値を渡し、process.env で参照するのが正しい
 {% endraw %}
 ```
 
+### src/models.rs
+```rs
+{% raw %}
+use serde::{Deserialize, Serialize};
+
+/// JSON event structure for ym2151-log
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct Ym2151Event {
+    pub time: f64,
+    pub addr: String,
+    pub data: String,
+}
+
+/// JSON log structure for ym2151-log
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct Ym2151Log {
+    pub events: Vec<Ym2151Event>,
+}
+
+impl Ym2151Event {
+    /// Check if this event is a KeyON event (register 0x08)
+    pub fn is_key_on(&self) -> bool {
+        self.addr.to_uppercase() == "08"
+    }
+}
+
+{% endraw %}
+```
+
+### src/time_display.rs
+```rs
+{% raw %}
+use crate::models::Ym2151Log;
+
+/// Display mode for time values
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum TimeDisplayMode {
+    /// Display cumulative time (delta from previous event)
+    Cumulative,
+    /// Display absolute timestamp
+    Timestamp,
+}
+
+impl TimeDisplayMode {
+    /// Toggle between display modes
+    pub fn toggle(&mut self) {
+        *self = match *self {
+            TimeDisplayMode::Cumulative => TimeDisplayMode::Timestamp,
+            TimeDisplayMode::Timestamp => TimeDisplayMode::Cumulative,
+        };
+    }
+}
+
+/// Get cumulative time for an event (delta from previous)
+pub fn get_cumulative_time(log: &Ym2151Log, index: usize) -> f64 {
+    if index == 0 {
+        log.events[0].time
+    } else if index < log.events.len() {
+        log.events[index].time - log.events[index - 1].time
+    } else {
+        0.0
+    }
+}
+
+/// Get formatted time string for an event
+pub fn get_time_string(log: &Ym2151Log, index: usize, mode: TimeDisplayMode) -> String {
+    if index >= log.events.len() {
+        return String::from("0.000000");
+    }
+
+    let time = match mode {
+        TimeDisplayMode::Timestamp => log.events[index].time,
+        TimeDisplayMode::Cumulative => get_cumulative_time(log, index),
+    };
+
+    format!("{:.6}", time)
+}
+
+/// Format event for display
+pub fn format_event(log: &Ym2151Log, index: usize, mode: TimeDisplayMode) -> String {
+    if index >= log.events.len() {
+        return String::new();
+    }
+
+    let event = &log.events[index];
+    let time_str = get_time_string(log, index, mode);
+
+    if event.is_key_on() {
+        format!("{}  KeyON  {}", time_str, event.data)
+    } else {
+        format!("{}  {}  {}", time_str, event.addr, event.data)
+    }
+}
+
+{% endraw %}
+```
+
 ## 最近の変更（過去7日間）
 ### コミット履歴:
+29a881b Auto-translate README.ja.md to README.md [auto]
+6abd632 Merge pull request #24 from cat2151/copilot/fix-preview-performance-issue
+051c0a6 Change preview playback to play entire JSON instead of up to cursor position
+ab42a2c Initial plan
+b889de9 Update project summaries (overview & development status) [auto]
 839b4e3 Merge pull request #22 from cat2151/copilot/refactor-app-rs-tests
 53816b3 Refactor: Move app.rs tests to src/tests/app_tests.rs
 b94b2d3 Initial plan
 d5434f9 Update project summaries (overview & development status) [auto]
 20c60d2 Auto-translate README.ja.md to README.md [auto]
-f068d1a Clarify project scope and non-goals in README
-f9ecb83 Add issue note for #21 [auto]
-f6b9943 Add issue note for #20 [auto]
-260ea45 Add issue note for #19 [auto]
-160460f Update business logic implementation instructions
 
 ### 変更されたファイル:
 README.ja.md
@@ -733,14 +653,12 @@ generated-docs/development-status-generated-prompt.md
 generated-docs/development-status.md
 generated-docs/project-overview-generated-prompt.md
 generated-docs/project-overview.md
-issue-notes/19.md
-issue-notes/20.md
-issue-notes/21.md
 src/app.rs
 src/main.rs
+src/preview.rs
 src/tests/app_tests.rs
 src/tests/mod.rs
 
 
 ---
-Generated at: 2025-12-19 07:04:26 JST
+Generated at: 2025-12-21 07:04:01 JST

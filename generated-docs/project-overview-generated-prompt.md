@@ -1,4 +1,4 @@
-Last updated: 2025-12-21
+Last updated: 2025-12-22
 
 
 # プロジェクト概要生成プロンプト（来訪者向け）
@@ -279,6 +279,7 @@ cargo run -- test_data/sample.json
   📁 tests/
     📄 app_tests.rs
     📄 mod.rs
+    📄 model_tests.rs
   📄 time_display.rs
   📄 ui.rs
 📁 test_data/
@@ -314,4 +315,4 @@ test_data/sample.json
 
 
 ---
-Generated at: 2025-12-21 07:04:01 JST
+Generated at: 2025-12-22 07:04:33 JST

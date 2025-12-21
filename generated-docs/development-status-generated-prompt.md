@@ -1,4 +1,4 @@
-Last updated: 2025-12-21
+Last updated: 2025-12-22
 
 # 開発状況生成プロンプト（開発者向け）
 
@@ -220,41 +220,13 @@ Last updated: 2025-12-21
 - src/preview.rs
 - src/tests/app_tests.rs
 - src/tests/mod.rs
+- src/tests/model_tests.rs
 - src/time_display.rs
 - src/ui.rs
 - test_data/minimal.json
 - test_data/sample.json
 
 ## 現在のオープンIssues
-## [Issue #25](../issue-notes/25.md): Distinguish KEYOFF from KEYON for YM2151 register 0x08
-YM2151 register 0x08 controls both key-on and key-off operations. Previously, all 0x08 events displayed as "KeyON" regardless of the data value.
-
-## Changes
-
-- **models.rs**: Added `is_key_off()` method that checks if bits 3-6 (mask 0x78) are all zero in the data field
-- **time_display.rs**: Display...
-ラベル: 
---- issue-notes/25.md の内容 ---
-
-```markdown
-
-```
-
-## [Issue #19](../issue-notes/19.md): addr 0x08 KEYON表示について、dataのbit3,4,5,6が0であれば、KEYOFF表示とする
-[issue-notes/19.md](https://github.com/cat2151/ym2151-log-editor/blob/main/issue-notes/19.md)
-
-...
-ラベル: 
---- issue-notes/19.md の内容 ---
-
-```markdown
-# issue addr 0x08 KEYON表示について、dataのbit3,4,5,6が0であれば、KEYOFF表示とする #19
-[issues #19](https://github.com/cat2151/ym2151-log-editor/issues/19)
-
-
-
-```
-
 ## [Issue #2](../issue-notes/2.md): ドッグフーディングする
 
 ラベル: 
@@ -265,56 +237,6 @@ YM2151 register 0x08 controls both key-on and key-off operations. Previously, al
 ```
 
 ## ドキュメントで言及されているファイルの内容
-### .github/actions-tmp/issue-notes/19.md
-```md
-{% raw %}
-# issue project-summary の development-status 生成時、issue-notes/ 配下のmdファイルの内容を参照させる #19
-[issues #19](https://github.com/cat2151/github-actions/issues/19)
-
-# 何が困るの？
-- issue解決に向けての次の一手の内容が実態に即していないことが多い。
-
-# 対策案
-- issue-notes/ 配下のmdファイルの内容を参照させる
-
-# 備考
-- さらにmd内に書かれているfileも、project内をcjsに検索させて添付させると、よりGeminiの生成品質が向上する可能性がある。
-    - [issues #20](https://github.com/cat2151/github-actions/issues/20)
-- さらにproject overviewでGeminiがまとめたmdも、Geminiに与えると、よりGeminiの生成品質が向上する可能性がある。
-    - [issues #21](https://github.com/cat2151/github-actions/issues/21)
-- さらに、Geminiに与えたpromptをfileにしてcommit pushしておくと、デバッグに役立つ可能性がある。
-    - [issues #22](https://github.com/cat2151/github-actions/issues/22)
-
-# close条件
-- issues #22 がcloseされること。
-- commitされたpromptを確認し、issue-notes/ 配下のmdファイルがpromptに添付されていること、が確認できること。
-
-# 状況
-- 課題、実装したがtestができていない
-- 対策、issues #22 が実装されれば、testができる
-- 対策、issues #22 のcloseを待つ
-
-# 状況
-- issues #22 がcloseされた
-- testできるようになった
-- commitされたpromptを確認した。issue-notes/ 配下のmdファイルがpromptに添付されていること、が確認できた
-
-# closeする
-
-{% endraw %}
-```
-
-### issue-notes/19.md
-```md
-{% raw %}
-# issue addr 0x08 KEYON表示について、dataのbit3,4,5,6が0であれば、KEYOFF表示とする #19
-[issues #19](https://github.com/cat2151/ym2151-log-editor/issues/19)
-
-
-
-{% endraw %}
-```
-
 ### .github/actions-tmp/issue-notes/2.md
 ```md
 {% raw %}
@@ -490,161 +412,18 @@ jobs:
 {% endraw %}
 ```
 
-### .github/actions-tmp/issue-notes/25.md
-```md
-{% raw %}
-# issue project summaryを他projectからcallしたところ、issue-notes参照ディレクトリ誤りが発覚した #25
-[issues #25](https://github.com/cat2151/github-actions/issues/25)
-
-# 事象
-- `Issueノートが存在しません: /home/runner/work/tonejs-mml-to-json/tonejs-mml-to-json/.github/actions-tmp/issue-notes/6.md`
-
-# どうする？
-- 当該処理のディレクトリ部分を確認する
-- 日次バッチでGeminiに確認させてみる
-- 結果
-    - Geminiに確認させてpromptを生成させ、agentに投げた
-    - 結果、projectRootの扱いの誤り、と判明
-        - 共通workflow側のdirを引数でわたしてしまっていた
-        - target repository側のdirを引数でわたすべき
-- 修正したつもり
-- 次の日次バッチで動作確認させるつもり
-
-# 結果
-- test green
-
-# closeとする
-
-{% endraw %}
-```
-
-### .github/actions-tmp/issue-notes/9.md
-```md
-{% raw %}
-# issue 関数コールグラフhtmlビジュアライズが0件なので、原因を可視化する #9
-[issues #9](https://github.com/cat2151/github-actions/issues/9)
-
-# agentに修正させたり、人力で修正したりした
-- agentがハルシネーションし、いろいろ根の深いバグにつながる、エラー隠蔽などを仕込んでいたため、検知が遅れた
-- 詳しくはcommit logを参照のこと
-- WSL + actの環境を少し変更、act起動時のコマンドライン引数を変更し、generated-docsをmountする（ほかはデフォルト挙動であるcpだけにする）ことで、デバッグ情報をコンテナ外に出力できるようにし、デバッグを効率化した
-
-# test green
-
-# closeとする
-
-{% endraw %}
-```
-
-### src/models.rs
-```rs
-{% raw %}
-use serde::{Deserialize, Serialize};
-
-/// JSON event structure for ym2151-log
-#[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct Ym2151Event {
-    pub time: f64,
-    pub addr: String,
-    pub data: String,
-}
-
-/// JSON log structure for ym2151-log
-#[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct Ym2151Log {
-    pub events: Vec<Ym2151Event>,
-}
-
-impl Ym2151Event {
-    /// Check if this event is a KeyON event (register 0x08)
-    pub fn is_key_on(&self) -> bool {
-        self.addr.to_uppercase() == "08"
-    }
-}
-
-{% endraw %}
-```
-
-### src/time_display.rs
-```rs
-{% raw %}
-use crate::models::Ym2151Log;
-
-/// Display mode for time values
-#[derive(Debug, Clone, Copy, PartialEq)]
-pub enum TimeDisplayMode {
-    /// Display cumulative time (delta from previous event)
-    Cumulative,
-    /// Display absolute timestamp
-    Timestamp,
-}
-
-impl TimeDisplayMode {
-    /// Toggle between display modes
-    pub fn toggle(&mut self) {
-        *self = match *self {
-            TimeDisplayMode::Cumulative => TimeDisplayMode::Timestamp,
-            TimeDisplayMode::Timestamp => TimeDisplayMode::Cumulative,
-        };
-    }
-}
-
-/// Get cumulative time for an event (delta from previous)
-pub fn get_cumulative_time(log: &Ym2151Log, index: usize) -> f64 {
-    if index == 0 {
-        log.events[0].time
-    } else if index < log.events.len() {
-        log.events[index].time - log.events[index - 1].time
-    } else {
-        0.0
-    }
-}
-
-/// Get formatted time string for an event
-pub fn get_time_string(log: &Ym2151Log, index: usize, mode: TimeDisplayMode) -> String {
-    if index >= log.events.len() {
-        return String::from("0.000000");
-    }
-
-    let time = match mode {
-        TimeDisplayMode::Timestamp => log.events[index].time,
-        TimeDisplayMode::Cumulative => get_cumulative_time(log, index),
-    };
-
-    format!("{:.6}", time)
-}
-
-/// Format event for display
-pub fn format_event(log: &Ym2151Log, index: usize, mode: TimeDisplayMode) -> String {
-    if index >= log.events.len() {
-        return String::new();
-    }
-
-    let event = &log.events[index];
-    let time_str = get_time_string(log, index, mode);
-
-    if event.is_key_on() {
-        format!("{}  KeyON  {}", time_str, event.data)
-    } else {
-        format!("{}  {}  {}", time_str, event.addr, event.data)
-    }
-}
-
-{% endraw %}
-```
-
 ## 最近の変更（過去7日間）
 ### コミット履歴:
+41d84de Merge pull request #25 from cat2151/copilot/add-keyoff-display-logic
+6a8621f Update project summaries (overview & development status) [auto]
+73d490e KEYOFF表示機能を実装: addr 0x08でbit3-6が0の場合にKEYOFF表示
+6229c63 Initial plan
 29a881b Auto-translate README.ja.md to README.md [auto]
 6abd632 Merge pull request #24 from cat2151/copilot/fix-preview-performance-issue
 051c0a6 Change preview playback to play entire JSON instead of up to cursor position
 ab42a2c Initial plan
 b889de9 Update project summaries (overview & development status) [auto]
 839b4e3 Merge pull request #22 from cat2151/copilot/refactor-app-rs-tests
-53816b3 Refactor: Move app.rs tests to src/tests/app_tests.rs
-b94b2d3 Initial plan
-d5434f9 Update project summaries (overview & development status) [auto]
-20c60d2 Auto-translate README.ja.md to README.md [auto]
 
 ### 変更されたファイル:
 README.ja.md
@@ -655,10 +434,13 @@ generated-docs/project-overview-generated-prompt.md
 generated-docs/project-overview.md
 src/app.rs
 src/main.rs
+src/models.rs
 src/preview.rs
 src/tests/app_tests.rs
 src/tests/mod.rs
+src/tests/model_tests.rs
+src/time_display.rs
 
 
 ---
-Generated at: 2025-12-21 07:04:01 JST
+Generated at: 2025-12-22 07:04:33 JST

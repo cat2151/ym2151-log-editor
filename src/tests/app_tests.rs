@@ -429,3 +429,28 @@ fn test_insert_event_scroll_adjustment() {
     // Verify scroll_offset was adjusted to keep new event visible
     assert_eq!(app.navigation.scroll_offset, 0);
 }
+
+#[test]
+fn test_toggle_loop_requires_events() {
+    let mut app = App::new();
+
+    app.toggle_loop();
+
+    assert!(!app.loop_enabled);
+}
+
+#[test]
+fn test_toggle_loop_on_and_off() {
+    let mut app = App::new();
+    app.log.events.push(Ym2151Event {
+        time: 0.0,
+        addr: "20".to_string(),
+        data: "4F".to_string(),
+    });
+
+    app.toggle_loop();
+    assert!(app.loop_enabled);
+
+    app.toggle_loop();
+    assert!(!app.loop_enabled);
+}

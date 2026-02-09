@@ -36,7 +36,13 @@ fn render_header(f: &mut Frame, area: Rect, app: &App) {
         TimeDisplayMode::Timestamp => "Time: Timestamp",
     };
 
-    let header_text = format!("{} | {}", title, time_mode_text);
+    let loop_text = if app.loop_enabled {
+        "Loop: On"
+    } else {
+        "Loop: Off"
+    };
+
+    let header_text = format!("{} | {} | {}", title, time_mode_text, loop_text);
     let header = Paragraph::new(header_text)
         .block(Block::default().borders(Borders::ALL))
         .style(Style::default().fg(Color::Cyan));
@@ -86,6 +92,7 @@ fn render_footer(f: &mut Frame, area: Rect, app: &App) {
             Span::raw("/|ENTER: Insert | "),
             Span::raw("DEL: Delete | "),
             Span::raw("P: Preview | "),
+            Span::raw("L: Loop On/Off | "),
             Span::raw("T: Toggle Time Mode | "),
             Span::raw("S: Save | "),
             Span::raw("Q/ESC: Quit"),
@@ -96,6 +103,7 @@ fn render_footer(f: &mut Frame, area: Rect, app: &App) {
             Span::raw("/|ENTER: Insert | "),
             Span::raw("DEL: Delete | "),
             Span::raw("P: Preview | "),
+            Span::raw("L: Loop On/Off | "),
             Span::raw("T: Toggle Time Mode | "),
             Span::raw("S: Save | "),
             Span::raw("Q/ESC: Quit"),

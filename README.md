@@ -55,6 +55,7 @@ cargo run -- path/to/your/file.json
 | DELETE | Delete the current event |
 | 0-9 | Set wait time (0-9 milliseconds, cumulative mode only) |
 | P | Preview playback (plays the entire JSON) |
+| L | Toggle loop playback (interactive mode) |
 | T | Toggle time display mode (Cumulative ↔ Timestamp) |
 | S | Save file |
 | Q or ESC | Exit application |

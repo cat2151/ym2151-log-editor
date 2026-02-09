@@ -1,6 +1,7 @@
 use crate::models::Ym2151Log;
 use crate::navigation::NavigationState;
 use crate::time_display::TimeDisplayMode;
+use std::time::Instant;
 
 /// Application state
 pub struct App {
@@ -12,6 +13,12 @@ pub struct App {
     pub navigation: NavigationState,
     /// Time display mode
     pub time_mode: TimeDisplayMode,
+    /// Whether loop playback is enabled
+    pub loop_enabled: bool,
+    /// Last time a loop iteration started
+    loop_started_at: Option<Instant>,
+    /// Whether loop playback should be refreshed on next tick
+    loop_dirty: bool,
     /// Whether the app should quit
     pub should_quit: bool,
 }
@@ -23,12 +30,16 @@ impl App {
             file_path: None,
             navigation: NavigationState::new(),
             time_mode: TimeDisplayMode::Cumulative,
+            loop_enabled: false,
+            loop_started_at: None,
+            loop_dirty: false,
             should_quit: false,
         }
     }
 
     /// Load a JSON file
     pub fn load_file(&mut self, path: &str) -> Result<(), Box<dyn std::error::Error>> {
+        self.disable_loop();
         self.log = crate::file_io::load_file(path)?;
         self.file_path = Some(path.to_string());
         self.navigation.reset();
@@ -75,6 +86,40 @@ impl App {
         crate::preview::preview_current_event(&self.log, self.navigation.selected_index);
     }
 
+    /// Toggle loop playback using interactive mode
+    pub fn toggle_loop(&mut self) {
+        if self.loop_enabled {
+            self.disable_loop();
+        } else if crate::preview::start_loop_playback(&self.log) {
+            self.loop_enabled = true;
+            self.loop_started_at = Some(Instant::now());
+            self.loop_dirty = false;
+        }
+    }
+
+    /// Periodic tick to manage loop playback scheduling
+    pub fn tick(&mut self) {
+        if !self.loop_enabled {
+            return;
+        }
+
+        let duration = self.loop_duration_seconds();
+        if duration <= 0.0 {
+            return;
+        }
+
+        let should_restart = self.loop_dirty
+            || self
+                .loop_started_at
+                .map(|t| t.elapsed().as_secs_f64() >= duration)
+                .unwrap_or(true);
+
+        if should_restart && crate::preview::queue_loop_playback(&self.log) {
+            self.loop_started_at = Some(Instant::now());
+            self.loop_dirty = false;
+        }
+    }
+
     /// Set wait time (cumulative time) for the selected event in milliseconds
     /// Only works in Cumulative display mode
     ///
@@ -89,18 +134,22 @@ impl App {
             milliseconds,
             self.time_mode,
         );
+
+        self.mark_loop_dirty();
     }
 
     /// Delete the currently selected event
     pub fn delete_selected_event(&mut self) {
         crate::event_editor::delete_event(&mut self.log, self.navigation.selected_index);
         self.navigation.adjust_after_delete(self.log.events.len());
+        self.mark_loop_dirty();
     }
 
     /// Insert a new event before the currently selected position
     pub fn insert_event_before_selected(&mut self) {
         crate::event_editor::insert_event_before(&mut self.log, self.navigation.selected_index);
         self.navigation.adjust_after_insert();
+        self.mark_loop_dirty();
     }
 
     // Accessor methods for backward compatibility with UI code
@@ -110,6 +159,24 @@ impl App {
 
     pub fn scroll_offset(&self) -> usize {
         self.navigation.scroll_offset
+    }
+
+    fn disable_loop(&mut self) {
+        crate::preview::stop_loop_playback();
+        self.loop_enabled = false;
+        self.loop_started_at = None;
+        self.loop_dirty = false;
+    }
+
+    fn loop_duration_seconds(&self) -> f64 {
+        self.log.events.last().map(|e| e.time).unwrap_or(0.0)
+    }
+
+    fn mark_loop_dirty(&mut self) {
+        if self.loop_enabled {
+            self.loop_dirty = true;
+            self.loop_started_at = None;
+        }
     }
 }
 

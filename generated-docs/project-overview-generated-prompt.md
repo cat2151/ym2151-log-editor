@@ -1,4 +1,4 @@
-Last updated: 2025-12-22
+Last updated: 2026-02-10
 
 
 # プロジェクト概要生成プロンプト（来訪者向け）
@@ -118,6 +118,7 @@ cargo run -- path/to/your/file.json
 | DELETE | 現在のイベントを削除 |
 | 0-9 | 待機時間を設定（0-9ミリ秒、累積モードのみ） |
 | P | プレビュー再生（JSON全体を再生） |
+| L | ループ再生の切り替え（インタラクティブモード） |
 | T | 時刻表示モードの切り替え（累積 ↔ タイムスタンプ） |
 | S | ファイル保存 |
 | Q または ESC | アプリケーション終了 |
@@ -268,6 +269,8 @@ cargo run -- test_data/sample.json
   📖 19.md
   📖 20.md
   📖 21.md
+  📖 26.md
+  📖 28.md
 📁 src/
   📄 app.rs
   📄 event_editor.rs
@@ -302,6 +305,8 @@ googled947dc864c270e07.html
 issue-notes/19.md
 issue-notes/20.md
 issue-notes/21.md
+issue-notes/26.md
+issue-notes/28.md
 test_data/minimal.json
 test_data/sample.json
 
@@ -315,4 +320,4 @@ test_data/sample.json
 
 
 ---
-Generated at: 2025-12-22 07:04:33 JST
+Generated at: 2026-02-10 07:12:17 JST

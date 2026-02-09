@@ -1,4 +1,4 @@
-Last updated: 2025-12-22
+Last updated: 2026-02-10
 
 # 開発状況生成プロンプト（開発者向け）
 
@@ -109,6 +109,7 @@ Last updated: 2025-12-22
 - .github/actions-tmp/.github/workflows/call-rust-windows-check.yml
 - .github/actions-tmp/.github/workflows/call-translate-readme.yml
 - .github/actions-tmp/.github/workflows/callgraph.yml
+- .github/actions-tmp/.github/workflows/check-large-files.yml
 - .github/actions-tmp/.github/workflows/check-recent-human-commit.yml
 - .github/actions-tmp/.github/workflows/daily-project-summary.yml
 - .github/actions-tmp/.github/workflows/issue-note.yml
@@ -131,6 +132,9 @@ Last updated: 2025-12-22
 - .github/actions-tmp/.github_automation/callgraph/scripts/find-process-results.cjs
 - .github/actions-tmp/.github_automation/callgraph/scripts/generate-html-graph.cjs
 - .github/actions-tmp/.github_automation/callgraph/scripts/generateHTML.cjs
+- .github/actions-tmp/.github_automation/check-large-files/README.md
+- .github/actions-tmp/.github_automation/check-large-files/check-large-files.toml.example
+- .github/actions-tmp/.github_automation/check-large-files/scripts/check_large_files.py
 - .github/actions-tmp/.github_automation/check_recent_human_commit/scripts/check-recent-human-commit.cjs
 - .github/actions-tmp/.github_automation/project_summary/docs/daily-summary-setup.md
 - .github/actions-tmp/.github_automation/project_summary/prompts/development-status-prompt.md
@@ -187,6 +191,7 @@ Last updated: 2025-12-22
 - .github/actions-tmp/issue-notes/29.md
 - .github/actions-tmp/issue-notes/3.md
 - .github/actions-tmp/issue-notes/30.md
+- .github/actions-tmp/issue-notes/31.md
 - .github/actions-tmp/issue-notes/4.md
 - .github/actions-tmp/issue-notes/7.md
 - .github/actions-tmp/issue-notes/8.md
@@ -211,6 +216,8 @@ Last updated: 2025-12-22
 - issue-notes/19.md
 - issue-notes/20.md
 - issue-notes/21.md
+- issue-notes/26.md
+- issue-notes/28.md
 - src/app.rs
 - src/event_editor.rs
 - src/file_io.rs
@@ -227,7 +234,22 @@ Last updated: 2025-12-22
 - test_data/sample.json
 
 ## 現在のオープンIssues
-## [Issue #2](../issue-notes/2.md): ドッグフーディングする
+## [Issue #28](../issue-notes/28.md): （人力）プチノイズ対策を、loop mode onで調査し、結果をissue-notesに書いていく
+[issue-notes/28.md](https://github.com/cat2151/ym2151-log-editor/blob/main/issue-notes/28.md)
+
+...
+ラベル: 
+--- issue-notes/28.md の内容 ---
+
+```markdown
+# issue （人力）プチノイズ対策を、loop mode onで調査し、結果をissue-notesに書いていく #28
+[issues #28](https://github.com/cat2151/ym2151-log-editor/issues/28)
+
+
+
+```
+
+## [Issue #2](../issue-notes/2.md): （人力）ドッグフーディングする
 
 ラベル: 
 --- issue-notes/2.md の内容 ---
@@ -412,18 +434,229 @@ jobs:
 {% endraw %}
 ```
 
+### .github/actions-tmp/issue-notes/28.md
+```md
+{% raw %}
+# issue 直近24時間でuser commitがあるかどうか、のチェックを、workflowのjobs先頭に新規jobを追加して実施し、本体jobの先頭にneedsを書く #28
+[issues #28](https://github.com/cat2151/github-actions/issues/28)
+
+# これまでの課題は？
+- これまでは各workflow内の終盤のscriptにバラバラに実装されていたので、
+    - ムダにcheckout等、各種処理が走っていた
+
+# 対策案は？
+- 直近24時間でuser commitがあるかどうか、
+    - のチェックを、
+        - workflowのjobs先頭に新規jobを追加して実施し、
+            - 本体jobの先頭にneedsを書く
+- この対策で、各workflow先頭にこれを書くだけでよくなり、エコになる想定
+
+# ChatGPTに生成させた
+## 呼び出し元のサンプル
+- 実際には、共通workflowのjobsの先頭付近を、このサンプルを参考に書き換えるイメージ
+```
+jobs:
+  check_recent_human_commit:
+    uses: ./.github/workflows/check-recent-human-commit.yml
+
+  build:
+    needs: check_recent_human_commit
+    if: needs.check_recent_human_commit.outputs.has_recent_human_commit == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run build
+        run: echo "Building because there is a recent human commit!"
+```
+## 共通ワークフロー側の案
+- シンプルにmailのみを条件とし、mailも1種類のみに明示する
+```
+name: "Check recent human commit"
+
+on:
+  workflow_call:
+
+jobs:
+  check-recent-human-commit:
+    runs-on: ubuntu-latest
+    outputs:
+      has_recent_human_commit: ${{ steps.check.outputs.has_recent_human_commit }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Check recent human commit
+        id: check
+        run: |
+          set -e
+
+          HAS_HUMAN=false
+
+          while IFS=$'\x01' read -r HASH NAME EMAIL SUBJECT; do
+            SUBJECT="${SUBJECT%$'\x02'}"
+
+            if [[ ! "$EMAIL" =~ ^41898282\+github-actions\[bot\]@users\.noreply\.github\.com$ ]]; then
+              echo "HUMAN: Commit $HASH | Author: $NAME <$EMAIL> | Message: $SUBJECT"
+              HAS_HUMAN=true
+              break
+            else
+              echo "BOT: Commit $HASH | Author: $NAME <$EMAIL> | Message: $SUBJECT"
+            fi
+          done <<< "$(git log --since="24 hours ago" --pretty=format:'%H%x01%an%x01%ae%x01%s%x02')"
+
+          if [ "$HAS_HUMAN" = true ]; then
+            echo "Found recent human commit."
+            echo "has_recent_human_commit=true" >> $GITHUB_OUTPUT
+          else
+            echo "No human commits in last 24h."
+            echo "has_recent_human_commit=false" >> $GITHUB_OUTPUT
+```
+## 備忘
+- 上記はChatGPTに生成させ、それをレビューさせて改善させる、のサイクルで生成した。
+    - 一発で生成はできなかった
+    - ChatGPTが自分で生成したものに対して自己レビューでミスや改善点が多発していた
+        - ブレも発生し、二転三転気味でもあり、
+            - ハルシネーションに近い低品質状態だと感じた
+                - これは経験則からの感覚的なもの
+    - 生成の品質が低い、ということ
+        - LLMはまだ学習不足、github-actions workflow yml の学習不足である、と解釈する
+        - shell scriptの生成品質も低いかも。
+            - もともとshell scriptで複雑なlogicを書くとtest costが高い、なぜなら読みづらいから。
+                - なのでロジックをcjs側に切り出したほうが全体最適の観点からよりよい、と考える
+
+# どうする？
+- shell scriptはやめて、cjsでlogicを担当させる。
+  - 現状のshell scriptを改めて見直すと、これはcjs側にしたほうがよい、と感覚的に、経験則で、わかる。
+- logicをcjs側に切り出す。実際、既存でgitの24hチェックをcjs側でやっている実績がある。そこのロジックを参考にする。
+- 今のmdの仕様をもとに、ymlとcjsを生成させる。
+- 生成させた。ChatGPTに投げた
+- 人力でいくつか変更したり、ChatGPTに投げて修正させるサイクルを回したりした
+- testする
+
+# バグ
+- 結果、バグがあったのでagentにlogを投げ、修正させ、人力修正し、agentにセルフレビューさせ、のサイクルを回した
+- testする
+- 結果、callgraphで、エラーなくhumanを検知したが、callgraphが呼ばれない、というバグが発生
+- ひとまずagentの提案したcodeを切り分けのため試す、バグ状況は変わらない想定
+- 結果、バグ状況は変わらず
+- 対策、trueのlogをagentに投げて、callgraphが呼ばれないことを伝え、可視化を実装させた
+- testする
+- 結果、バグ状況は変わらず
+- 対策、logをagentに投げて、callgraphが呼ばれないことを伝え、さらに可視化を実装させた
+- testする
+- 結果、バグ状況は変わらず
+- 対策、logをagentに投げて、callgraphが呼ばれないことを伝え、さらに可視化を実装させた
+- testする
+- 結果、バグ状況は変わらず
+- 対策、logをagentに投げて、callgraphが呼ばれないことを伝えた
+- ここで、根本的にymlのworkflow記述が間違っていることが判明
+  - agentが最初にcode生成したときから根本的なバグが仕込まれていたということ。
+    - agentの学習不足。github-actionsのworkflowの学習不足。
+- そこをagentに修正させ、test greenとなった
+
+# closeとする
+
+{% endraw %}
+```
+
+### issue-notes/28.md
+```md
+{% raw %}
+# issue （人力）プチノイズ対策を、loop mode onで調査し、結果をissue-notesに書いていく #28
+[issues #28](https://github.com/cat2151/ym2151-log-editor/issues/28)
+
+
+
+{% endraw %}
+```
+
+### .github/actions-tmp/issue-notes/8.md
+```md
+{% raw %}
+# issue 関数コールグラフhtmlビジュアライズ生成の対象ソースファイルを、呼び出し元ymlで指定できるようにする #8
+[issues #8](https://github.com/cat2151/github-actions/issues/8)
+
+# これまでの課題
+- 以下が決め打ちになっていた
+```
+  const allowedFiles = [
+    'src/main.js',
+    'src/mml2json.js',
+    'src/play.js'
+  ];
+```
+
+# 対策
+- 呼び出し元ymlで指定できるようにする
+
+# agent
+- agentにやらせることができれば楽なので、初手agentを試した
+- 失敗
+    - ハルシネーションしてscriptを大量破壊した
+- 分析
+    - 修正対象scriptはagentが生成したもの
+    - 低品質な生成結果でありソースが巨大
+    - ハルシネーションで破壊されやすいソース
+    - AIの生成したソースは、必ずしもAIフレンドリーではない
+
+# 人力リファクタリング
+- 低品質コードを、最低限agentが扱えて、ハルシネーションによる大量破壊を防止できる内容、にする
+- 手短にやる
+    - そもそもビジュアライズは、agentに雑に指示してやらせたもので、
+    - 今後別のビジュアライザを選ぶ可能性も高い
+    - 今ここで手間をかけすぎてコンコルド効果（サンクコストバイアス）を増やすのは、project群をトータルで俯瞰して見たとき、損
+- 対象
+    - allowedFiles のあるソース
+        - callgraph-utils.cjs
+            - たかだか300行未満のソースである
+            - この程度でハルシネーションされるのは予想外
+            - やむなし、リファクタリングでソース分割を進める
+
+# agentに修正させる
+## prompt
+```
+allowedFilesを引数で受け取るようにしたいです。
+ないならエラー。
+最終的に呼び出し元すべてに波及して修正したいです。
+
+呼び出し元をたどってエントリポイントも見つけて、
+エントリポイントにおいては、
+引数で受け取ったjsonファイル名 allowedFiles.js から
+jsonファイル allowedFiles.jsonの内容をreadして
+変数 allowedFilesに格納、
+後続処理に引き渡す、としたいです。
+
+まずplanしてください。
+planにおいては、修正対象のソースファイル名と関数名を、呼び出し元を遡ってすべて特定し、listしてください。
+```
+
+# 修正が順調にできた
+- コマンドライン引数から受け取る作りになっていなかったので、そこだけ指示して修正させた
+- yml側は人力で修正した
+
+# 他のリポジトリから呼び出した場合にバグらないよう修正する
+- 気付いた
+    - 共通ワークフローとして他のリポジトリから使った場合はバグるはず。
+        - ymlから、共通ワークフロー側リポジトリのcheckoutが漏れているので。
+- 他のyml同様に修正する
+- あわせて全体にymlをリファクタリングし、修正しやすくし、今後のyml読み書きの学びにしやすくする
+
+# local WSL + act : test green
+
+# closeとする
+- もし生成されたhtmlがNGの場合は、別issueとするつもり
+
+{% endraw %}
+```
+
 ## 最近の変更（過去7日間）
 ### コミット履歴:
-41d84de Merge pull request #25 from cat2151/copilot/add-keyoff-display-logic
-6a8621f Update project summaries (overview & development status) [auto]
-73d490e KEYOFF表示機能を実装: addr 0x08でbit3-6が0の場合にKEYOFF表示
-6229c63 Initial plan
-29a881b Auto-translate README.ja.md to README.md [auto]
-6abd632 Merge pull request #24 from cat2151/copilot/fix-preview-performance-issue
-051c0a6 Change preview playback to play entire JSON instead of up to cursor position
-ab42a2c Initial plan
-b889de9 Update project summaries (overview & development status) [auto]
-839b4e3 Merge pull request #22 from cat2151/copilot/refactor-app-rs-tests
+94b963e Auto-translate README.ja.md to README.md [auto]
+7dac411 Add issue note for #28 [auto]
+4f99979 Merge pull request #27 from cat2151/codex/add-loop-functionality
+01fe134 fix: guard loop enablement and add tick tests
+5ddb2f9 feat: add loop playback toggle
+b67c945 Initial plan
+fa7bcac Add issue note for #26 [auto]
 
 ### 変更されたファイル:
 README.ja.md
@@ -432,6 +665,8 @@ generated-docs/development-status-generated-prompt.md
 generated-docs/development-status.md
 generated-docs/project-overview-generated-prompt.md
 generated-docs/project-overview.md
+issue-notes/26.md
+issue-notes/28.md
 src/app.rs
 src/main.rs
 src/models.rs
@@ -440,7 +675,8 @@ src/tests/app_tests.rs
 src/tests/mod.rs
 src/tests/model_tests.rs
 src/time_display.rs
+src/ui.rs
 
 
 ---
-Generated at: 2025-12-22 07:04:33 JST
+Generated at: 2026-02-10 07:12:17 JST

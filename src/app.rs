@@ -90,7 +90,15 @@ impl App {
     pub fn toggle_loop(&mut self) {
         if self.loop_enabled {
             self.disable_loop();
-        } else if crate::preview::start_loop_playback(&self.log) {
+            return;
+        }
+
+        if self.log.events.is_empty() || self.loop_duration_seconds() <= 0.0 {
+            self.disable_loop();
+            return;
+        }
+
+        if crate::preview::start_loop_playback(&self.log) {
             self.loop_enabled = true;
             self.loop_started_at = Some(Instant::now());
             self.loop_dirty = false;
@@ -103,8 +111,14 @@ impl App {
             return;
         }
 
+        if self.log.events.is_empty() {
+            self.disable_loop();
+            return;
+        }
+
         let duration = self.loop_duration_seconds();
         if duration <= 0.0 {
+            self.disable_loop();
             return;
         }
 
@@ -177,6 +191,26 @@ impl App {
             self.loop_dirty = true;
             self.loop_started_at = None;
         }
+    }
+
+    #[cfg(test)]
+    pub(crate) fn test_set_loop_started_at(&mut self, instant: Instant) {
+        self.loop_started_at = Some(instant);
+    }
+
+    #[cfg(test)]
+    pub(crate) fn test_set_loop_dirty(&mut self, dirty: bool) {
+        self.loop_dirty = dirty;
+    }
+
+    #[cfg(test)]
+    pub(crate) fn test_loop_started_at(&self) -> Option<Instant> {
+        self.loop_started_at
+    }
+
+    #[cfg(test)]
+    pub(crate) fn test_loop_dirty(&self) -> bool {
+        self.loop_dirty
     }
 }
 

@@ -1,4 +1,4 @@
-Last updated: 2026-02-10
+Last updated: 2026-02-24
 
 
 # プロジェクト概要生成プロンプト（来訪者向け）
@@ -263,6 +263,7 @@ cargo run -- test_data/sample.json
 📄 LICENSE
 📖 README.ja.md
 📖 README.md
+📄 _config.yml
 📁 generated-docs/
 🌐 googled947dc864c270e07.html
 📁 issue-notes/
@@ -320,4 +321,4 @@ test_data/sample.json
 
 
 ---
-Generated at: 2026-02-10 07:12:17 JST
+Generated at: 2026-02-24 07:16:41 JST

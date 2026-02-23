@@ -1,4 +1,4 @@
-Last updated: 2026-02-10
+Last updated: 2026-02-24
 
 # 開発状況生成プロンプト（開発者向け）
 
@@ -191,8 +191,11 @@ Last updated: 2026-02-10
 - .github/actions-tmp/issue-notes/29.md
 - .github/actions-tmp/issue-notes/3.md
 - .github/actions-tmp/issue-notes/30.md
-- .github/actions-tmp/issue-notes/31.md
+- .github/actions-tmp/issue-notes/35.md
+- .github/actions-tmp/issue-notes/38.md
 - .github/actions-tmp/issue-notes/4.md
+- .github/actions-tmp/issue-notes/40.md
+- .github/actions-tmp/issue-notes/42.md
 - .github/actions-tmp/issue-notes/7.md
 - .github/actions-tmp/issue-notes/8.md
 - .github/actions-tmp/issue-notes/9.md
@@ -211,6 +214,7 @@ Last updated: 2026-02-10
 - LICENSE
 - README.ja.md
 - README.md
+- _config.yml
 - generated-docs/project-overview-generated-prompt.md
 - googled947dc864c270e07.html
 - issue-notes/19.md
@@ -234,7 +238,7 @@ Last updated: 2026-02-10
 - test_data/sample.json
 
 ## 現在のオープンIssues
-## [Issue #28](../issue-notes/28.md): （人力）プチノイズ対策を、loop mode onで調査し、結果をissue-notesに書いていく
+## [Issue #28](../issue-notes/28.md): （人力）プチノイズ対策を、local Rustバイナリにてloop mode onで調査し、結果をissue-notesに書いていく
 [issue-notes/28.md](https://github.com/cat2151/ym2151-log-editor/blob/main/issue-notes/28.md)
 
 ...
@@ -650,17 +654,12 @@ planにおいては、修正対象のソースファイル名と関数名を、�
 
 ## 最近の変更（過去7日間）
 ### コミット履歴:
-94b963e Auto-translate README.ja.md to README.md [auto]
-7dac411 Add issue note for #28 [auto]
-4f99979 Merge pull request #27 from cat2151/codex/add-loop-functionality
-01fe134 fix: guard loop enablement and add tick tests
-5ddb2f9 feat: add loop playback toggle
-b67c945 Initial plan
-fa7bcac Add issue note for #26 [auto]
+00a1d11 jekyll用config
 
 ### 変更されたファイル:
 README.ja.md
 README.md
+_config.yml
 generated-docs/development-status-generated-prompt.md
 generated-docs/development-status.md
 generated-docs/project-overview-generated-prompt.md
@@ -669,14 +668,10 @@ issue-notes/26.md
 issue-notes/28.md
 src/app.rs
 src/main.rs
-src/models.rs
 src/preview.rs
 src/tests/app_tests.rs
-src/tests/mod.rs
-src/tests/model_tests.rs
-src/time_display.rs
 src/ui.rs
 
 
 ---
-Generated at: 2026-02-10 07:12:17 JST
+Generated at: 2026-02-24 07:16:42 JST

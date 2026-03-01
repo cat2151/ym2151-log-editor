@@ -1,4 +1,4 @@
-Last updated: 2026-02-24
+Last updated: 2026-03-02
 
 # 開発状況生成プロンプト（開発者向け）
 
@@ -104,6 +104,7 @@ Last updated: 2026-02-24
 
 ## プロジェクトのファイル一覧
 - .github/actions-tmp/.github/workflows/call-callgraph.yml
+- .github/actions-tmp/.github/workflows/call-check-large-files.yml
 - .github/actions-tmp/.github/workflows/call-daily-project-summary.yml
 - .github/actions-tmp/.github/workflows/call-issue-note.yml
 - .github/actions-tmp/.github/workflows/call-rust-windows-check.yml
@@ -133,7 +134,7 @@ Last updated: 2026-02-24
 - .github/actions-tmp/.github_automation/callgraph/scripts/generate-html-graph.cjs
 - .github/actions-tmp/.github_automation/callgraph/scripts/generateHTML.cjs
 - .github/actions-tmp/.github_automation/check-large-files/README.md
-- .github/actions-tmp/.github_automation/check-large-files/check-large-files.toml.example
+- .github/actions-tmp/.github_automation/check-large-files/check-large-files.toml.default
 - .github/actions-tmp/.github_automation/check-large-files/scripts/check_large_files.py
 - .github/actions-tmp/.github_automation/check_recent_human_commit/scripts/check-recent-human-commit.cjs
 - .github/actions-tmp/.github_automation/project_summary/docs/daily-summary-setup.md
@@ -195,7 +196,8 @@ Last updated: 2026-02-24
 - .github/actions-tmp/issue-notes/38.md
 - .github/actions-tmp/issue-notes/4.md
 - .github/actions-tmp/issue-notes/40.md
-- .github/actions-tmp/issue-notes/42.md
+- .github/actions-tmp/issue-notes/44.md
+- .github/actions-tmp/issue-notes/46.md
 - .github/actions-tmp/issue-notes/7.md
 - .github/actions-tmp/issue-notes/8.md
 - .github/actions-tmp/issue-notes/9.md
@@ -203,6 +205,7 @@ Last updated: 2026-02-24
 - .github/actions-tmp/package.json
 - .github/actions-tmp/src/main.js
 - .github/copilot-instructions.md
+- .github/workflows/call-check-large-files.yml
 - .github/workflows/call-daily-project-summary.yml
 - .github/workflows/call-issue-note.yml
 - .github/workflows/call-rust-windows-check.yml
@@ -238,6 +241,31 @@ Last updated: 2026-02-24
 - test_data/sample.json
 
 ## 現在のオープンIssues
+## [Issue #29](../issue-notes/29.md): 大きなファイルの検出: 1個のファイルが500行を超えています
+以下のファイルが500行を超えています。リファクタリングを検討してください。
+
+## 検出されたファイル
+
+| ファイル | 行数 | 超過行数 |
+|---------|------|----------|
+| `src/tests/app_tests.rs` | 529 | +29 |
+
+## テスト実施のお願い
+
+- リファクタリング前後にテストを実行し、それぞれのテスト失敗件数を報告してください
+- リファクタリング前後のどちらかでテストがredの場合、まず別issueでtest greenにしてからリファクタリングしてください
+
+## 推奨事項
+
+1. ファイルを機能ごとに分割する
+...
+ラベル: refactoring, code-quality, automated
+--- issue-notes/29.md の内容 ---
+
+```markdown
+
+```
+
 ## [Issue #28](../issue-notes/28.md): （人力）プチノイズ対策を、local Rustバイナリにてloop mode onで調査し、結果をissue-notesに書いていく
 [issue-notes/28.md](https://github.com/cat2151/ym2151-log-editor/blob/main/issue-notes/28.md)
 
@@ -573,6 +601,47 @@ jobs:
 {% endraw %}
 ```
 
+### .github/actions-tmp/issue-notes/29.md
+```md
+{% raw %}
+# issue project-overviewで、Nuked-OPMを使ったプロジェクトが、ハルシネーションでTone.jsと表示されてしまっている #29
+[issues #29](https://github.com/cat2151/github-actions/issues/29)
+
+# 分析
+- 技術スタック欄について、
+    - agentが実装した、
+        - 今までの実装そのものに問題がある
+- 問題
+    - ハードコーディングされた「Tone.js」
+    - などの文字列を使って、
+    - 「検出」をしている
+    - メンテ必須になるし、新たな音楽ライブラリに対応できない（今回の問題はこれ）
+- 考え方
+    - 根本的に「技術スタック説明に、ハードコーディングされたlistベースの検出を入れようとした」のが間違い
+    - デメリットが大きすぎて、逆効果になっている
+
+# 対策
+- 技術スタック欄について、「検出」機能を削除する
+    - LLMには、「README、ソースのtree、ソースの呼び出し階層tree」がわたる
+        - LLMは、それを元に、LLMの知識による技術スタック説明を生成する
+
+# close条件
+- 当該プロジェクトの、project-overviewの生成結果において、ハルシネーションの「Tone.js」が出力されないこと
+- ついでに
+    - READMEの文字数制限を撤廃した。
+        - より高精度な生成を可能にするため。Geminiなので入力データ量に余裕があるので。
+        - 結果、READMEが全量出力され、体感で生成品質が向上したこと
+    - promptをcommit pushするようにした。
+        - より高精度な生成のため。本件のような場合の調査を効率化するため。
+        - 結果、promptが出力されること
+
+# test green
+
+# closeとする
+
+{% endraw %}
+```
+
 ### .github/actions-tmp/issue-notes/8.md
 ```md
 {% raw %}
@@ -652,11 +721,568 @@ planにおいては、修正対象のソースファイル名と関数名を、�
 {% endraw %}
 ```
 
+### .github/actions-tmp/issue-notes/9.md
+```md
+{% raw %}
+# issue 関数コールグラフhtmlビジュアライズが0件なので、原因を可視化する #9
+[issues #9](https://github.com/cat2151/github-actions/issues/9)
+
+# agentに修正させたり、人力で修正したりした
+- agentがハルシネーションし、いろいろ根の深いバグにつながる、エラー隠蔽などを仕込んでいたため、検知が遅れた
+- 詳しくはcommit logを参照のこと
+- WSL + actの環境を少し変更、act起動時のコマンドライン引数を変更し、generated-docsをmountする（ほかはデフォルト挙動であるcpだけにする）ことで、デバッグ情報をコンテナ外に出力できるようにし、デバッグを効率化した
+
+# test green
+
+# closeとする
+
+{% endraw %}
+```
+
+### src/tests/app_tests.rs
+```rs
+{% raw %}
+use crate::app::App;
+use crate::models::Ym2151Event;
+use crate::time_display::TimeDisplayMode;
+
+#[test]
+fn test_set_wait_time_ms() {
+    let mut app = App::new();
+    app.time_mode = TimeDisplayMode::Cumulative;
+
+    // Create test events
+    app.log.events = vec![
+        Ym2151Event {
+            time: 0.0,
+            addr: "20".to_string(),
+            data: "4F".to_string(),
+        },
+        Ym2151Event {
+            time: 0.01,
+            addr: "40".to_string(),
+            data: "16".to_string(),
+        },
+        Ym2151Event {
+            time: 0.02,
+            addr: "60".to_string(),
+            data: "14".to_string(),
+        },
+    ];
+
+    // Select event 1 and set wait time to 5ms
+    app.navigation.selected_index = 1;
+    app.set_wait_time_ms(5);
+
+    // Verify event 1 now has timestamp 0.005 (0.0 + 0.005)
+    assert!((app.log.events[1].time - 0.005).abs() < 0.0001);
+
+    // Verify event 2 was also adjusted (should be 0.015, was 0.02, delta = -0.005)
+    assert!((app.log.events[2].time - 0.015).abs() < 0.0001);
+}
+
+#[test]
+fn test_set_wait_time_ms_timestamp_mode() {
+    let mut app = App::new();
+    app.time_mode = TimeDisplayMode::Timestamp;
+
+    app.log.events = vec![
+        Ym2151Event {
+            time: 0.0,
+            addr: "20".to_string(),
+            data: "4F".to_string(),
+        },
+        Ym2151Event {
+            time: 0.01,
+            addr: "40".to_string(),
+            data: "16".to_string(),
+        },
+    ];
+
+    app.navigation.selected_index = 1;
+    let original_time = app.log.events[1].time;
+
+    // Should not modify in Timestamp mode
+    app.set_wait_time_ms(5);
+
+    assert_eq!(app.log.events[1].time, original_time);
+}
+
+#[test]
+fn test_set_wait_time_ms_first_event() {
+    let mut app = App::new();
+    app.time_mode = TimeDisplayMode::Cumulative;
+
+    app.log.events = vec![
+        Ym2151Event {
+            time: 0.0,
+            addr: "20".to_string(),
+            data: "4F".to_string(),
+        },
+        Ym2151Event {
+            time: 0.01,
+            addr: "40".to_string(),
+            data: "16".to_string(),
+        },
+    ];
+
+    // Select first event and set wait time to 3ms
+    app.navigation.selected_index = 0;
+    app.set_wait_time_ms(3);
+
+    // First event should be at 0.003
+    assert!((app.log.events[0].time - 0.003).abs() < 0.0001);
+
+    // Second event should also be adjusted (was 0.01, delta = +0.003)
+    assert!((app.log.events[1].time - 0.013).abs() < 0.0001);
+}
+
+#[test]
+fn test_set_wait_time_ms_zero() {
+    let mut app = App::new();
+    app.time_mode = TimeDisplayMode::Cumulative;
+
+    app.log.events = vec![
+        Ym2151Event {
+            time: 0.0,
+            addr: "20".to_string(),
+            data: "4F".to_string(),
+        },
+        Ym2151Event {
+            time: 0.01,
+            addr: "40".to_string(),
+            data: "16".to_string(),
+        },
+        Ym2151Event {
+            time: 0.02,
+            addr: "60".to_string(),
+            data: "14".to_string(),
+        },
+    ];
+
+    // Select event 1 and set wait time to 0ms
+    app.navigation.selected_index = 1;
+    app.set_wait_time_ms(0);
+
+    // Verify event 1 now has timestamp 0.0 (same as previous event)
+    assert!((app.log.events[1].time - 0.0).abs() < 0.0001);
+
+    // Verify event 2 was also adjusted (should be 0.01, was 0.02, delta = -0.01)
+    assert!((app.log.events[2].time - 0.01).abs() < 0.0001);
+}
+
+#[test]
+fn test_delete_selected_event() {
+    let mut app = App::new();
+    app.log.events = vec![
+        Ym2151Event {
+            time: 0.0,
+            addr: "20".to_string(),
+            data: "4F".to_string(),
+        },
+        Ym2151Event {
+            time: 0.01,
+            addr: "40".to_string(),
+            data: "16".to_string(),
+        },
+        Ym2151Event {
+            time: 0.02,
+            addr: "60".to_string(),
+            data: "14".to_string(),
+        },
+    ];
+
+    // Select middle event and delete it
+    app.navigation.selected_index = 1;
+    app.delete_selected_event();
+
+    // Verify event count decreased
+    assert_eq!(app.log.events.len(), 2);
+
+    // Verify the correct event was deleted (remaining events should be index 0 and 2)
+    assert_eq!(app.log.events[0].addr, "20");
+    assert_eq!(app.log.events[1].addr, "60");
+
+    // Verify selected_index is still valid
+    assert_eq!(app.navigation.selected_index, 1);
+}
+
+#[test]
+fn test_delete_last_event() {
+    let mut app = App::new();
+    app.log.events = vec![
+        Ym2151Event {
+            time: 0.0,
+            addr: "20".to_string(),
+            data: "4F".to_string(),
+        },
+        Ym2151Event {
+            time: 0.01,
+            addr: "40".to_string(),
+            data: "16".to_string(),
+        },
+    ];
+
+    // Select last event and delete it
+    app.navigation.selected_index = 1;
+    app.delete_selected_event();
+
+    // Verify event count decreased
+    assert_eq!(app.log.events.len(), 1);
+
+    // Verify selected_index was adjusted to last valid index
+    assert_eq!(app.navigation.selected_index, 0);
+}
+
+#[test]
+fn test_delete_single_event() {
+    let mut app = App::new();
+    app.log.events = vec![Ym2151Event {
+        time: 0.0,
+        addr: "20".to_string(),
+        data: "4F".to_string(),
+    }];
+
+    // Select the only event and delete it
+    app.navigation.selected_index = 0;
+    app.delete_selected_event();
+
+    // Verify all events are deleted
+    assert_eq!(app.log.events.len(), 0);
+
+    // selected_index should remain 0 (though there are no events)
+    assert_eq!(app.navigation.selected_index, 0);
+}
+
+#[test]
+fn test_delete_empty_list() {
+    let mut app = App::new();
+    app.log.events = vec![];
+
+    // Try to delete from empty list (should not panic)
+    app.navigation.selected_index = 0;
+    app.delete_selected_event();
+
+    // Verify still empty
+    assert_eq!(app.log.events.len(), 0);
+}
+
+#[test]
+fn test_move_down_to_empty_line() {
+    let mut app = App::new();
+    app.log.events = vec![
+        Ym2151Event {
+            time: 0.0,
+            addr: "20".to_string(),
+            data: "4F".to_string(),
+        },
+        Ym2151Event {
+            time: 0.01,
+            addr: "40".to_string(),
+            data: "16".to_string(),
+        },
+    ];
+
+    // Start at first event
+    app.navigation.selected_index = 0;
+
+    // Move down to second event
+    app.move_down();
+    assert_eq!(app.navigation.selected_index, 1);
+
+    // Move down to empty line (one beyond last event)
+    app.move_down();
+    assert_eq!(app.navigation.selected_index, 2);
+    assert_eq!(app.navigation.selected_index, app.log.events.len());
+
+    // Try to move down again (should stay at empty line)
+    app.move_down();
+    assert_eq!(app.navigation.selected_index, 2);
+}
+
+#[test]
+fn test_move_down_empty_log() {
+    let mut app = App::new();
+    app.log.events = vec![];
+
+    // Start at index 0 (empty)
+    app.navigation.selected_index = 0;
+
+    // Try to move down (should stay at 0)
+    app.move_down();
+    assert_eq!(app.navigation.selected_index, 0);
+}
+
+#[test]
+fn test_insert_event_before_selected_at_start() {
+    let mut app = App::new();
+    app.log.events = vec![
+        Ym2151Event {
+            time: 0.01,
+            addr: "20".to_string(),
+            data: "4F".to_string(),
+        },
+        Ym2151Event {
+            time: 0.02,
+            addr: "40".to_string(),
+            data: "16".to_string(),
+        },
+    ];
+
+    // Insert before first event
+    app.navigation.selected_index = 0;
+    app.insert_event_before_selected();
+
+    // Verify event count increased
+    assert_eq!(app.log.events.len(), 3);
+
+    // Verify new event inserted at position 0
+    assert_eq!(app.log.events[0].addr, "00");
+    assert_eq!(app.log.events[0].data, "00");
+    assert!((app.log.events[0].time - 0.0).abs() < 0.0001);
+
+    // Verify original events shifted
+    assert_eq!(app.log.events[1].addr, "20");
+    assert_eq!(app.log.events[2].addr, "40");
+
+    // Verify selected_index stayed on the new event
+    assert_eq!(app.navigation.selected_index, 0);
+}
+
+#[test]
+fn test_insert_event_before_selected_in_middle() {
+    let mut app = App::new();
+    app.log.events = vec![
+        Ym2151Event {
+            time: 0.0,
+            addr: "20".to_string(),
+            data: "4F".to_string(),
+        },
+        Ym2151Event {
+            time: 0.01,
+            addr: "40".to_string(),
+            data: "16".to_string(),
+        },
+        Ym2151Event {
+            time: 0.02,
+            addr: "60".to_string(),
+            data: "14".to_string(),
+        },
+    ];
+
+    // Insert before middle event (index 1)
+    app.navigation.selected_index = 1;
+    app.insert_event_before_selected();
+
+    // Verify event count increased
+    assert_eq!(app.log.events.len(), 4);
+
+    // Verify new event inserted at position 1 with time from previous event
+    assert_eq!(app.log.events[1].addr, "00");
+    assert_eq!(app.log.events[1].data, "00");
+    assert!((app.log.events[1].time - 0.0).abs() < 0.0001);
+
+    // Verify original events
+    assert_eq!(app.log.events[0].addr, "20");
+    assert_eq!(app.log.events[2].addr, "40");
+    assert_eq!(app.log.events[3].addr, "60");
+
+    // Verify selected_index stayed on the new event
+    assert_eq!(app.navigation.selected_index, 1);
+}
+
+#[test]
+fn test_insert_event_before_selected_at_end() {
+    let mut app = App::new();
+    app.log.events = vec![
+        Ym2151Event {
+            time: 0.0,
+            addr: "20".to_string(),
+            data: "4F".to_string(),
+        },
+        Ym2151Event {
+            time: 0.01,
+            addr: "40".to_string(),
+            data: "16".to_string(),
+        },
+    ];
+
+    // Move cursor to empty line after last event
+    app.navigation.selected_index = 2;
+    app.insert_event_before_selected();
+
+    // Verify event count increased
+    assert_eq!(app.log.events.len(), 3);
+
+    // Verify new event inserted at position 2 with time from last event
+    assert_eq!(app.log.events[2].addr, "00");
+    assert_eq!(app.log.events[2].data, "00");
+    assert!((app.log.events[2].time - 0.01).abs() < 0.0001);
+
+    // Verify original events unchanged
+    assert_eq!(app.log.events[0].addr, "20");
+    assert_eq!(app.log.events[1].addr, "40");
+
+    // Verify selected_index stayed at 2 (now pointing to the new event)
+    assert_eq!(app.navigation.selected_index, 2);
+}
+
+#[test]
+fn test_insert_event_before_selected_empty_list() {
+    let mut app = App::new();
+    app.log.events = vec![];
+
+    // Insert into empty list
+    app.navigation.selected_index = 0;
+    app.insert_event_before_selected();
+
+    // Verify event count increased
+    assert_eq!(app.log.events.len(), 1);
+
+    // Verify new event created with time 0.0
+    assert_eq!(app.log.events[0].addr, "00");
+    assert_eq!(app.log.events[0].data, "00");
+    assert!((app.log.events[0].time - 0.0).abs() < 0.0001);
+
+    // Verify selected_index is still 0
+    assert_eq!(app.navigation.selected_index, 0);
+}
+
+#[test]
+fn test_insert_event_scroll_adjustment() {
+    let mut app = App::new();
+    app.log.events = vec![
+        Ym2151Event {
+            time: 0.0,
+            addr: "20".to_string(),
+            data: "4F".to_string(),
+        },
+        Ym2151Event {
+            time: 0.01,
+            addr: "40".to_string(),
+            data: "16".to_string(),
+        },
+    ];
+
+    // Set scroll_offset ahead of selected_index
+    app.navigation.selected_index = 0;
+    app.navigation.scroll_offset = 1;
+
+    app.insert_event_before_selected();
+
+    // Verify scroll_offset was adjusted to keep new event visible
+    assert_eq!(app.navigation.scroll_offset, 0);
+}
+
+#[test]
+fn test_toggle_loop_requires_events() {
+    let mut app = App::new();
+
+    app.toggle_loop();
+
+    assert!(!app.loop_enabled);
+}
+
+#[test]
+fn test_toggle_loop_on_and_off() {
+    let mut app = App::new();
+    app.log.events.push(Ym2151Event {
+        time: 0.01,
+        addr: "20".to_string(),
+        data: "4F".to_string(),
+    });
+
+    app.toggle_loop();
+    assert!(app.loop_enabled);
+
+    app.toggle_loop();
+    assert!(!app.loop_enabled);
+}
+
+#[test]
+fn test_toggle_loop_ignores_zero_duration() {
+    let mut app = App::new();
+    app.log.events.push(Ym2151Event {
+        time: 0.0,
+        addr: "20".to_string(),
+        data: "4F".to_string(),
+    });
+
+    app.toggle_loop();
+
+    assert!(!app.loop_enabled);
+}
+
+#[test]
+fn test_tick_restarts_after_duration_elapsed() {
+    let mut app = App::new();
+    app.log.events.push(Ym2151Event {
+        time: 0.05,
+        addr: "20".to_string(),
+        data: "4F".to_string(),
+    });
+
+    app.toggle_loop();
+    assert!(app.loop_enabled);
+
+    let previous_start = app.test_loop_started_at().unwrap();
+    let past = previous_start - std::time::Duration::from_millis(100);
+    app.test_set_loop_started_at(past);
+
+    app.tick();
+
+    let new_start = app.test_loop_started_at().unwrap();
+    assert!(new_start > past);
+}
+
+#[test]
+fn test_tick_reschedules_when_dirty() {
+    let mut app = App::new();
+    app.log.events.push(Ym2151Event {
+        time: 0.05,
+        addr: "20".to_string(),
+        data: "4F".to_string(),
+    });
+
+    app.toggle_loop();
+    let previous_start = app.test_loop_started_at().unwrap();
+    app.test_set_loop_dirty(true);
+    app.tick();
+
+    assert!(!app.test_loop_dirty());
+    let new_start = app.test_loop_started_at().unwrap();
+    assert!(new_start >= previous_start);
+}
+
+#[test]
+fn test_tick_disables_when_log_becomes_empty() {
+    let mut app = App::new();
+    app.log.events.push(Ym2151Event {
+        time: 0.05,
+        addr: "20".to_string(),
+        data: "4F".to_string(),
+    });
+
+    app.toggle_loop();
+    assert!(app.loop_enabled);
+
+    app.log.events.clear();
+    app.tick();
+
+    assert!(!app.loop_enabled);
+}
+
+{% endraw %}
+```
+
 ## 最近の変更（過去7日間）
 ### コミット履歴:
+871ee29 check large files
+ad343cc Update project summaries (overview & development status) [auto]
 00a1d11 jekyll用config
 
 ### 変更されたファイル:
+.github/workflows/call-check-large-files.yml
 README.ja.md
 README.md
 _config.yml
@@ -664,7 +1290,6 @@ generated-docs/development-status-generated-prompt.md
 generated-docs/development-status.md
 generated-docs/project-overview-generated-prompt.md
 generated-docs/project-overview.md
-issue-notes/26.md
 issue-notes/28.md
 src/app.rs
 src/main.rs
@@ -674,4 +1299,4 @@ src/ui.rs
 
 
 ---
-Generated at: 2026-02-24 07:16:42 JST
+Generated at: 2026-03-02 07:04:49 JST

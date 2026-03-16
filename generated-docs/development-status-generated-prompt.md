@@ -1,4 +1,4 @@
-Last updated: 2026-03-03
+Last updated: 2026-03-17
 
 # 開発状況生成プロンプト（開発者向け）
 
@@ -197,7 +197,7 @@ Last updated: 2026-03-03
 - .github/actions-tmp/issue-notes/4.md
 - .github/actions-tmp/issue-notes/40.md
 - .github/actions-tmp/issue-notes/44.md
-- .github/actions-tmp/issue-notes/49.md
+- .github/actions-tmp/issue-notes/52.md
 - .github/actions-tmp/issue-notes/7.md
 - .github/actions-tmp/issue-notes/8.md
 - .github/actions-tmp/issue-notes/9.md
@@ -220,11 +220,8 @@ Last updated: 2026-03-03
 - _config.yml
 - generated-docs/project-overview-generated-prompt.md
 - googled947dc864c270e07.html
-- issue-notes/19.md
-- issue-notes/20.md
-- issue-notes/21.md
-- issue-notes/26.md
 - issue-notes/28.md
+- issue-notes/31.md
 - src/app.rs
 - src/event_editor.rs
 - src/file_io.rs
@@ -245,6 +242,47 @@ Last updated: 2026-03-03
 - test_data/sample.json
 
 ## 現在のオープンIssues
+## [Issue #32](../issue-notes/32.md): Add feature to read from clipboard when --clipboard argument is specified
+- [x] リポジトリ・コードの確認
+- [x] `restore_terminal` 関数を追加して重複を解消
+- [x] クリップボード読み取りをターミナル初期化前に移動
+- [x] `load_from_str` のテストを追加（正常系・異常系・file_path・navigation確認）
+- [x] ビルド・lint・テスト確認（全39テスト通過）・CodeQL確認
+
+<!-- START COPILOT ORIGINAL PROMPT -->
+
+
+
+<details>
+
+<summary>Original prompt</summary>
+
+> 
+> ----
+> 
+> *This...
+ラベル: 
+--- issue-notes/32.md の内容 ---
+
+```markdown
+
+```
+
+## [Issue #31](../issue-notes/31.md): 引数 --clipboard 指定時はクリップボードからreadする
+[issue-notes/31.md](https://github.com/cat2151/ym2151-log-editor/blob/main/issue-notes/31.md)
+
+...
+ラベル: 
+--- issue-notes/31.md の内容 ---
+
+```markdown
+# issue 引数 --clipboard 指定時はクリップボードからreadする #31
+[issues #31](https://github.com/cat2151/ym2151-log-editor/issues/31)
+
+
+
+```
+
 ## [Issue #28](../issue-notes/28.md): （人力）プチノイズ対策を、local Rustバイナリにてloop mode onで調査し、結果をissue-notesに書いていく
 [issue-notes/28.md](https://github.com/cat2151/ym2151-log-editor/blob/main/issue-notes/28.md)
 
@@ -659,23 +697,36 @@ planにおいては、修正対象のソースファイル名と関数名を、�
 {% endraw %}
 ```
 
+### issue-notes/31.md
+```md
+{% raw %}
+# issue 引数 --clipboard 指定時はクリップボードからreadする #31
+[issues #31](https://github.com/cat2151/ym2151-log-editor/issues/31)
+
+
+
+{% endraw %}
+```
+
 ## 最近の変更（過去7日間）
 ### コミット履歴:
-9b53225 Merge pull request #30 from cat2151/copilot/refactor-large-file-app-tests
-3636948 split app_tests.rs into focused test files by functionality
-52e3f8c Initial plan
-f1ce2bf Update project summaries (overview & development status) [auto]
-871ee29 check large files
-ad343cc Update project summaries (overview & development status) [auto]
+103ca25 Auto-translate README.ja.md to README.md [auto]
+36920bc Update Japanese README with installation and status
+35834ed Add issue note for #31 [auto]
 
 ### 変更されたファイル:
 .github/workflows/call-check-large-files.yml
+README.ja.md
 README.md
-_config.yml
 generated-docs/development-status-generated-prompt.md
 generated-docs/development-status.md
 generated-docs/project-overview-generated-prompt.md
 generated-docs/project-overview.md
+issue-notes/19.md
+issue-notes/20.md
+issue-notes/21.md
+issue-notes/26.md
+issue-notes/31.md
 src/tests/app_tests.rs
 src/tests/delete_event_tests.rs
 src/tests/insert_event_tests.rs
@@ -686,4 +737,4 @@ src/tests/set_wait_time_tests.rs
 
 
 ---
-Generated at: 2026-03-03 07:08:18 JST
+Generated at: 2026-03-17 07:10:46 JST

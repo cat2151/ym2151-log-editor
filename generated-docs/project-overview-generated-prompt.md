@@ -1,4 +1,4 @@
-Last updated: 2026-03-03
+Last updated: 2026-03-17
 
 
 # プロジェクト概要生成プロンプト（来訪者向け）
@@ -69,6 +69,15 @@ YM2151イベントログエディタ（TUIインターフェース）。Rust製�
   <a href="README.ja.md"><img src="https://img.shields.io/badge/🇯🇵-Japanese-red.svg" alt="Japanese"></a>
   <a href="README.md"><img src="https://img.shields.io/badge/🇺🇸-English-blue.svg" alt="English"></a>
 </p>
+
+## 状況
+
+- testしてないと思う
+- installする
+
+```
+cargo install --force --git https://github.com/cat2151/ym2151-log-editor
+```
 
 ## 概要
 
@@ -267,11 +276,8 @@ cargo run -- test_data/sample.json
 📁 generated-docs/
 🌐 googled947dc864c270e07.html
 📁 issue-notes/
-  📖 19.md
-  📖 20.md
-  📖 21.md
-  📖 26.md
   📖 28.md
+  📖 31.md
 📁 src/
   📄 app.rs
   📄 event_editor.rs
@@ -307,11 +313,8 @@ IMPLEMENTATION_PLAN.md
 README.ja.md
 README.md
 googled947dc864c270e07.html
-issue-notes/19.md
-issue-notes/20.md
-issue-notes/21.md
-issue-notes/26.md
 issue-notes/28.md
+issue-notes/31.md
 test_data/minimal.json
 test_data/sample.json
 
@@ -325,4 +328,4 @@ test_data/sample.json
 
 
 ---
-Generated at: 2026-03-03 07:08:17 JST
+Generated at: 2026-03-17 07:10:46 JST

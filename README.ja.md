@@ -7,6 +7,15 @@ YM2151イベントログエディタ（TUIインターフェース）。Rust製�
   <a href="README.md"><img src="https://img.shields.io/badge/🇺🇸-English-blue.svg" alt="English"></a>
 </p>
 
+## 状況
+
+- testしてないと思う
+- installする
+
+```
+cargo install --force --git https://github.com/cat2151/ym2151-log-editor
+```
+
 ## 概要
 
 YM2151シンセサイザーのイベントログ用ターミナルベースのJSONエディタです。YM2151イベントデータの可視化と編集を支援し、特にタイミング調整とイベント検査に焦点を当てています。

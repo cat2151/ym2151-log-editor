@@ -46,6 +46,15 @@ impl App {
         Ok(())
     }
 
+    /// Load from a JSON string (e.g. clipboard content)
+    pub fn load_from_str(&mut self, content: &str) -> Result<(), Box<dyn std::error::Error>> {
+        self.disable_loop();
+        self.log = serde_json::from_str(content)?;
+        self.file_path = None;
+        self.navigation.reset();
+        Ok(())
+    }
+
     /// Save the current log to file
     pub fn save_file(&self) -> Result<(), Box<dyn std::error::Error>> {
         if let Some(path) = &self.file_path {

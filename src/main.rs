@@ -23,6 +23,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Get filename from command line args
     let args: Vec<String> = env::args().collect();
 
+    // Check for --clipboard flag
+    let use_clipboard = args.iter().any(|a| a == "--clipboard");
+    // The file argument is the first non-flag argument after the program name
+    let file_arg = args.iter().skip(1).find(|a| !a.starts_with("--")).cloned();
+
     // Initialize server on Windows
     #[cfg(windows)]
     {
@@ -40,10 +45,26 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let backend = CrosstermBackend::new(stdout);
     let mut terminal = Terminal::new(backend)?;
 
-    // Create app and load file if provided
+    // Create app and load data
     let mut app = App::new();
-    if args.len() > 1 {
-        if let Err(e) = app.load_file(&args[1]) {
+    if use_clipboard {
+        // Read from clipboard
+        let clipboard_text = arboard::Clipboard::new()
+            .and_then(|mut cb| cb.get_text())
+            .map_err(|e| format!("Failed to read clipboard: {}", e))?;
+        if let Err(e) = app.load_from_str(&clipboard_text) {
+            disable_raw_mode()?;
+            execute!(
+                terminal.backend_mut(),
+                LeaveAlternateScreen,
+                DisableMouseCapture
+            )?;
+            terminal.show_cursor()?;
+            eprintln!("Error loading from clipboard: {}", e);
+            return Err(e);
+        }
+    } else if let Some(path) = &file_arg {
+        if let Err(e) = app.load_file(path) {
             // Restore terminal before showing error
             disable_raw_mode()?;
             execute!(

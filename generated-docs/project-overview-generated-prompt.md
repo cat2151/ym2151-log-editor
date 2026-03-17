@@ -1,4 +1,4 @@
-Last updated: 2026-03-17
+Last updated: 2026-03-18
 
 
 # プロジェクト概要生成プロンプト（来訪者向け）
@@ -289,6 +289,7 @@ cargo run -- test_data/sample.json
   📁 tests/
     📄 delete_event_tests.rs
     📄 insert_event_tests.rs
+    📄 load_from_str_tests.rs
     📄 loop_tests.rs
     📄 mod.rs
     📄 model_tests.rs
@@ -328,4 +329,4 @@ test_data/sample.json
 
 
 ---
-Generated at: 2026-03-17 07:10:46 JST
+Generated at: 2026-03-18 07:10:05 JST

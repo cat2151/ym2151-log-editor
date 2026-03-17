@@ -1,4 +1,4 @@
-Last updated: 2026-03-17
+Last updated: 2026-03-18
 
 # 開発状況生成プロンプト（開発者向け）
 
@@ -231,6 +231,7 @@ Last updated: 2026-03-17
 - src/preview.rs
 - src/tests/delete_event_tests.rs
 - src/tests/insert_event_tests.rs
+- src/tests/load_from_str_tests.rs
 - src/tests/loop_tests.rs
 - src/tests/mod.rs
 - src/tests/model_tests.rs
@@ -242,47 +243,6 @@ Last updated: 2026-03-17
 - test_data/sample.json
 
 ## 現在のオープンIssues
-## [Issue #32](../issue-notes/32.md): Add feature to read from clipboard when --clipboard argument is specified
-- [x] リポジトリ・コードの確認
-- [x] `restore_terminal` 関数を追加して重複を解消
-- [x] クリップボード読み取りをターミナル初期化前に移動
-- [x] `load_from_str` のテストを追加（正常系・異常系・file_path・navigation確認）
-- [x] ビルド・lint・テスト確認（全39テスト通過）・CodeQL確認
-
-<!-- START COPILOT ORIGINAL PROMPT -->
-
-
-
-<details>
-
-<summary>Original prompt</summary>
-
-> 
-> ----
-> 
-> *This...
-ラベル: 
---- issue-notes/32.md の内容 ---
-
-```markdown
-
-```
-
-## [Issue #31](../issue-notes/31.md): 引数 --clipboard 指定時はクリップボードからreadする
-[issue-notes/31.md](https://github.com/cat2151/ym2151-log-editor/blob/main/issue-notes/31.md)
-
-...
-ラベル: 
---- issue-notes/31.md の内容 ---
-
-```markdown
-# issue 引数 --clipboard 指定時はクリップボードからreadする #31
-[issues #31](https://github.com/cat2151/ym2151-log-editor/issues/31)
-
-
-
-```
-
 ## [Issue #28](../issue-notes/28.md): （人力）プチノイズ対策を、local Rustバイナリにてloop mode onで調査し、結果をissue-notesに書いていく
 [issue-notes/28.md](https://github.com/cat2151/ym2151-log-editor/blob/main/issue-notes/28.md)
 
@@ -697,25 +657,20 @@ planにおいては、修正対象のソースファイル名と関数名を、�
 {% endraw %}
 ```
 
-### issue-notes/31.md
-```md
-{% raw %}
-# issue 引数 --clipboard 指定時はクリップボードからreadする #31
-[issues #31](https://github.com/cat2151/ym2151-log-editor/issues/31)
-
-
-
-{% endraw %}
-```
-
 ## 最近の変更（過去7日間）
 ### コミット履歴:
+e562b06 Merge pull request #32 from cat2151/copilot/add-clipboard-read-functionality
+970b9ad Update project summaries (overview & development status) [auto]
+27fc408 Address PR review: refactor terminal restore, pre-init clipboard read, add load_from_str tests
+9926bd5 Add --clipboard argument to read YM2151 log from clipboard
 103ca25 Auto-translate README.ja.md to README.md [auto]
+d76d1d2 Initial plan
 36920bc Update Japanese README with installation and status
 35834ed Add issue note for #31 [auto]
 
 ### 変更されたファイル:
-.github/workflows/call-check-large-files.yml
+Cargo.lock
+Cargo.toml
 README.ja.md
 README.md
 generated-docs/development-status-generated-prompt.md
@@ -727,9 +682,12 @@ issue-notes/20.md
 issue-notes/21.md
 issue-notes/26.md
 issue-notes/31.md
+src/app.rs
+src/main.rs
 src/tests/app_tests.rs
 src/tests/delete_event_tests.rs
 src/tests/insert_event_tests.rs
+src/tests/load_from_str_tests.rs
 src/tests/loop_tests.rs
 src/tests/mod.rs
 src/tests/navigation_tests.rs
@@ -737,4 +695,4 @@ src/tests/set_wait_time_tests.rs
 
 
 ---
-Generated at: 2026-03-17 07:10:46 JST
+Generated at: 2026-03-18 07:10:05 JST

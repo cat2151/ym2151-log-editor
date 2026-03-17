@@ -1,50 +1,50 @@
-Last updated: 2026-03-17
+Last updated: 2026-03-18
 
 # Development Status
 
 ## 現在のIssues
-- [Issue #32](../issue-notes/32.md)と[Issue #31](../issue-notes/31.md)では、`--clipboard`引数によるクリップボードからのログデータ読み取り機能の実装とテストが進められ、重複コードの解消や堅牢性の向上が図られています。
-- [Issue #28](../issue-notes/28.md)では、人力でYM2151エディタのループモードでのプチノイズ対策の調査が進行中であり、その結果をissue-notesに記録していきます。
-- [Issue #2](../issue-notes/2.md)は、開発中のプロダクトを積極的に自身で利用する「ドッグフーディング」を通じて、実用的な改善点やバグを発見する人力タスクです。
+-   [Issue #28](../issue-notes/28.md)では、YM2151ログエディタにおけるプチノイズ対策のため、Rustバイナリのloop modeでの挙動を調査し、その結果を記録する人力タスクが進行中です。
+-   [Issue #2](../issue-notes/2.md)として、開発中のYM2151ログエディタを実際に利用して使い勝手や潜在的な問題を発見するドッグフーディングを進めています。
+-   これらの人力タスクを通じて、エディタの品質向上とユーザーエクスペリエンスの改善を目指しており、継続的な調査とテストが求められています。
 
 ## 次の一手候補
-1.  [Issue #31](../issue-notes/31.md) `--clipboard` 機能の統合とユーザー体験改善
-    -   最初の小さな一歩: クリップボードからの読み込み機能が正常に動作するか、様々な入力パターン（例：空文字列、無効なJSON形式、有効なJSON形式だが特定のキーが欠落している場合、非常に大きなデータなど）で手動テストを行い、エッジケースを特定する。
+1.  [Issue #28](../issue-notes/28.md): YM2151ログエディタのプチノイズ対策調査を開始
+    -   最初の小さな一歩: `src/main.rs`にYM2151ログファイルをloop modeで再生した際のレジスタ出力データを一時的に記録するデバッグ機能を実装する。
+    -   Agent実行プロンプ:
+        ```
+        対象ファイル: src/main.rs, src/app.rs, src/file_io.rs
+
+        実行内容: `src/main.rs`に`--loop-record`のようなコマンドライン引数オプションを追加し、指定されたYM2151ログファイル（例: `test_data/minimal.json`）を繰り返し再生しながら、YM2151のレジスタ値変化などの出力データをファイルに記録する機能を提案・実装してください。関連する`src/app.rs`や`src/file_io.rs`の関数についても、必要な修正や統合案を検討してください。
+
+        確認事項: 既存のユーザーインターフェースやファイルI/Oのロジックに影響を与えないこと。記録されるデータは、後続の分析が容易なプレーンテキスト形式またはJSON形式であること。
+
+        期待する出力: 提案された機能の実装に必要なRustコードの変更点リスト（差分形式）と、その機能を手動でテストするための手順をMarkdown形式で出力してください。
+        ```
+
+2.  [Issue #2](../issue-notes/2.md): YM2151ログエディタで新規ログ作成と編集フローを試す
+    -   最初の小さな一歩: YM2151ログエディタを起動し、新規の空ログファイルを作成した後、基本的なイベント（音符、WAITなど）を追加、編集し、保存・再読み込みの一連の操作を手動で試行する。
     -   Agent実行プロンプト:
         ```
-        対象ファイル: `src/main.rs`, `src/file_io.rs`, `src/tests/model_tests.rs`
+        対象ファイル: src/app.rs, src/event_editor.rs, src/file_io.rs, src/ui.rs, src/models.rs
 
-        実行内容: `--clipboard` 引数でクリップボードからデータを読み込む際の堅牢性を向上させるため、`src/file_io.rs`内の`load_from_str`関数および関連するエラーハンドリングロジックを分析する。特に、不正な入力に対するエラーメッセージの明確化と、ユーザーが問題を理解しやすくなるための改善点を特定する。
+        実行内容: 新規ファイル作成、イベントの追加・編集、ファイルの保存・読み込みといった基本的なUI操作が、`src/app.rs`から`src/event_editor.rs`、`src/file_io.rs`、`src/ui.rs`、`src/models.rs`といった各ファイルでどのように連携しているかを分析してください。特に、新しいイベントタイプを追加する際に影響を受ける可能性のあるファイルや関数、データ構造を特定し、その関係性をmarkdown形式で説明してください。
 
-        確認事項: クリップボードからの入力が期待されるJSON形式ではない場合に、アプリケーションがクラッシュせず、ユーザーに適切なフィードバックを提供できるか。
+        確認事項: ドッグフーディングの観点から、現在の実装で新規ファイル作成から保存までのワークフローがスムーズに実行できるか、UIの各要素が期待通りに機能するかをコードレベルで確認すること。
 
-        期待する出力: `src/file_io.rs` または `src/main.rs` に追加すべきエラーハンドリングロジックの改善案と、具体的なエラーメッセージの例をmarkdown形式で出力する。
+        期待する出力: ドッグフーディングで重点的に確認すべき主要なUI操作と、それらを支えるコードロジックの関連性を説明するmarkdownドキュメント。将来的な機能拡張（例: 新しいイベントタイプのサポート）に備えて、変更が予想される主要な箇所のリストも含む。
         ```
 
-2.  [Issue #32](../issue-notes/32.md) 継続的なコード品質の維持とテスト網羅性の確認
-    -   最初の小さな一歩: `Cargo.toml`と`Cargo.lock`をレビューし、使われていない依存関係や、より新しいバージョンが存在する依存関係がないか確認する。また、`src/`ディレクトリ内の各モジュールについて、既存のテストファイル (`src/tests/*.rs`) が適切に存在し、基本的な機能がカバーされているかをざっと確認する。
+3.  CI/CDワークフローの最新化と安定性チェック
+    -   最初の小さな一歩: `generated-docs/development-status.md`が期待通りに自動更新されているか、その生成に関わる`.github/workflows/call-daily-project-summary.yml`ワークフローの最新の実行ログを確認する。
     -   Agent実行プロンプト:
         ```
-        対象ファイル: `src/models.rs`, `src/tests/model_tests.rs`, `Cargo.toml`
+        対象ファイル: .github/workflows/call-daily-project-summary.yml, .github/actions-tmp/.github_automation/project_summary/scripts/development/DevelopmentStatusGenerator.cjs, .github/actions-tmp/.github_automation/project_summary/prompts/development-status-prompt.md
 
-        実行内容: `src/models.rs`に定義されているデータ構造の完全性と、それに対応するテスト`src/tests/model_tests.rs`の網羅性を分析する。特に、`models.rs`内の各フィールドがデフォルト値を持つ場合や、特定のバリデーションが必要な場合に、その挙動がテストでカバーされているかを確認する。また、`Cargo.toml`で定義されている依存関係が最新かつ適切であるかを確認する。
+        実行内容: `call-daily-project-summary.yml`ワークフローが、`.github/actions-tmp/.github_automation/project_summary/scripts/development/DevelopmentStatusGenerator.cjs`スクリプトと`development-status-prompt.md`を使用して`generated-docs/development-status.md`を生成するプロセスを詳細に分析してください。特に、プロンプトの内容がスクリプトに正しく反映され、出力されるMarkdownファイルが意図した開発状況を正確に反映しているかを評価し、改善の余地があれば提案してください。
 
-        確認事項: `models.rs`のデータ構造に対するSerialize/Deserialize、データ変換、バリデーションロジックが、十分なテストケースで検証されているか。不必要な依存関係や更新可能な依存関係が存在しないか。
+        確認事項: ワークフローのスケジュールトリガーが正しく設定されているか。`DevelopmentStatusGenerator.cjs`が依存する`IssueTracker.cjs`や`GitUtils.cjs`などのヘルパースクリプトが正しいパスで参照されているか。
 
-        期待する出力: `src/models.rs`のテストカバレッジを向上させるための新たなテストケースの提案と、`Cargo.toml`の依存関係に関する最適化案（例: 未使用のクレートの削除、バージョンアップの推奨）をmarkdown形式で出力する。
-        ```
-
-3.  [Issue #28](../issue-notes/28.md) 「プチノイズ対策」のための基礎調査と再現環境の整備
-    -   最初の小さな一歩: `src/app.rs`と`src/main.rs`内の、イベント処理ループや時間管理ロジックに関連する部分を特定する。特に、`--loop` 引数がどのように処理に影響するかを確認する。
-    -   Agent実行プロンプト:
-        ```
-        対象ファイル: `src/main.rs`, `src/app.rs`, `src/time_display.rs`, `src/tests/loop_tests.rs`
-
-        実行内容: `ym2151-log-editor`が`--loop`モードで動作する際の、イベント処理の精度と安定性を評価するための初期調査を行う。特に、`src/app.rs`のメインループ、`src/time_display.rs`の時間計算ロジック、および`src/tests/loop_tests.rs`内の既存のループテストを分析し、プチノイズの原因となりうる微細な時間ずれや処理の遅延を検出するためのロギング強化ポイントを特定する。
-
-        確認事項: `--loop`モードで指定された時間間隔が正確に守られているか、またはその誤差がどの程度許容されるべきか。アプリケーションが長時間安定して動作するための堅牢性。
-
-        期待する出力: `src/app.rs`または`src/time_display.rs`に、ループモード実行時の詳細なタイムスタンプやイベント処理情報をログ出力するためのコード変更案（擬似コードまたはRustのコード例）をmarkdown形式で出力する。これにより、プチノイズ発生時の挙動をより詳細に分析できる。
+        期待する出力: 現在のワークフロー、スクリプト、プロンプトの連携に関する評価結果。もし出力の質やワークフローの安定性を向上させるための具体的な改善点が見つかった場合、ワークフローYAMLファイルまたはJavaScriptスクリプトに対する変更提案（差分形式）をMarkdownで記述してください。
 
 ---
-Generated at: 2026-03-17 07:11:22 JST
+Generated at: 2026-03-18 07:10:27 JST

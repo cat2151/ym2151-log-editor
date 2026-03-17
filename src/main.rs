@@ -23,6 +23,22 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Get filename from command line args
     let args: Vec<String> = env::args().collect();
 
+    // Check for --clipboard flag
+    let use_clipboard = args.iter().any(|a| a == "--clipboard");
+    // The file argument is the first non-flag argument after the program name
+    let file_arg = args.iter().skip(1).find(|a| !a.starts_with("--")).cloned();
+
+    // Read clipboard content BEFORE terminal initialization so that on error
+    // we can simply return without needing to restore the terminal.
+    let clipboard_content = if use_clipboard {
+        let text = arboard::Clipboard::new()
+            .and_then(|mut cb| cb.get_text())
+            .map_err(|e| format!("Failed to read clipboard: {}", e))?;
+        Some(text)
+    } else {
+        None
+    };
+
     // Initialize server on Windows
     #[cfg(windows)]
     {
@@ -40,18 +56,17 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let backend = CrosstermBackend::new(stdout);
     let mut terminal = Terminal::new(backend)?;
 
-    // Create app and load file if provided
+    // Create app and load data
     let mut app = App::new();
-    if args.len() > 1 {
-        if let Err(e) = app.load_file(&args[1]) {
-            // Restore terminal before showing error
-            disable_raw_mode()?;
-            execute!(
-                terminal.backend_mut(),
-                LeaveAlternateScreen,
-                DisableMouseCapture
-            )?;
-            terminal.show_cursor()?;
+    if let Some(content) = clipboard_content {
+        if let Err(e) = app.load_from_str(&content) {
+            restore_terminal(&mut terminal)?;
+            eprintln!("Error loading from clipboard: {}", e);
+            return Err(e);
+        }
+    } else if let Some(path) = &file_arg {
+        if let Err(e) = app.load_file(path) {
+            restore_terminal(&mut terminal)?;
             eprintln!("Error loading file: {}", e);
             return Err(e);
         }
@@ -61,6 +76,21 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let res = run_app(&mut terminal, &mut app);
 
     // Restore terminal
+    restore_terminal(&mut terminal)?;
+
+    if let Err(err) = res {
+        eprintln!("Error: {:?}", err);
+    }
+
+    Ok(())
+}
+
+/// Restore the terminal to its original state.
+/// Should be called on both normal exit and error paths after `enable_raw_mode()` and
+/// `EnterAlternateScreen` have been invoked. Returns an error if any restoration step fails.
+fn restore_terminal<B: ratatui::backend::Backend + io::Write>(
+    terminal: &mut Terminal<B>,
+) -> io::Result<()> {
     disable_raw_mode()?;
     execute!(
         terminal.backend_mut(),
@@ -68,11 +98,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         DisableMouseCapture
     )?;
     terminal.show_cursor()?;
-
-    if let Err(err) = res {
-        eprintln!("Error: {:?}", err);
-    }
-
     Ok(())
 }
 

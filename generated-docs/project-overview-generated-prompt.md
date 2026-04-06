@@ -1,4 +1,4 @@
-Last updated: 2026-03-18
+Last updated: 2026-04-07
 
 
 # プロジェクト概要生成プロンプト（来訪者向け）
@@ -329,4 +329,4 @@ test_data/sample.json
 
 
 ---
-Generated at: 2026-03-18 07:10:05 JST
+Generated at: 2026-04-07 07:11:05 JST

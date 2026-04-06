@@ -1,4 +1,4 @@
-Last updated: 2026-03-18
+Last updated: 2026-04-07
 
 # 開発状況生成プロンプト（開発者向け）
 
@@ -107,6 +107,8 @@ Last updated: 2026-03-18
 - .github/actions-tmp/.github/workflows/call-check-large-files.yml
 - .github/actions-tmp/.github/workflows/call-daily-project-summary.yml
 - .github/actions-tmp/.github/workflows/call-issue-note.yml
+- .github/actions-tmp/.github/workflows/call-rust-fmt-commit.yml
+- .github/actions-tmp/.github/workflows/call-rust-windows-cargo-check.yml
 - .github/actions-tmp/.github/workflows/call-rust-windows-check.yml
 - .github/actions-tmp/.github/workflows/call-translate-readme.yml
 - .github/actions-tmp/.github/workflows/callgraph.yml
@@ -114,6 +116,8 @@ Last updated: 2026-03-18
 - .github/actions-tmp/.github/workflows/check-recent-human-commit.yml
 - .github/actions-tmp/.github/workflows/daily-project-summary.yml
 - .github/actions-tmp/.github/workflows/issue-note.yml
+- .github/actions-tmp/.github/workflows/rust-fmt-commit.yml
+- .github/actions-tmp/.github/workflows/rust-windows-cargo-check.yml
 - .github/actions-tmp/.github/workflows/rust-windows-check.yml
 - .github/actions-tmp/.github/workflows/translate-readme.yml
 - .github/actions-tmp/.github_automation/callgraph/codeql-queries/callgraph.ql
@@ -157,6 +161,7 @@ Last updated: 2026-03-18
 - .github/actions-tmp/.github_automation/translate/scripts/translate-readme.cjs
 - .github/actions-tmp/.gitignore
 - .github/actions-tmp/.vscode/settings.json
+- .github/actions-tmp/AGENTS.md
 - .github/actions-tmp/LICENSE
 - .github/actions-tmp/README.ja.md
 - .github/actions-tmp/README.md
@@ -197,7 +202,8 @@ Last updated: 2026-03-18
 - .github/actions-tmp/issue-notes/4.md
 - .github/actions-tmp/issue-notes/40.md
 - .github/actions-tmp/issue-notes/44.md
-- .github/actions-tmp/issue-notes/52.md
+- .github/actions-tmp/issue-notes/57.md
+- .github/actions-tmp/issue-notes/67.md
 - .github/actions-tmp/issue-notes/7.md
 - .github/actions-tmp/issue-notes/8.md
 - .github/actions-tmp/issue-notes/9.md
@@ -659,20 +665,14 @@ planにおいては、修正対象のソースファイル名と関数名を、�
 
 ## 最近の変更（過去7日間）
 ### コミット履歴:
-e562b06 Merge pull request #32 from cat2151/copilot/add-clipboard-read-functionality
-970b9ad Update project summaries (overview & development status) [auto]
-27fc408 Address PR review: refactor terminal restore, pre-init clipboard read, add load_from_str tests
-9926bd5 Add --clipboard argument to read YM2151 log from clipboard
-103ca25 Auto-translate README.ja.md to README.md [auto]
-d76d1d2 Initial plan
-36920bc Update Japanese README with installation and status
-35834ed Add issue note for #31 [auto]
+bde57f1 Jekyll設定
 
 ### 変更されたファイル:
 Cargo.lock
 Cargo.toml
 README.ja.md
 README.md
+_config.yml
 generated-docs/development-status-generated-prompt.md
 generated-docs/development-status.md
 generated-docs/project-overview-generated-prompt.md
@@ -684,15 +684,9 @@ issue-notes/26.md
 issue-notes/31.md
 src/app.rs
 src/main.rs
-src/tests/app_tests.rs
-src/tests/delete_event_tests.rs
-src/tests/insert_event_tests.rs
 src/tests/load_from_str_tests.rs
-src/tests/loop_tests.rs
 src/tests/mod.rs
-src/tests/navigation_tests.rs
-src/tests/set_wait_time_tests.rs
 
 
 ---
-Generated at: 2026-03-18 07:10:05 JST
+Generated at: 2026-04-07 07:11:05 JST

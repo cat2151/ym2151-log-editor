@@ -2,6 +2,7 @@
 name = "ym2151-log-editor"
 version = "0.1.0"
 edition = "2021"
+build = "build.rs"
 
 [dependencies]
 ratatui = "0.29"
@@ -9,6 +10,8 @@ crossterm = "0.28"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 arboard = "3.6.1"
+clap = { version = "4", features = ["derive"] }
+cat-self-update-lib = { git = "https://github.com/cat2151/cat-self-update", package = "cat-self-update-lib" }
 
 [target.'cfg(windows)'.dependencies]
 ym2151-log-play-server = { git = "https://github.com/cat2151/ym2151-log-play-server" }

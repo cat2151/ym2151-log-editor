@@ -53,6 +53,12 @@ cargo run -- path/to/your/file.json
 ```bash
 # ファイルを指定してエディタを起動
 ./target/release/ym2151-log-editor your_log.json
+
+# 更新があるか確認
+./target/release/ym2151-log-editor check
+
+# cargo install 経由でこのアプリを更新
+./target/release/ym2151-log-editor update
 ```
 
 ### キーボード操作

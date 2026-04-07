@@ -1,4 +1,5 @@
 mod app;
+mod cli;
 mod event_editor;
 mod file_io;
 mod models;
@@ -17,17 +18,25 @@ use crossterm::{
     terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
 };
 use ratatui::{backend::CrosstermBackend, Terminal};
-use std::{env, io, time::Duration};
+use std::{io, time::Duration};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    // Get filename from command line args
-    let args: Vec<String> = env::args().collect();
+    match cli::parse() {
+        cli::StartupMode::Update => return cli::run_update(),
+        cli::StartupMode::Check => return cli::run_check(),
+        cli::StartupMode::Editor {
+            use_clipboard,
+            file_arg,
+        } => run_editor(use_clipboard, file_arg)?,
+    }
 
-    // Check for --clipboard flag
-    let use_clipboard = args.iter().any(|a| a == "--clipboard");
-    // The file argument is the first non-flag argument after the program name
-    let file_arg = args.iter().skip(1).find(|a| !a.starts_with("--")).cloned();
+    Ok(())
+}
 
+fn run_editor(
+    use_clipboard: bool,
+    file_arg: Option<String>,
+) -> Result<(), Box<dyn std::error::Error>> {
     // Read clipboard content BEFORE terminal initialization so that on error
     // we can simply return without needing to restore the terminal.
     let clipboard_content = if use_clipboard {

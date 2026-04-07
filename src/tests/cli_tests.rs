@@ -35,6 +35,22 @@ fn parse_editor_file_argument_named_like_subcommand_with_explicit_path() {
 }
 
 #[test]
+fn parse_editor_file_argument_named_like_update_subcommand_with_explicit_path() {
+    let cli = Cli::try_parse_from(["ym2151-log-editor", "./update"]).unwrap();
+
+    assert_eq!(cli.command, None);
+    assert!(!cli.clipboard);
+    assert_eq!(cli.file.as_deref(), Some("./update"));
+    assert_eq!(
+        StartupMode::from(cli),
+        StartupMode::Editor {
+            use_clipboard: false,
+            file_arg: Some("./update".to_string()),
+        }
+    );
+}
+
+#[test]
 fn parse_editor_clipboard_flag() {
     let cli = Cli::try_parse_from(["ym2151-log-editor", "--clipboard"]).unwrap();
 

@@ -59,6 +59,9 @@ cargo run -- path/to/your/file.json
 
 # cargo install 経由でこのアプリを更新
 ./target/release/ym2151-log-editor update
+
+# ファイル名が check / update の場合はパスとして明示して起動
+./target/release/ym2151-log-editor ./check
 ```
 
 ### キーボード操作

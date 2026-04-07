@@ -15,7 +15,7 @@ pub(crate) struct Cli {
     #[arg(long)]
     pub(crate) clipboard: bool,
 
-    /// JSON file to open
+    /// JSON file to open. If the file name is `check` or `update`, pass it explicitly as `./check` or `./update`.
     #[arg(value_name = "FILE")]
     pub(crate) file: Option<String>,
 

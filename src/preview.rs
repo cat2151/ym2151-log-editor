@@ -11,24 +11,7 @@ trait InteractivePlaybackClient {
 }
 
 #[cfg(any(all(windows, not(test)), test))]
-fn start_loop_playback_with_client(
-    log: &Ym2151Log,
-    interactive_loop_active: &mut bool,
-    client: &impl InteractivePlaybackClient,
-) -> bool {
-    if log.events.is_empty() {
-        return false;
-    }
-
-    if !ensure_interactive_started(interactive_loop_active, client) {
-        return false;
-    }
-
-    send_loop_json_with_client(log, client)
-}
-
-#[cfg(any(all(windows, not(test)), test))]
-fn queue_loop_playback_with_client(
+fn play_loop_playback_with_client(
     log: &Ym2151Log,
     interactive_loop_active: &mut bool,
     client: &impl InteractivePlaybackClient,
@@ -133,7 +116,7 @@ pub fn preview_current_event(_log: &Ym2151Log, _selected_index: usize) {
 #[cfg(all(windows, not(test)))]
 pub fn start_loop_playback(log: &Ym2151Log) -> bool {
     let mut interactive_loop_active = INTERACTIVE_LOOP_ACTIVE.load(Ordering::Relaxed);
-    let started = start_loop_playback_with_client(
+    let started = play_loop_playback_with_client(
         log,
         &mut interactive_loop_active,
         &Ym2151LogPlayServerClient,
@@ -146,7 +129,7 @@ pub fn start_loop_playback(log: &Ym2151Log) -> bool {
 #[cfg(all(windows, not(test)))]
 pub fn queue_loop_playback(log: &Ym2151Log) -> bool {
     let mut interactive_loop_active = INTERACTIVE_LOOP_ACTIVE.load(Ordering::Relaxed);
-    let queued = queue_loop_playback_with_client(
+    let queued = play_loop_playback_with_client(
         log,
         &mut interactive_loop_active,
         &Ym2151LogPlayServerClient,
@@ -202,7 +185,7 @@ mod tests {
         fn start_interactive(&self) -> Result<(), String> {
             self.calls.borrow_mut().push(MockCall::StartInteractive);
             if self.fail_start {
-                Err("failed to start".to_string())
+                Err("Mock: failed to start interactive mode".to_string())
             } else {
                 Ok(())
             }
@@ -237,7 +220,7 @@ mod tests {
         let mut interactive_loop_active = false;
         let client = MockInteractivePlaybackClient::default();
 
-        let started = start_loop_playback_with_client(&log, &mut interactive_loop_active, &client);
+        let started = play_loop_playback_with_client(&log, &mut interactive_loop_active, &client);
 
         assert!(started);
         assert!(interactive_loop_active);
@@ -257,12 +240,12 @@ mod tests {
         let mut interactive_loop_active = false;
         let client = MockInteractivePlaybackClient::default();
 
-        assert!(start_loop_playback_with_client(
+        assert!(play_loop_playback_with_client(
             &first_log,
             &mut interactive_loop_active,
             &client
         ));
-        assert!(queue_loop_playback_with_client(
+        assert!(play_loop_playback_with_client(
             &second_log,
             &mut interactive_loop_active,
             &client
@@ -288,7 +271,7 @@ mod tests {
             ..Default::default()
         };
 
-        let started = start_loop_playback_with_client(&log, &mut interactive_loop_active, &client);
+        let started = play_loop_playback_with_client(&log, &mut interactive_loop_active, &client);
 
         assert!(!started);
         assert!(!interactive_loop_active);

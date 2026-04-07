@@ -237,8 +237,7 @@ mod tests {
         let mut interactive_loop_active = false;
         let client = MockInteractivePlaybackClient::default();
 
-        let started =
-            start_loop_playback_with_client(&log, &mut interactive_loop_active, &client);
+        let started = start_loop_playback_with_client(&log, &mut interactive_loop_active, &client);
 
         assert!(started);
         assert!(interactive_loop_active);
@@ -289,15 +288,11 @@ mod tests {
             ..Default::default()
         };
 
-        let started =
-            start_loop_playback_with_client(&log, &mut interactive_loop_active, &client);
+        let started = start_loop_playback_with_client(&log, &mut interactive_loop_active, &client);
 
         assert!(!started);
         assert!(!interactive_loop_active);
-        assert_eq!(
-            *client.calls.borrow(),
-            vec![MockCall::StartInteractive]
-        );
+        assert_eq!(*client.calls.borrow(), vec![MockCall::StartInteractive]);
     }
 
     #[test]

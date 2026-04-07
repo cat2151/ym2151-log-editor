@@ -35,12 +35,7 @@ pub fn start_loop_playback(log: &Ym2151Log) -> bool {
             eprintln!("Failed to start interactive mode for loop: {}", e);
             return false;
         }
-        if let Err(e) = ym2151_log_play_server::client::clear_schedule() {
-            eprintln!("Failed to clear schedule: {}", e);
-        }
         INTERACTIVE_LOOP_ACTIVE.store(true, Ordering::Relaxed);
-    } else if let Err(e) = ym2151_log_play_server::client::clear_schedule() {
-        eprintln!("Failed to clear schedule: {}", e);
     }
 
     send_loop_json(log)

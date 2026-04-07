@@ -1992,9 +1992,10 @@ dependencies = [
 [[package]]
 name = "ym2151-log-play-server"
 version = "0.1.0"
-source = "git+https://github.com/cat2151/ym2151-log-play-server#90067fff0242a5427bbc71a287b3650d73a65e1b"
+source = "git+https://github.com/cat2151/ym2151-log-play-server#de1933edd307a663ea70e8dadba93ebcfe0a795c"
 dependencies = [
  "anyhow",
+ "cat-self-update-lib",
  "cc",
  "chrono",
  "clap",

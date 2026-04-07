@@ -47,6 +47,9 @@
 ## 依存クレート
 - `ratatui`（TUI）、`crossterm`（ターミナル）、`serde`/`serde_json`（シリアライズ）
 
+## 依存追加・更新時の注意
+- `cat2151` 管理のライブラリを git 依存で追加・更新する場合、`rev` / `tag` で固定しない。
+
 ## 今後の拡張予定
 - 編集（時刻・アドレス・データ）、挿入/削除、Undo/Redo、音声プレビュー、バッチ操作等（詳細は `IMPLEMENTATION_PLAN.md`）
 

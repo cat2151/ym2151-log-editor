@@ -53,6 +53,15 @@ cargo run -- path/to/your/file.json
 ```bash
 # Launch the editor with a specified file
 ./target/release/ym2151-log-editor your_log.json
+
+# Check whether an update is available
+./target/release/ym2151-log-editor check
+
+# Update this application via cargo install
+./target/release/ym2151-log-editor update
+
+# If a file is literally named check or update, pass it explicitly as a path
+./target/release/ym2151-log-editor ./check
 ```
 
 ### Keyboard Shortcuts

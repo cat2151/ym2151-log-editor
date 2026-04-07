@@ -1,4 +1,5 @@
 // Test modules
+mod cli_tests;
 mod delete_event_tests;
 mod insert_event_tests;
 mod load_from_str_tests;

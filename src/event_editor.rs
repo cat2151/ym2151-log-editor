@@ -99,13 +99,13 @@ pub fn insert_events_before(
         return;
     }
 
-    let insert_at = selected_index.min(log.events.len());
-    let new_time = if insert_at == 0 {
+    let insertion_index = selected_index.min(log.events.len());
+    let new_time = if insertion_index == 0 {
         0.0
-    } else if insert_at >= log.events.len() {
+    } else if insertion_index >= log.events.len() {
         log.events.last().map(|e| e.time).unwrap_or(0.0)
     } else {
-        log.events[insert_at - 1].time
+        log.events[insertion_index - 1].time
     };
     let first_time = events_to_insert[0].time;
 
@@ -118,5 +118,6 @@ pub fn insert_events_before(
         })
         .collect::<Vec<_>>();
 
-    log.events.splice(insert_at..insert_at, inserted_events);
+    log.events
+        .splice(insertion_index..insertion_index, inserted_events);
 }

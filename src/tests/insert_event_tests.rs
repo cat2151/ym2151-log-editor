@@ -8,6 +8,13 @@ const VALID_PASTE_JSON: &str = r#"{
     ]
 }"#;
 
+const LONG_PASTE_JSON: &str = r#"{
+    "events": [
+        { "time": 0.1, "addr": "28", "data": "00" },
+        { "time": 0.6, "addr": "08", "data": "78" }
+    ]
+}"#;
+
 #[test]
 fn test_insert_event_before_selected_at_start() {
     let mut app = App::new();
@@ -249,4 +256,36 @@ fn test_insert_events_from_str_before_selected_invalid_json_keeps_log_unchanged(
     assert_eq!(app.log.events.len(), 1);
     assert_eq!(app.log.events[0].addr, "20");
     assert_eq!(app.navigation.selected_index, 0);
+}
+
+#[test]
+fn test_insert_events_from_str_before_selected_shifts_following_events_when_needed() {
+    let mut app = App::new();
+    app.log.events = vec![
+        Ym2151Event {
+            time: 0.0,
+            addr: "20".to_string(),
+            data: "4F".to_string(),
+        },
+        Ym2151Event {
+            time: 0.05,
+            addr: "40".to_string(),
+            data: "16".to_string(),
+        },
+        Ym2151Event {
+            time: 0.06,
+            addr: "60".to_string(),
+            data: "14".to_string(),
+        },
+    ];
+    app.navigation.selected_index = 1;
+
+    let result = app.insert_events_from_str_before_selected(LONG_PASTE_JSON);
+
+    assert!(result.is_ok());
+    assert_eq!(app.log.events.len(), 5);
+    assert!((app.log.events[1].time - 0.0).abs() < 0.0001);
+    assert!((app.log.events[2].time - 0.5).abs() < 0.0001);
+    assert!((app.log.events[3].time - 0.5).abs() < 0.0001);
+    assert!((app.log.events[4].time - 0.51).abs() < 0.0001);
 }

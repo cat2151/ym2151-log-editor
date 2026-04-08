@@ -107,6 +107,7 @@ pub fn insert_events_before(
     } else {
         log.events[insertion_index - 1].time
     };
+    let next_time = log.events.get(insertion_index).map(|event| event.time);
     let first_time = events_to_insert[0].time;
 
     let inserted_events = events_to_insert
@@ -117,6 +118,19 @@ pub fn insert_events_before(
             event
         })
         .collect::<Vec<_>>();
+    let inserted_max_time = inserted_events
+        .iter()
+        .map(|event| event.time)
+        .fold(f64::NEG_INFINITY, f64::max);
+
+    if let Some(next_time) = next_time {
+        let shift_amount = (inserted_max_time - next_time).max(0.0);
+        if shift_amount > 0.0 {
+            for event in &mut log.events[insertion_index..] {
+                event.time += shift_amount;
+            }
+        }
+    }
 
     log.events
         .splice(insertion_index..insertion_index, inserted_events);

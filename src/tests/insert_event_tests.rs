@@ -1,6 +1,13 @@
 use crate::app::App;
 use crate::models::Ym2151Event;
 
+const VALID_PASTE_JSON: &str = r#"{
+    "events": [
+        { "time": 0.1, "addr": "28", "data": "00" },
+        { "time": 0.12, "addr": "08", "data": "78" }
+    ]
+}"#;
+
 #[test]
 fn test_insert_event_before_selected_at_start() {
     let mut app = App::new();
@@ -160,4 +167,86 @@ fn test_insert_event_scroll_adjustment() {
 
     // Verify scroll_offset was adjusted to keep new event visible
     assert_eq!(app.navigation.scroll_offset, 0);
+}
+
+#[test]
+fn test_insert_events_from_str_before_selected_in_middle() {
+    let mut app = App::new();
+    app.file_path = Some("test_data/sample.json".to_string());
+    app.log.events = vec![
+        Ym2151Event {
+            time: 0.0,
+            addr: "20".to_string(),
+            data: "4F".to_string(),
+        },
+        Ym2151Event {
+            time: 0.05,
+            addr: "40".to_string(),
+            data: "16".to_string(),
+        },
+        Ym2151Event {
+            time: 0.10,
+            addr: "60".to_string(),
+            data: "14".to_string(),
+        },
+    ];
+    app.navigation.selected_index = 1;
+
+    let result = app.insert_events_from_str_before_selected(VALID_PASTE_JSON);
+
+    assert!(result.is_ok());
+    assert_eq!(app.file_path.as_deref(), Some("test_data/sample.json"));
+    assert_eq!(app.log.events.len(), 5);
+    assert_eq!(app.navigation.selected_index, 1);
+    assert_eq!(app.log.events[0].addr, "20");
+    assert_eq!(app.log.events[1].addr, "28");
+    assert_eq!(app.log.events[1].data, "00");
+    assert!((app.log.events[1].time - 0.0).abs() < 0.0001);
+    assert_eq!(app.log.events[2].addr, "08");
+    assert_eq!(app.log.events[2].data, "78");
+    assert!((app.log.events[2].time - 0.02).abs() < 0.0001);
+    assert_eq!(app.log.events[3].addr, "40");
+    assert!((app.log.events[3].time - 0.05).abs() < 0.0001);
+}
+
+#[test]
+fn test_insert_events_from_str_before_selected_at_end() {
+    let mut app = App::new();
+    app.log.events = vec![
+        Ym2151Event {
+            time: 0.0,
+            addr: "20".to_string(),
+            data: "4F".to_string(),
+        },
+        Ym2151Event {
+            time: 0.05,
+            addr: "40".to_string(),
+            data: "16".to_string(),
+        },
+    ];
+    app.navigation.selected_index = 2;
+
+    let result = app.insert_events_from_str_before_selected(VALID_PASTE_JSON);
+
+    assert!(result.is_ok());
+    assert_eq!(app.log.events.len(), 4);
+    assert!((app.log.events[2].time - 0.05).abs() < 0.0001);
+    assert!((app.log.events[3].time - 0.07).abs() < 0.0001);
+}
+
+#[test]
+fn test_insert_events_from_str_before_selected_invalid_json_keeps_log_unchanged() {
+    let mut app = App::new();
+    app.log.events = vec![Ym2151Event {
+        time: 0.0,
+        addr: "20".to_string(),
+        data: "4F".to_string(),
+    }];
+
+    let result = app.insert_events_from_str_before_selected("not valid json {{{");
+
+    assert!(result.is_err());
+    assert_eq!(app.log.events.len(), 1);
+    assert_eq!(app.log.events[0].addr, "20");
+    assert_eq!(app.navigation.selected_index, 0);
 }

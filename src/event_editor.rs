@@ -88,3 +88,35 @@ pub fn insert_event_before(log: &mut Ym2151Log, selected_index: usize) {
     // insert() can handle index == len(), which appends to the end
     log.events.insert(selected_index, new_event);
 }
+
+/// Insert events before the specified position while preserving their relative timing
+pub fn insert_events_before(
+    log: &mut Ym2151Log,
+    selected_index: usize,
+    events_to_insert: &[Ym2151Event],
+) {
+    if events_to_insert.is_empty() {
+        return;
+    }
+
+    let insert_at = selected_index.min(log.events.len());
+    let new_time = if insert_at == 0 {
+        0.0
+    } else if insert_at >= log.events.len() {
+        log.events.last().map(|e| e.time).unwrap_or(0.0)
+    } else {
+        log.events[insert_at - 1].time
+    };
+    let first_time = events_to_insert[0].time;
+
+    let inserted_events = events_to_insert
+        .iter()
+        .cloned()
+        .map(|mut event| {
+            event.time = new_time + (event.time - first_time);
+            event
+        })
+        .collect::<Vec<_>>();
+
+    log.events.splice(insert_at..insert_at, inserted_events);
+}

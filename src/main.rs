@@ -13,7 +13,9 @@ mod tests;
 
 use app::App;
 use crossterm::{
-    event::{self, DisableMouseCapture, EnableMouseCapture, Event, KeyCode, KeyEventKind},
+    event::{
+        self, DisableMouseCapture, EnableMouseCapture, Event, KeyCode, KeyEventKind, KeyModifiers,
+    },
     execute,
     terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
 };
@@ -122,46 +124,59 @@ fn run_app<B: ratatui::backend::Backend>(
                 // Only process key press events, not release events
                 // This prevents double-triggering on Windows
                 if key.kind == KeyEventKind::Press {
-                    match key.code {
-                        KeyCode::Char('q') | KeyCode::Char('Q') | KeyCode::Esc => {
-                            app.should_quit = true;
-                        }
-                        KeyCode::Char('t') | KeyCode::Char('T') => {
-                            app.toggle_time_mode();
-                        }
-                        KeyCode::Char('s') | KeyCode::Char('S') => {
-                            if let Err(e) = app.save_file() {
-                                // In a real app, you'd want to show this error in the UI
-                                eprintln!("Error saving file: {}", e);
+                    if key.modifiers.contains(KeyModifiers::CONTROL)
+                        && matches!(key.code, KeyCode::Char('v') | KeyCode::Char('V'))
+                    {
+                        match arboard::Clipboard::new().and_then(|mut cb| cb.get_text()) {
+                            Ok(text) => {
+                                if let Err(e) = app.insert_events_from_str_before_selected(&text) {
+                                    eprintln!("Error pasting from clipboard: {}", e);
+                                }
                             }
+                            Err(e) => eprintln!("Failed to read clipboard: {}", e),
                         }
-                        KeyCode::Char('p') | KeyCode::Char('P') => {
-                            app.preview_current_event();
+                    } else {
+                        match key.code {
+                            KeyCode::Char('q') | KeyCode::Char('Q') | KeyCode::Esc => {
+                                app.should_quit = true;
+                            }
+                            KeyCode::Char('t') | KeyCode::Char('T') => {
+                                app.toggle_time_mode();
+                            }
+                            KeyCode::Char('s') | KeyCode::Char('S') => {
+                                if let Err(e) = app.save_file() {
+                                    // In a real app, you'd want to show this error in the UI
+                                    eprintln!("Error saving file: {}", e);
+                                }
+                            }
+                            KeyCode::Char('p') | KeyCode::Char('P') => {
+                                app.preview_current_event();
+                            }
+                            KeyCode::Char('l') | KeyCode::Char('L') => {
+                                app.toggle_loop();
+                            }
+                            KeyCode::Char(c @ '0'..='9') => {
+                                // Map '0'-'9' to 0-9ms
+                                let milliseconds = c.to_digit(10).unwrap();
+                                app.set_wait_time_ms(milliseconds);
+                            }
+                            KeyCode::Up => {
+                                app.move_up();
+                            }
+                            KeyCode::Down => {
+                                app.move_down();
+                            }
+                            KeyCode::Delete => {
+                                app.delete_selected_event();
+                            }
+                            KeyCode::Char('/') => {
+                                app.insert_event_before_selected();
+                            }
+                            KeyCode::Enter => {
+                                app.insert_event_before_selected();
+                            }
+                            _ => {}
                         }
-                        KeyCode::Char('l') | KeyCode::Char('L') => {
-                            app.toggle_loop();
-                        }
-                        KeyCode::Char(c @ '0'..='9') => {
-                            // Map '0'-'9' to 0-9ms
-                            let milliseconds = c.to_digit(10).unwrap();
-                            app.set_wait_time_ms(milliseconds);
-                        }
-                        KeyCode::Up => {
-                            app.move_up();
-                        }
-                        KeyCode::Down => {
-                            app.move_down();
-                        }
-                        KeyCode::Delete => {
-                            app.delete_selected_event();
-                        }
-                        KeyCode::Char('/') => {
-                            app.insert_event_before_selected();
-                        }
-                        KeyCode::Enter => {
-                            app.insert_event_before_selected();
-                        }
-                        _ => {}
                     }
                 }
             }

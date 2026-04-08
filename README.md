@@ -71,6 +71,7 @@ cargo run -- path/to/your/file.json
 |-----|-----|
 | ↑/↓ | Move between events |
 | / or ENTER | Insert a new event before the current line |
+| CTRL+V | Insert events from clipboard JSON before the current line |
 | DELETE | Delete the current event |
 | 0-9 | Set wait time (0-9 milliseconds, cumulative mode only) |
 | P | Preview playback (play the entire JSON) |

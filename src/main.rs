@@ -13,9 +13,7 @@ mod tests;
 
 use app::App;
 use crossterm::{
-    event::{
-        self, DisableMouseCapture, EnableMouseCapture, Event, KeyCode, KeyEventKind, KeyModifiers,
-    },
+    event::{self, DisableMouseCapture, EnableMouseCapture, Event, KeyCode, KeyEventKind},
     execute,
     terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
 };
@@ -125,20 +123,6 @@ fn run_app<B: ratatui::backend::Backend>(
                 // This prevents double-triggering on Windows
                 if key.kind == KeyEventKind::Press {
                     match key.code {
-                        KeyCode::Char('v') | KeyCode::Char('V')
-                            if key.modifiers.contains(KeyModifiers::CONTROL) =>
-                        {
-                            match arboard::Clipboard::new().and_then(|mut cb| cb.get_text()) {
-                                Ok(text) => {
-                                    if let Err(e) =
-                                        app.insert_events_from_str_before_selected(&text)
-                                    {
-                                        eprintln!("Error pasting from clipboard: {}", e);
-                                    }
-                                }
-                                Err(e) => eprintln!("Failed to read clipboard: {}", e),
-                            }
-                        }
                         KeyCode::Char('q') | KeyCode::Char('Q') | KeyCode::Esc => {
                             app.should_quit = true;
                         }

@@ -49,7 +49,7 @@ impl App {
     /// Load from a JSON string (e.g. clipboard content)
     pub fn load_from_str(&mut self, content: &str) -> Result<(), Box<dyn std::error::Error>> {
         self.disable_loop();
-        self.log = crate::file_io::load_from_str(content)?;
+        self.log = serde_json::from_str(content)?;
         self.file_path = None;
         self.navigation.reset();
         Ok(())
@@ -173,22 +173,6 @@ impl App {
         crate::event_editor::insert_event_before(&mut self.log, self.navigation.selected_index);
         self.navigation.adjust_after_insert();
         self.mark_loop_dirty();
-    }
-
-    /// Insert events parsed from a JSON string before the currently selected position
-    pub fn insert_events_from_str_before_selected(
-        &mut self,
-        content: &str,
-    ) -> Result<(), Box<dyn std::error::Error>> {
-        let log = crate::file_io::load_from_str(content)?;
-        crate::event_editor::insert_events_before(
-            &mut self.log,
-            self.navigation.selected_index,
-            &log.events,
-        );
-        self.navigation.adjust_after_insert();
-        self.mark_loop_dirty();
-        Ok(())
     }
 
     // Accessor methods for backward compatibility with UI code

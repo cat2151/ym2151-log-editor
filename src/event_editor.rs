@@ -118,13 +118,16 @@ pub fn insert_events_before(
             event
         })
         .collect::<Vec<_>>();
-    let inserted_max_time = inserted_events
+    let Some(inserted_max_time) = inserted_events
         .iter()
         .map(|event| event.time)
-        .fold(f64::NEG_INFINITY, f64::max);
+        .reduce(f64::max)
+    else {
+        return;
+    };
 
     if let Some(next_time) = next_time {
-        let shift_amount = (inserted_max_time - next_time).max(0.0);
+        let shift_amount = inserted_max_time - next_time;
         if shift_amount > 0.0 {
             for event in &mut log.events[insertion_index..] {
                 event.time += shift_amount;

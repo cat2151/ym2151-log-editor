@@ -285,7 +285,15 @@ fn test_insert_events_from_str_before_selected_shifts_following_events_when_need
     assert!(result.is_ok());
     assert_eq!(app.log.events.len(), 5);
     assert!((app.log.events[1].time - 0.0).abs() < 0.0001);
+    assert_eq!(app.log.events[1].addr, "28");
+    assert_eq!(app.log.events[1].data, "00");
     assert!((app.log.events[2].time - 0.5).abs() < 0.0001);
+    assert_eq!(app.log.events[2].addr, "08");
+    assert_eq!(app.log.events[2].data, "78");
     assert!((app.log.events[3].time - 0.5).abs() < 0.0001);
+    assert_eq!(app.log.events[3].addr, "40");
+    assert_eq!(app.log.events[3].data, "16");
     assert!((app.log.events[4].time - 0.51).abs() < 0.0001);
+    assert_eq!(app.log.events[4].addr, "60");
+    assert_eq!(app.log.events[4].data, "14");
 }

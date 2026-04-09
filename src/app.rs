@@ -21,6 +21,8 @@ pub struct App {
     loop_dirty: bool,
     /// Whether the app should quit
     pub should_quit: bool,
+    /// Whether the help overlay is visible
+    help_visible: bool,
 }
 
 impl App {
@@ -34,6 +36,7 @@ impl App {
             loop_started_at: None,
             loop_dirty: false,
             should_quit: false,
+            help_visible: false,
         }
     }
 
@@ -182,6 +185,18 @@ impl App {
 
     pub fn scroll_offset(&self) -> usize {
         self.navigation.scroll_offset
+    }
+
+    pub fn toggle_help(&mut self) {
+        self.help_visible = !self.help_visible;
+    }
+
+    pub fn hide_help(&mut self) {
+        self.help_visible = false;
+    }
+
+    pub fn help_visible(&self) -> bool {
+        self.help_visible
     }
 
     fn disable_loop(&mut self) {

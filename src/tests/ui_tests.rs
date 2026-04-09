@@ -40,3 +40,24 @@ fn monokai_background_fills_screen() {
     let buffer = terminal.backend().buffer();
     assert_eq!(buffer[(0, 0)].bg, Color::Rgb(39, 40, 34));
 }
+
+#[test]
+fn footer_uses_zero_to_nine_wait_hint() {
+    let backend = TestBackend::new(120, 10);
+    let mut terminal = Terminal::new(backend).unwrap();
+    let mut app = App::new();
+
+    terminal.draw(|f| crate::ui::render(f, &mut app)).unwrap();
+
+    let buffer = terminal.backend().buffer();
+    let mut rendered = String::new();
+    for y in 0..buffer.area.height {
+        for x in 0..buffer.area.width {
+            rendered.push_str(buffer[(x, y)].symbol());
+        }
+        rendered.push('\n');
+    }
+
+    assert!(rendered.contains("0-9: Set Wait(ms)"));
+    assert!(!rendered.contains("1-0: Set Wait(ms)"));
+}

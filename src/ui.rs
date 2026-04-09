@@ -7,6 +7,7 @@ use ratatui::{
     widgets::{Block, Borders, Clear, List, ListItem, Paragraph},
     Frame,
 };
+use unicode_width::UnicodeWidthStr;
 
 const MONOKAI_BG: Color = Color::Rgb(39, 40, 34);
 const MONOKAI_FG: Color = Color::Rgb(248, 248, 242);
@@ -121,7 +122,7 @@ fn render_footer(f: &mut Frame, area: Rect, app: &App) {
     let footer_text = if app.time_mode == TimeDisplayMode::Cumulative {
         vec![
             Span::raw("↑/↓: Navigate | "),
-            Span::raw("1-0: Set Wait(ms) | "),
+            Span::raw("0-9: Set Wait(ms) | "),
             Span::raw("/|ENTER: Insert | "),
             Span::raw("DEL: Delete | "),
             Span::raw("P: Preview | "),
@@ -158,31 +159,8 @@ fn render_footer(f: &mut Frame, area: Rect, app: &App) {
 }
 
 fn render_help_overlay(f: &mut Frame) {
-    let help_lines = [
-        "Help (? / ESC to close)",
-        "",
-        "↑/↓: Navigate",
-        "0-9: Set Wait(ms) in cumulative mode",
-        "/ or ENTER: Insert event before cursor",
-        "DEL: Delete selected event",
-        "P: Preview current JSON",
-        "L: Toggle loop playback",
-        "T: Toggle time display mode",
-        "S: Save file",
-        "Q: Quit editor",
-        "",
-        "Clipboard JSON input: start with --clipboard",
-    ];
-    let popup = centered_rect(
-        help_lines
-            .iter()
-            .map(|line| line.len() as u16)
-            .max()
-            .unwrap_or(0)
-            + HELP_HORIZONTAL_PADDING,
-        help_lines.len() as u16 + HELP_VERTICAL_PADDING,
-        f.area(),
-    );
+    let help_lines = help_lines();
+    let popup = help_popup_rect(f.area());
     let text = help_lines
         .into_iter()
         .enumerate()
@@ -210,18 +188,83 @@ fn render_help_overlay(f: &mut Frame) {
     f.render_widget(Paragraph::new(text).block(block), popup);
 }
 
+fn help_lines() -> [&'static str; 13] {
+    [
+        "Help (? / ESC to close)",
+        "",
+        "↑/↓: Navigate",
+        "0-9: Set Wait(ms) in cumulative mode",
+        "/ or ENTER: Insert event before cursor",
+        "DEL: Delete selected event",
+        "P: Preview current JSON",
+        "L: Toggle loop playback",
+        "T: Toggle time display mode",
+        "S: Save file",
+        "Q: Quit editor",
+        "",
+        "Clipboard JSON input: start with --clipboard",
+    ]
+}
+
+fn help_popup_rect(area: Rect) -> Rect {
+    let help_lines = help_lines();
+    let content_width = widest_display_width(&help_lines);
+    centered_rect(
+        content_width + HELP_HORIZONTAL_PADDING,
+        help_lines.len() as u16 + HELP_VERTICAL_PADDING,
+        area,
+    )
+}
+
+fn widest_display_width(lines: &[&str]) -> u16 {
+    lines
+        .iter()
+        .map(|line| UnicodeWidthStr::width(*line) as u16)
+        .max()
+        .unwrap_or(0)
+}
+
 fn centered_rect(width: u16, height: u16, area: Rect) -> Rect {
-    let popup_width = width
-        .min(area.width.saturating_sub(POPUP_MARGIN))
-        .max(MIN_POPUP_SIZE);
-    let popup_height = height
-        .min(area.height.saturating_sub(POPUP_MARGIN))
-        .max(MIN_POPUP_SIZE);
+    let available_width = area.width.saturating_sub(POPUP_MARGIN);
+    let available_height = area.height.saturating_sub(POPUP_MARGIN);
+    let min_popup_width = MIN_POPUP_SIZE.min(available_width);
+    let min_popup_height = MIN_POPUP_SIZE.min(available_height);
+    let popup_width = width.min(available_width).max(min_popup_width);
+    let popup_height = height.min(available_height).max(min_popup_height);
 
     Rect {
         x: area.x + area.width.saturating_sub(popup_width) / 2,
         y: area.y + area.height.saturating_sub(popup_height) / 2,
         width: popup_width,
         height: popup_height,
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn widest_display_width_uses_terminal_width_not_utf8_bytes() {
+        let lines = ["abc", "↑/↓"];
+
+        assert_eq!(
+            widest_display_width(&lines),
+            UnicodeWidthStr::width("↑/↓") as u16
+        );
+    }
+
+    #[test]
+    fn centered_rect_never_exceeds_small_area() {
+        let area = Rect {
+            x: 0,
+            y: 0,
+            width: 2,
+            height: 2,
+        };
+        let popup = centered_rect(20, 20, area);
+
+        assert!(popup.width <= area.width);
+        assert!(popup.height <= area.height);
     }
 }

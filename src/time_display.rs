@@ -52,12 +52,11 @@ pub fn format_event(log: &Ym2151Log, index: usize, mode: TimeDisplayMode) -> Str
 
     let event = &log.events[index];
     let time_str = get_time_string(log, index, mode);
-
-    if event.is_key_off() {
-        format!("{}  KEYOFF  {}", time_str, event.data)
-    } else if event.is_key_on() {
-        format!("{}  KeyON  {}", time_str, event.data)
-    } else {
-        format!("{}  {}  {}", time_str, event.addr, event.data)
-    }
+    format!(
+        "{}  {}  {}  {}",
+        time_str,
+        event.addr,
+        event.data,
+        event.description()
+    )
 }

@@ -29,6 +29,6 @@ fn format_event_appends_operator_description() {
 
     assert_eq!(
         format_event(&log, 0, TimeDisplayMode::Cumulative),
-        "0.000000  60  14  ch0 m1 tl"
+        "0.000000  60  14  ch0 m1 total level"
     );
 }

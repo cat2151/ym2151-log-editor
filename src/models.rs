@@ -1,5 +1,7 @@
 use serde::{Deserialize, Serialize};
 
+const OPERATOR_NAMES: [&str; 4] = ["m1", "c1", "m2", "c2"];
+
 /// JSON event structure for ym2151-log
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Ym2151Event {
@@ -60,12 +62,12 @@ impl Ym2151Event {
             0x28..=0x2F => format!("ch{} key code", addr & 0x07),
             0x30..=0x37 => format!("ch{} key fraction", addr & 0x07),
             0x38..=0x3F => format!("ch{} pms / ams", addr & 0x07),
-            0x40..=0x5F => self.operator_description(addr, "dt1 / mul"),
-            0x60..=0x7F => self.operator_description(addr, "tl"),
-            0x80..=0x9F => self.operator_description(addr, "ks / ar"),
-            0xA0..=0xBF => self.operator_description(addr, "ame / d1r"),
-            0xC0..=0xDF => self.operator_description(addr, "dt2 / d2r"),
-            0xE0..=0xFF => self.operator_description(addr, "d1l / rr"),
+            0x40..=0x5F => self.operator_description(addr, "detune1 / multiple"),
+            0x60..=0x7F => self.operator_description(addr, "total level"),
+            0x80..=0x9F => self.operator_description(addr, "key scale / attack rate"),
+            0xA0..=0xBF => self.operator_description(addr, "am enable / decay1 rate"),
+            0xC0..=0xDF => self.operator_description(addr, "detune2 / decay2 rate"),
+            0xE0..=0xFF => self.operator_description(addr, "decay1 level / release rate"),
             _ => format!("reg {:02X}", addr),
         }
     }
@@ -109,12 +111,8 @@ impl Ym2151Event {
 
     fn operator_description(&self, addr: u8, parameter: &str) -> String {
         let channel = addr & 0x07;
-        let operator = match (addr >> 3) & 0x03 {
-            0 => "m1",
-            1 => "c1",
-            2 => "m2",
-            _ => "c2",
-        };
+        let operator_index = ((addr >> 3) & 0x03) as usize;
+        let operator = OPERATOR_NAMES[operator_index];
         format!("ch{} {} {}", channel, operator, parameter)
     }
 }

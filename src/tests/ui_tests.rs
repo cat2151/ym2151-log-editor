@@ -31,7 +31,8 @@ fn help_overlay_renders_clipboard_hint() {
     let rendered = render_to_string(&terminal);
 
     assert!(rendered.contains("Clipboard JSON input: start with --clipboard"));
-    assert!(rendered.contains("Help (? / ESC to close)"));
+    assert!(rendered.contains("Help (? / Esc to close)"));
+    assert!(rendered.contains("Esc / q: Quit editor"));
     assert!(rendered.contains("↑/↓ or k/j: Navigate"));
 }
 
@@ -57,6 +58,7 @@ fn footer_uses_zero_to_nine_wait_hint() {
 
     let rendered = render_to_string(&terminal);
 
+    assert!(rendered.contains("Esc/q : quit,? : help"));
     assert!(rendered.contains("0-9: Set Wait(ms)"));
     assert!(!rendered.contains("1-0: Set Wait(ms)"));
     assert!(rendered.contains("↑/↓ or k/j: Navigate"));
@@ -73,6 +75,7 @@ fn footer_uses_vim_style_navigation_hint_in_timestamp_mode() {
 
     let rendered = render_to_string(&terminal);
 
+    assert!(rendered.contains("Esc/q : quit,? : help"));
     assert!(rendered.contains("↑/↓ or k/j: Navigate"));
     assert!(!rendered.contains("0-9: Set Wait(ms)"));
 }

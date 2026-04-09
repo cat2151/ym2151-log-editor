@@ -121,6 +121,7 @@ fn render_content(f: &mut Frame, area: Rect, app: &mut App) {
 fn render_footer(f: &mut Frame, area: Rect, app: &App) {
     let footer_text = if app.time_mode == TimeDisplayMode::Cumulative {
         vec![
+            Span::raw("Esc/q: Quit, ?: Help | "),
             Span::raw("↑/↓ or k/j: Navigate | "),
             Span::raw("0-9: Set Wait(ms) | "),
             Span::raw("/|ENTER: Insert | "),
@@ -128,21 +129,18 @@ fn render_footer(f: &mut Frame, area: Rect, app: &App) {
             Span::raw("P: Preview | "),
             Span::raw("L: Loop On/Off | "),
             Span::raw("T: Toggle Time Mode | "),
-            Span::raw("?: Help | "),
             Span::raw("S: Save | "),
-            Span::raw("Q/ESC: Quit"),
         ]
     } else {
         vec![
+            Span::raw("Esc/q: Quit, ?: Help | "),
             Span::raw("↑/↓ or k/j: Navigate | "),
             Span::raw("/|ENTER: Insert | "),
             Span::raw("DEL: Delete | "),
             Span::raw("P: Preview | "),
             Span::raw("L: Loop On/Off | "),
             Span::raw("T: Toggle Time Mode | "),
-            Span::raw("?: Help | "),
             Span::raw("S: Save | "),
-            Span::raw("Q/ESC: Quit"),
         ]
     };
 
@@ -190,7 +188,7 @@ fn render_help_overlay(f: &mut Frame) {
 
 fn help_lines() -> [&'static str; 13] {
     [
-        "Help (? / ESC to close)",
+        "Help (? / Esc to close)",
         "",
         "↑/↓ or k/j: Navigate",
         "0-9: Set Wait(ms) in cumulative mode",
@@ -200,7 +198,7 @@ fn help_lines() -> [&'static str; 13] {
         "L: Toggle loop playback",
         "T: Toggle time display mode",
         "S: Save file",
-        "Q: Quit editor",
+        "Esc / q: Quit editor",
         "",
         "Clipboard JSON input: start with --clipboard",
     ]

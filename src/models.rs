@@ -79,10 +79,12 @@ impl Ym2151Event {
             return String::from("key on/off");
         };
         let channel = data & 0x07;
-        if (data & 0x78) == 0 {
+        if self.is_key_off() {
             format!("ch{} keyoff", channel)
-        } else {
+        } else if self.is_key_on() {
             format!("ch{} keyon", channel)
+        } else {
+            String::from("key on/off")
         }
     }
 

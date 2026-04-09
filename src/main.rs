@@ -122,7 +122,23 @@ fn run_app<B: ratatui::backend::Backend>(
                 // Only process key press events, not release events
                 // This prevents double-triggering on Windows
                 if key.kind == KeyEventKind::Press {
+                    if app.help_visible() {
+                        match key.code {
+                            KeyCode::Char('?') | KeyCode::Esc => {
+                                app.hide_help();
+                            }
+                            KeyCode::Char('q') | KeyCode::Char('Q') => {
+                                app.should_quit = true;
+                            }
+                            _ => {}
+                        }
+                        continue;
+                    }
+
                     match key.code {
+                        KeyCode::Char('?') => {
+                            app.toggle_help();
+                        }
                         KeyCode::Char('q') | KeyCode::Char('Q') | KeyCode::Esc => {
                             app.should_quit = true;
                         }

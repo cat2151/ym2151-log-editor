@@ -7,3 +7,4 @@ mod loop_tests;
 mod model_tests;
 mod navigation_tests;
 mod set_wait_time_tests;
+mod ui_tests;

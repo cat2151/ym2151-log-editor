@@ -21,12 +21,12 @@ use ratatui::{backend::CrosstermBackend, Terminal};
 use std::{io, time::Duration};
 
 fn is_move_up_key(code: &KeyCode) -> bool {
-    matches!(code, KeyCode::Up | KeyCode::Char('k') | KeyCode::Char('K'))
+    matches!(*code, KeyCode::Up | KeyCode::Char('k') | KeyCode::Char('K'))
 }
 
 fn is_move_down_key(code: &KeyCode) -> bool {
     matches!(
-        code,
+        *code,
         KeyCode::Down | KeyCode::Char('j') | KeyCode::Char('J')
     )
 }

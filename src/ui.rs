@@ -16,6 +16,10 @@ const MONOKAI_ORANGE: Color = Color::Rgb(253, 151, 31);
 const MONOKAI_PURPLE: Color = Color::Rgb(174, 129, 255);
 const MONOKAI_YELLOW: Color = Color::Rgb(230, 219, 116);
 const MONOKAI_SELECTION: Color = Color::Rgb(73, 72, 62);
+const HELP_HORIZONTAL_PADDING: u16 = 4;
+const HELP_VERTICAL_PADDING: u16 = 2;
+const POPUP_MARGIN: u16 = 2;
+const MIN_POPUP_SIZE: u16 = 3;
 
 /// Render the application UI
 pub fn render(f: &mut Frame, app: &mut App) {
@@ -175,8 +179,8 @@ fn render_help_overlay(f: &mut Frame) {
             .map(|line| line.len() as u16)
             .max()
             .unwrap_or(0)
-            + 4,
-        help_lines.len() as u16 + 2,
+            + HELP_HORIZONTAL_PADDING,
+        help_lines.len() as u16 + HELP_VERTICAL_PADDING,
         f.area(),
     );
     let text = help_lines
@@ -207,8 +211,12 @@ fn render_help_overlay(f: &mut Frame) {
 }
 
 fn centered_rect(width: u16, height: u16, area: Rect) -> Rect {
-    let popup_width = width.min(area.width.saturating_sub(2)).max(3);
-    let popup_height = height.min(area.height.saturating_sub(2)).max(3);
+    let popup_width = width
+        .min(area.width.saturating_sub(POPUP_MARGIN))
+        .max(MIN_POPUP_SIZE);
+    let popup_height = height
+        .min(area.height.saturating_sub(POPUP_MARGIN))
+        .max(MIN_POPUP_SIZE);
 
     Rect {
         x: area.x + area.width.saturating_sub(popup_width) / 2,

@@ -25,7 +25,10 @@ fn is_move_up_key(code: &KeyCode) -> bool {
 }
 
 fn is_move_down_key(code: &KeyCode) -> bool {
-    matches!(code, KeyCode::Down | KeyCode::Char('j') | KeyCode::Char('J'))
+    matches!(
+        code,
+        KeyCode::Down | KeyCode::Char('j') | KeyCode::Char('J')
+    )
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {

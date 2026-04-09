@@ -130,7 +130,7 @@ fn render_footer(f: &mut Frame, area: Rect, app: &App) {
             Span::raw("L: Loop On/Off | "),
             Span::raw("T: Toggle Time Mode | "),
             Span::raw("S: Save | "),
-            Span::raw("q/ESC: Quit"),
+            Span::raw("Esc/q: Quit"),
         ]
     } else {
         vec![
@@ -142,7 +142,7 @@ fn render_footer(f: &mut Frame, area: Rect, app: &App) {
             Span::raw("L: Loop On/Off | "),
             Span::raw("T: Toggle Time Mode | "),
             Span::raw("S: Save | "),
-            Span::raw("q/ESC: Quit"),
+            Span::raw("Esc/q: Quit"),
         ]
     };
 

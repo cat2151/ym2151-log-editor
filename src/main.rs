@@ -20,6 +20,14 @@ use crossterm::{
 use ratatui::{backend::CrosstermBackend, Terminal};
 use std::{io, time::Duration};
 
+fn is_move_up_key(code: &KeyCode) -> bool {
+    matches!(code, KeyCode::Up | KeyCode::Char('k') | KeyCode::Char('K'))
+}
+
+fn is_move_down_key(code: &KeyCode) -> bool {
+    matches!(code, KeyCode::Down | KeyCode::Char('j') | KeyCode::Char('J'))
+}
+
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     match cli::parse() {
         cli::StartupMode::Update => return cli::run_update(),
@@ -162,10 +170,10 @@ fn run_app<B: ratatui::backend::Backend>(
                             let milliseconds = c.to_digit(10).unwrap();
                             app.set_wait_time_ms(milliseconds);
                         }
-                        KeyCode::Up => {
+                        code if is_move_up_key(&code) => {
                             app.move_up();
                         }
-                        KeyCode::Down => {
+                        code if is_move_down_key(&code) => {
                             app.move_down();
                         }
                         KeyCode::Delete => {

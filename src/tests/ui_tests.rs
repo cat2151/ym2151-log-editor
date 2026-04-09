@@ -32,6 +32,7 @@ fn help_overlay_renders_clipboard_hint() {
 
     assert!(rendered.contains("Clipboard JSON input: start with --clipboard"));
     assert!(rendered.contains("Help (? / ESC to close)"));
+    assert!(rendered.contains("↑/↓ or k/j: Navigate"));
 }
 
 #[test]

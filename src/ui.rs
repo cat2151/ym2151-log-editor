@@ -192,7 +192,7 @@ fn help_lines() -> [&'static str; 13] {
     [
         "Help (? / ESC to close)",
         "",
-        "↑/↓: Navigate",
+        "↑/↓ or k/j: Navigate",
         "0-9: Set Wait(ms) in cumulative mode",
         "/ or ENTER: Insert event before cursor",
         "DEL: Delete selected event",

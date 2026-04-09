@@ -32,6 +32,7 @@ fn help_overlay_renders_clipboard_hint() {
 
     assert!(rendered.contains("Clipboard JSON input: start with --clipboard"));
     assert!(rendered.contains("Help (? / ESC to close)"));
+    assert!(rendered.contains("↑/↓ or k/j: Navigate"));
 }
 
 #[test]
@@ -58,6 +59,22 @@ fn footer_uses_zero_to_nine_wait_hint() {
 
     assert!(rendered.contains("0-9: Set Wait(ms)"));
     assert!(!rendered.contains("1-0: Set Wait(ms)"));
+    assert!(rendered.contains("↑/↓ or k/j: Navigate"));
+}
+
+#[test]
+fn footer_uses_vim_style_navigation_hint_in_timestamp_mode() {
+    let backend = TestBackend::new(120, 10);
+    let mut terminal = Terminal::new(backend).unwrap();
+    let mut app = App::new();
+    app.toggle_time_mode();
+
+    terminal.draw(|f| crate::ui::render(f, &mut app)).unwrap();
+
+    let rendered = render_to_string(&terminal);
+
+    assert!(rendered.contains("↑/↓ or k/j: Navigate"));
+    assert!(!rendered.contains("0-9: Set Wait(ms)"));
 }
 
 #[test]

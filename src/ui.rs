@@ -121,7 +121,7 @@ fn render_content(f: &mut Frame, area: Rect, app: &mut App) {
 fn render_footer(f: &mut Frame, area: Rect, app: &App) {
     let footer_text = if app.time_mode == TimeDisplayMode::Cumulative {
         vec![
-            Span::raw("↑/↓: Navigate | "),
+            Span::raw("↑/↓ or k/j: Navigate | "),
             Span::raw("0-9: Set Wait(ms) | "),
             Span::raw("/|ENTER: Insert | "),
             Span::raw("DEL: Delete | "),
@@ -134,7 +134,7 @@ fn render_footer(f: &mut Frame, area: Rect, app: &App) {
         ]
     } else {
         vec![
-            Span::raw("↑/↓: Navigate | "),
+            Span::raw("↑/↓ or k/j: Navigate | "),
             Span::raw("/|ENTER: Insert | "),
             Span::raw("DEL: Delete | "),
             Span::raw("P: Preview | "),
@@ -192,7 +192,7 @@ fn help_lines() -> [&'static str; 13] {
     [
         "Help (? / ESC to close)",
         "",
-        "↑/↓: Navigate",
+        "↑/↓ or k/j: Navigate",
         "0-9: Set Wait(ms) in cumulative mode",
         "/ or ENTER: Insert event before cursor",
         "DEL: Delete selected event",

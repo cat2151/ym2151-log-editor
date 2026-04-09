@@ -121,7 +121,7 @@ fn render_content(f: &mut Frame, area: Rect, app: &mut App) {
 fn render_footer(f: &mut Frame, area: Rect, app: &App) {
     let footer_text = if app.time_mode == TimeDisplayMode::Cumulative {
         vec![
-            Span::raw("Esc/q : quit,? : help | "),
+            Span::raw("Esc/q: Quit, ?: Help | "),
             Span::raw("↑/↓ or k/j: Navigate | "),
             Span::raw("0-9: Set Wait(ms) | "),
             Span::raw("/|ENTER: Insert | "),
@@ -130,11 +130,10 @@ fn render_footer(f: &mut Frame, area: Rect, app: &App) {
             Span::raw("L: Loop On/Off | "),
             Span::raw("T: Toggle Time Mode | "),
             Span::raw("S: Save | "),
-            Span::raw("Esc/q: Quit"),
         ]
     } else {
         vec![
-            Span::raw("Esc/q : quit,? : help | "),
+            Span::raw("Esc/q: Quit, ?: Help | "),
             Span::raw("↑/↓ or k/j: Navigate | "),
             Span::raw("/|ENTER: Insert | "),
             Span::raw("DEL: Delete | "),
@@ -142,7 +141,6 @@ fn render_footer(f: &mut Frame, area: Rect, app: &App) {
             Span::raw("L: Loop On/Off | "),
             Span::raw("T: Toggle Time Mode | "),
             Span::raw("S: Save | "),
-            Span::raw("Esc/q: Quit"),
         ]
     };
 

@@ -58,7 +58,7 @@ fn footer_uses_zero_to_nine_wait_hint() {
 
     let rendered = render_to_string(&terminal);
 
-    assert!(rendered.contains("Esc/q : quit,? : help"));
+    assert!(rendered.contains("Esc/q: Quit, ?: Help"));
     assert!(rendered.contains("0-9: Set Wait(ms)"));
     assert!(!rendered.contains("1-0: Set Wait(ms)"));
     assert!(rendered.contains("↑/↓ or k/j: Navigate"));
@@ -75,7 +75,7 @@ fn footer_uses_vim_style_navigation_hint_in_timestamp_mode() {
 
     let rendered = render_to_string(&terminal);
 
-    assert!(rendered.contains("Esc/q : quit,? : help"));
+    assert!(rendered.contains("Esc/q: Quit, ?: Help"));
     assert!(rendered.contains("↑/↓ or k/j: Navigate"));
     assert!(!rendered.contains("0-9: Set Wait(ms)"));
 }

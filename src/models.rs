@@ -19,19 +19,18 @@ pub struct Ym2151Log {
 impl Ym2151Event {
     /// Check if this event is a KeyON event (register 0x08)
     pub fn is_key_on(&self) -> bool {
-        self.addr.to_uppercase() == "08"
+        self.parse_hex_byte(&self.addr) == Some(0x08)
     }
 
     /// Check if this event is a KEYOFF event (register 0x08 with bits 3,4,5,6 all zero)
     /// In YM2151, register 0x08 controls KEY ON/OFF. Bits 3-6 specify operators.
     /// If all of bits 3,4,5,6 are 0, it's a KEY OFF operation.
     pub fn is_key_off(&self) -> bool {
-        if self.addr.to_uppercase() != "08" {
+        if !self.is_key_on() {
             return false;
         }
 
-        // Parse hex data value
-        if let Ok(value) = u8::from_str_radix(&self.data, 16) {
+        if let Some(value) = self.parse_hex_byte(&self.data) {
             // Check if bits 3,4,5,6 are all 0
             // Bit mask for bits 3-6: 0b01111000 = 0x78
             (value & 0x78) == 0
@@ -81,12 +80,10 @@ impl Ym2151Event {
             return String::from("key on/off");
         };
         let channel = data & 0x07;
-        if self.is_key_off() {
+        if (data & 0x78) == 0 {
             format!("ch{} keyoff", channel)
-        } else if self.is_key_on() {
-            format!("ch{} keyon", channel)
         } else {
-            String::from("key on/off")
+            format!("ch{} keyon", channel)
         }
     }
 

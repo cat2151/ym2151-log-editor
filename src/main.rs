@@ -57,6 +57,18 @@ fn is_fast_move_down_key(key: &KeyEvent, pending_nine_prefix: bool) -> bool {
         || (pending_nine_prefix && matches!(key.code, KeyCode::Char('j') | KeyCode::Char('J')))
 }
 
+fn flush_pending_nine_prefix_if_timed_out(
+    app: &mut App,
+    pending_nine_prefix: &mut Option<PendingNinePrefix>,
+) {
+    if pending_nine_prefix.as_ref().is_some_and(|prefix| {
+        prefix.apply_wait_on_timeout && prefix.started_at.elapsed() >= NINE_PREFIX_TIMEOUT
+    }) {
+        app.set_wait_time_ms(9);
+        *pending_nine_prefix = None;
+    }
+}
+
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     match cli::parse() {
         cli::StartupMode::Update => return cli::run_update(),
@@ -154,12 +166,7 @@ fn run_app<B: ratatui::backend::Backend>(
     let mut pending_nine_prefix: Option<PendingNinePrefix> = None;
 
     loop {
-        if let Some(prefix) = pending_nine_prefix {
-            if prefix.apply_wait_on_timeout && prefix.started_at.elapsed() >= NINE_PREFIX_TIMEOUT {
-                app.set_wait_time_ms(9);
-                pending_nine_prefix = None;
-            }
-        }
+        flush_pending_nine_prefix_if_timed_out(app, &mut pending_nine_prefix);
 
         terminal.draw(|f| ui::render(f, app))?;
 
@@ -182,6 +189,7 @@ fn run_app<B: ratatui::backend::Backend>(
                         continue;
                     }
 
+                    flush_pending_nine_prefix_if_timed_out(app, &mut pending_nine_prefix);
                     let active_nine_prefix = pending_nine_prefix.take();
 
                     if let Some(prefix) = active_nine_prefix {
@@ -232,14 +240,15 @@ fn run_app<B: ratatui::backend::Backend>(
                             app.toggle_loop();
                         }
                         KeyCode::Char('9') => {
+                            // Delay bare '9' briefly so it can act as the prefix for 9j/9k.
                             pending_nine_prefix = Some(PendingNinePrefix {
                                 started_at: std::time::Instant::now(),
                                 apply_wait_on_timeout: app.time_mode
                                     == crate::time_display::TimeDisplayMode::Cumulative,
                             });
                         }
-                        KeyCode::Char(c @ '0'..='9') => {
-                            // Map '0'-'9' to 0-9ms
+                        KeyCode::Char(c @ '0'..='8') => {
+                            // Map '0'-'8' to 0-8ms immediately.
                             let milliseconds = c.to_digit(10).unwrap();
                             app.set_wait_time_ms(milliseconds);
                         }

@@ -97,3 +97,21 @@ fn event_list_renders_description_column_content() {
 
     assert!(rendered.contains("0.000000  08  78  ch0 keyon"));
 }
+
+#[test]
+fn event_list_renders_description_column_content_for_prefixed_hex_json_values() {
+    let backend = TestBackend::new(120, 10);
+    let mut terminal = Terminal::new(backend).unwrap();
+    let mut app = App::new();
+    app.log.events = vec![Ym2151Event {
+        time: 0.0,
+        addr: "0xA8".to_string(),
+        data: "0x05".to_string(),
+    }];
+
+    terminal.draw(|f| crate::ui::render(f, &mut app)).unwrap();
+
+    let rendered = render_to_string(&terminal);
+
+    assert!(rendered.contains("0.000000  0xA8  0x05  ch0 c1 am enable / decay1 rate"));
+}

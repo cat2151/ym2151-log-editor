@@ -7,6 +7,14 @@ const VALID_JSON: &str = r#"{
     ]
 }"#;
 
+const VALID_JSON_WITH_PREFIXED_HEX: &str = r#"{
+    "events": [
+        { "time": 0.0, "addr": "0x20", "data": "0xD7" },
+        { "time": 0.0, "addr": "0XA8", "data": "0X05" },
+        { "time": 0.25, "addr": "0x08", "data": "0x00" }
+    ]
+}"#;
+
 #[test]
 fn test_load_from_str_success() {
     let mut app = App::new();
@@ -62,4 +70,25 @@ fn test_load_from_str_wrong_schema() {
     // Valid JSON but not a Ym2151Log schema
     let result = app.load_from_str(r#"{"foo": "bar"}"#);
     assert!(result.is_err());
+}
+
+#[test]
+fn test_load_from_str_prefixed_hex_values_keep_description_available() {
+    let mut app = App::new();
+
+    let result = app.load_from_str(VALID_JSON_WITH_PREFIXED_HEX);
+
+    assert!(result.is_ok());
+    assert_eq!(
+        app.log
+            .events
+            .iter()
+            .map(|event| event.description())
+            .collect::<Vec<_>>(),
+        vec![
+            "ch0 pan / feedback / algorithm",
+            "ch0 c1 am enable / decay1 rate",
+            "ch0 keyoff",
+        ]
+    );
 }

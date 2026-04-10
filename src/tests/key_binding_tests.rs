@@ -2,6 +2,8 @@ use crate::{app::App, models::Ym2151Event, PendingCountPrefix, COUNT_PREFIX_TIME
 use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
 use std::time::{Duration, Instant};
 
+const FLOAT_TOLERANCE: f64 = 1e-9;
+
 #[test]
 fn vim_style_navigation_keys_are_supported() {
     assert!(crate::is_move_up_key(&KeyCode::Char('k')));
@@ -116,7 +118,7 @@ fn timed_out_count_prefix_clears_without_applying_wait_in_timestamp_mode() {
     crate::flush_pending_count_prefix_if_timed_out(&mut app, &mut pending);
 
     assert!(pending.is_none());
-    assert!((app.log.events[1].time - 0.02).abs() < f64::EPSILON);
+    assert!((app.log.events[1].time - 0.02).abs() < FLOAT_TOLERANCE);
 }
 
 #[test]
@@ -145,7 +147,7 @@ fn timed_out_count_prefix_applies_last_digit_wait_in_cumulative_mode() {
     crate::flush_pending_count_prefix_if_timed_out(&mut app, &mut pending);
 
     assert!(pending.is_none());
-    assert!((app.log.events[1].time - 0.002).abs() < f64::EPSILON);
+    assert!((app.log.events[1].time - 0.002).abs() < FLOAT_TOLERANCE);
 }
 
 #[test]

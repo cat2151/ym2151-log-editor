@@ -13,12 +13,24 @@ mod tests;
 
 use app::App;
 use crossterm::{
-    event::{self, DisableMouseCapture, EnableMouseCapture, Event, KeyCode, KeyEventKind},
+    event::{
+        self, DisableMouseCapture, EnableMouseCapture, Event, KeyCode, KeyEvent, KeyEventKind,
+        KeyModifiers,
+    },
     execute,
     terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
 };
 use ratatui::{backend::CrosstermBackend, Terminal};
 use std::{io, time::Duration};
+
+const FAST_MOVE_AMOUNT: usize = 10;
+const NINE_PREFIX_TIMEOUT: Duration = Duration::from_millis(250);
+
+#[derive(Clone, Copy, Debug)]
+struct PendingNinePrefix {
+    started_at: std::time::Instant,
+    apply_wait_on_timeout: bool,
+}
 
 fn is_move_up_key(code: &KeyCode) -> bool {
     matches!(*code, KeyCode::Up | KeyCode::Char('k') | KeyCode::Char('K'))
@@ -29,6 +41,20 @@ fn is_move_down_key(code: &KeyCode) -> bool {
         *code,
         KeyCode::Down | KeyCode::Char('j') | KeyCode::Char('J')
     )
+}
+
+fn is_fast_move_up_key(key: &KeyEvent, pending_nine_prefix: bool) -> bool {
+    matches!(key.code, KeyCode::PageUp)
+        || (key.modifiers.contains(KeyModifiers::CONTROL)
+            && matches!(key.code, KeyCode::Char('u') | KeyCode::Char('U')))
+        || (pending_nine_prefix && matches!(key.code, KeyCode::Char('k') | KeyCode::Char('K')))
+}
+
+fn is_fast_move_down_key(key: &KeyEvent, pending_nine_prefix: bool) -> bool {
+    matches!(key.code, KeyCode::PageDown)
+        || (key.modifiers.contains(KeyModifiers::CONTROL)
+            && matches!(key.code, KeyCode::Char('d') | KeyCode::Char('D')))
+        || (pending_nine_prefix && matches!(key.code, KeyCode::Char('j') | KeyCode::Char('J')))
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -125,7 +151,16 @@ fn run_app<B: ratatui::backend::Backend>(
     terminal: &mut Terminal<B>,
     app: &mut App,
 ) -> io::Result<()> {
+    let mut pending_nine_prefix: Option<PendingNinePrefix> = None;
+
     loop {
+        if let Some(prefix) = pending_nine_prefix {
+            if prefix.apply_wait_on_timeout && prefix.started_at.elapsed() >= NINE_PREFIX_TIMEOUT {
+                app.set_wait_time_ms(9);
+                pending_nine_prefix = None;
+            }
+        }
+
         terminal.draw(|f| ui::render(f, app))?;
 
         if event::poll(Duration::from_millis(50))? {
@@ -134,6 +169,7 @@ fn run_app<B: ratatui::backend::Backend>(
                 // This prevents double-triggering on Windows
                 if key.kind == KeyEventKind::Press {
                     if app.help_visible() {
+                        pending_nine_prefix = None;
                         match key.code {
                             KeyCode::Char('?') | KeyCode::Esc => {
                                 app.hide_help();
@@ -143,6 +179,33 @@ fn run_app<B: ratatui::backend::Backend>(
                             }
                             _ => {}
                         }
+                        continue;
+                    }
+
+                    let active_nine_prefix = pending_nine_prefix.take();
+
+                    if let Some(prefix) = active_nine_prefix {
+                        if is_fast_move_up_key(&key, true) {
+                            app.move_up_by(FAST_MOVE_AMOUNT);
+                            continue;
+                        }
+                        if is_fast_move_down_key(&key, true) {
+                            app.move_down_by(FAST_MOVE_AMOUNT);
+                            continue;
+                        }
+
+                        if prefix.apply_wait_on_timeout {
+                            app.set_wait_time_ms(9);
+                        }
+                    }
+
+                    if is_fast_move_up_key(&key, false) {
+                        app.move_up_by(FAST_MOVE_AMOUNT);
+                        continue;
+                    }
+
+                    if is_fast_move_down_key(&key, false) {
+                        app.move_down_by(FAST_MOVE_AMOUNT);
                         continue;
                     }
 
@@ -167,6 +230,13 @@ fn run_app<B: ratatui::backend::Backend>(
                         }
                         KeyCode::Char('l') | KeyCode::Char('L') => {
                             app.toggle_loop();
+                        }
+                        KeyCode::Char('9') => {
+                            pending_nine_prefix = Some(PendingNinePrefix {
+                                started_at: std::time::Instant::now(),
+                                apply_wait_on_timeout: app.time_mode
+                                    == crate::time_display::TimeDisplayMode::Cumulative,
+                            });
                         }
                         KeyCode::Char(c @ '0'..='9') => {
                             // Map '0'-'9' to 0-9ms

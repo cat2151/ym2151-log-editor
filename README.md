@@ -72,7 +72,7 @@ cargo run -- path/to/your/file.json
 | ↑/↓ or k/j | Move between events |
 | PageUp / PageDown | Jump 10 lines |
 | Ctrl+U / Ctrl+D | Jump 10 lines |
-| 9k / 9j | Jump 10 lines (vim style) |
+| 9k / 9j | Jump 9 lines (vim numeric prefix) |
 | / or ENTER | Insert a new event before the current line |
 | DELETE | Delete the current event |
 | 0-9 | Set wait time (0-9 milliseconds, cumulative mode only) |

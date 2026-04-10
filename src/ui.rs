@@ -193,7 +193,7 @@ fn help_lines() -> [&'static str; 16] {
         "↑/↓ or k/j: Navigate",
         "PgUp / PgDn: Jump 10 lines",
         "Ctrl+U / Ctrl+D: Jump 10 lines",
-        "9k / 9j: Jump 10 lines (vim style)",
+        "9k / 9j: Jump 9 lines (vim numeric prefix)",
         "0-9: Set Wait(ms) in cumulative mode",
         "/ or ENTER: Insert event before cursor",
         "DEL: Delete selected event",

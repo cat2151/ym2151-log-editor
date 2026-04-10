@@ -36,7 +36,7 @@ fn help_overlay_renders_clipboard_hint() {
     assert!(rendered.contains("↑/↓ or k/j: Navigate"));
     assert!(rendered.contains("PgUp / PgDn: Jump 10 lines"));
     assert!(rendered.contains("Ctrl+U / Ctrl+D: Jump 10 lines"));
-    assert!(rendered.contains("9k / 9j: Jump 10 lines (vim style)"));
+    assert!(rendered.contains("9k / 9j: Jump 9 lines (vim numeric prefix)"));
 }
 
 #[test]

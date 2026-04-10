@@ -28,38 +28,38 @@ fn unrelated_keys_do_not_trigger_navigation() {
 
 #[test]
 fn page_keys_trigger_ten_line_navigation() {
-    assert!(crate::is_fast_move_up_key(
-        &KeyEvent::new(KeyCode::PageUp, KeyModifiers::NONE),
-        false
-    ));
-    assert!(crate::is_fast_move_down_key(
-        &KeyEvent::new(KeyCode::PageDown, KeyModifiers::NONE),
-        false
-    ));
+    assert!(crate::is_fast_move_up_key(&KeyEvent::new(
+        KeyCode::PageUp,
+        KeyModifiers::NONE
+    )));
+    assert!(crate::is_fast_move_down_key(&KeyEvent::new(
+        KeyCode::PageDown,
+        KeyModifiers::NONE
+    )));
 }
 
 #[test]
 fn ctrl_u_and_ctrl_d_trigger_ten_line_navigation() {
-    assert!(crate::is_fast_move_up_key(
-        &KeyEvent::new(KeyCode::Char('u'), KeyModifiers::CONTROL),
-        false
-    ));
-    assert!(crate::is_fast_move_down_key(
-        &KeyEvent::new(KeyCode::Char('d'), KeyModifiers::CONTROL),
-        false
-    ));
+    assert!(crate::is_fast_move_up_key(&KeyEvent::new(
+        KeyCode::Char('u'),
+        KeyModifiers::CONTROL
+    )));
+    assert!(crate::is_fast_move_down_key(&KeyEvent::new(
+        KeyCode::Char('d'),
+        KeyModifiers::CONTROL
+    )));
 }
 
 #[test]
-fn nine_prefix_enables_vim_style_ten_line_navigation() {
-    assert!(crate::is_fast_move_up_key(
-        &KeyEvent::new(KeyCode::Char('k'), KeyModifiers::NONE),
-        true
-    ));
-    assert!(crate::is_fast_move_down_key(
-        &KeyEvent::new(KeyCode::Char('j'), KeyModifiers::NONE),
-        true
-    ));
+fn nine_prefix_is_not_treated_as_ten_line_shortcut() {
+    assert!(!crate::is_fast_move_up_key(&KeyEvent::new(
+        KeyCode::Char('k'),
+        KeyModifiers::NONE
+    )));
+    assert!(!crate::is_fast_move_down_key(&KeyEvent::new(
+        KeyCode::Char('j'),
+        KeyModifiers::NONE
+    )));
 }
 
 #[test]
@@ -68,6 +68,12 @@ fn nine_prefix_only_consumes_j_and_k() {
     assert!(crate::is_nine_prefix_move_down_key(&KeyCode::Char('j')));
     assert!(!crate::is_nine_prefix_move_up_key(&KeyCode::PageUp));
     assert!(!crate::is_nine_prefix_move_down_key(&KeyCode::PageDown));
+}
+
+#[test]
+fn nine_prefix_uses_vim_numeric_count() {
+    assert_eq!(crate::NINE_PREFIX_MOVE_AMOUNT, 9);
+    assert_eq!(crate::FAST_MOVE_AMOUNT, 10);
 }
 
 #[test]

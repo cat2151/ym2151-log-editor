@@ -24,6 +24,7 @@ use ratatui::{backend::CrosstermBackend, Terminal};
 use std::{io, time::Duration};
 
 const FAST_MOVE_AMOUNT: usize = 10;
+const NINE_PREFIX_MOVE_AMOUNT: usize = 9;
 const NINE_PREFIX_TIMEOUT: Duration = Duration::from_millis(250);
 
 #[derive(Clone, Copy, Debug)]
@@ -43,18 +44,16 @@ fn is_move_down_key(code: &KeyCode) -> bool {
     )
 }
 
-fn is_fast_move_up_key(key: &KeyEvent, pending_nine_prefix: bool) -> bool {
+fn is_fast_move_up_key(key: &KeyEvent) -> bool {
     matches!(key.code, KeyCode::PageUp)
         || (key.modifiers.contains(KeyModifiers::CONTROL)
             && matches!(key.code, KeyCode::Char('u') | KeyCode::Char('U')))
-        || (pending_nine_prefix && matches!(key.code, KeyCode::Char('k') | KeyCode::Char('K')))
 }
 
-fn is_fast_move_down_key(key: &KeyEvent, pending_nine_prefix: bool) -> bool {
+fn is_fast_move_down_key(key: &KeyEvent) -> bool {
     matches!(key.code, KeyCode::PageDown)
         || (key.modifiers.contains(KeyModifiers::CONTROL)
             && matches!(key.code, KeyCode::Char('d') | KeyCode::Char('D')))
-        || (pending_nine_prefix && matches!(key.code, KeyCode::Char('j') | KeyCode::Char('J')))
 }
 
 fn is_nine_prefix_move_up_key(code: &KeyCode) -> bool {
@@ -208,11 +207,11 @@ fn run_app<B: ratatui::backend::Backend>(
 
                     if let Some(prefix) = active_nine_prefix {
                         if is_nine_prefix_move_up_key(&key.code) {
-                            app.move_up_by(FAST_MOVE_AMOUNT);
+                            app.move_up_by(NINE_PREFIX_MOVE_AMOUNT);
                             continue;
                         }
                         if is_nine_prefix_move_down_key(&key.code) {
-                            app.move_down_by(FAST_MOVE_AMOUNT);
+                            app.move_down_by(NINE_PREFIX_MOVE_AMOUNT);
                             continue;
                         }
 
@@ -221,12 +220,12 @@ fn run_app<B: ratatui::backend::Backend>(
                         }
                     }
 
-                    if is_fast_move_up_key(&key, false) {
+                    if is_fast_move_up_key(&key) {
                         app.move_up_by(FAST_MOVE_AMOUNT);
                         continue;
                     }
 
-                    if is_fast_move_down_key(&key, false) {
+                    if is_fast_move_down_key(&key) {
                         app.move_down_by(FAST_MOVE_AMOUNT);
                         continue;
                     }

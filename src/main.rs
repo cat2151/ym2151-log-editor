@@ -57,14 +57,28 @@ fn is_fast_move_down_key(key: &KeyEvent, pending_nine_prefix: bool) -> bool {
         || (pending_nine_prefix && matches!(key.code, KeyCode::Char('j') | KeyCode::Char('J')))
 }
 
+fn is_nine_prefix_move_up_key(code: &KeyCode) -> bool {
+    matches!(code, KeyCode::Char('k') | KeyCode::Char('K'))
+}
+
+fn is_nine_prefix_move_down_key(code: &KeyCode) -> bool {
+    matches!(code, KeyCode::Char('j') | KeyCode::Char('J'))
+}
+
 fn flush_pending_nine_prefix_if_timed_out(
     app: &mut App,
     pending_nine_prefix: &mut Option<PendingNinePrefix>,
 ) {
-    if pending_nine_prefix.as_ref().is_some_and(|prefix| {
-        prefix.apply_wait_on_timeout && prefix.started_at.elapsed() >= NINE_PREFIX_TIMEOUT
-    }) {
-        app.set_wait_time_ms(9);
+    if pending_nine_prefix
+        .as_ref()
+        .is_some_and(|prefix| prefix.started_at.elapsed() >= NINE_PREFIX_TIMEOUT)
+    {
+        if pending_nine_prefix
+            .as_ref()
+            .is_some_and(|prefix| prefix.apply_wait_on_timeout)
+        {
+            app.set_wait_time_ms(9);
+        }
         *pending_nine_prefix = None;
     }
 }
@@ -193,11 +207,11 @@ fn run_app<B: ratatui::backend::Backend>(
                     let active_nine_prefix = pending_nine_prefix.take();
 
                     if let Some(prefix) = active_nine_prefix {
-                        if is_fast_move_up_key(&key, true) {
+                        if is_nine_prefix_move_up_key(&key.code) {
                             app.move_up_by(FAST_MOVE_AMOUNT);
                             continue;
                         }
-                        if is_fast_move_down_key(&key, true) {
+                        if is_nine_prefix_move_down_key(&key.code) {
                             app.move_down_by(FAST_MOVE_AMOUNT);
                             continue;
                         }

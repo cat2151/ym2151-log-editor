@@ -69,7 +69,7 @@ cargo run -- path/to/your/file.json
 
 | Key | Action |
 |-----|-----|
-| ↑/↓ or j/k | Move between events |
+| ↑/↓ or k/j | Move between events |
 | PageUp / PageDown | Jump 10 lines |
 | Ctrl+U / Ctrl+D | Jump 10 lines |
 | 9k / 9j | Jump 10 lines (vim style) |

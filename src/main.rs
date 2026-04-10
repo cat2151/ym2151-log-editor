@@ -24,13 +24,13 @@ use ratatui::{backend::CrosstermBackend, Terminal};
 use std::{io, time::Duration};
 
 const FAST_MOVE_AMOUNT: usize = 10;
-const NINE_PREFIX_MOVE_AMOUNT: usize = 9;
-const NINE_PREFIX_TIMEOUT: Duration = Duration::from_millis(250);
+const COUNT_PREFIX_TIMEOUT: Duration = Duration::from_millis(250);
 
 #[derive(Clone, Copy, Debug)]
-struct PendingNinePrefix {
+struct PendingCountPrefix {
     started_at: std::time::Instant,
-    apply_wait_on_timeout: bool,
+    count: usize,
+    wait_fallback_ms: Option<u32>,
 }
 
 fn is_move_up_key(code: &KeyCode) -> bool {
@@ -56,29 +56,58 @@ fn is_fast_move_down_key(key: &KeyEvent) -> bool {
             && matches!(key.code, KeyCode::Char('d') | KeyCode::Char('D')))
 }
 
-fn is_nine_prefix_move_up_key(code: &KeyCode) -> bool {
+fn is_count_prefix_move_up_key(code: &KeyCode) -> bool {
     matches!(code, KeyCode::Char('k') | KeyCode::Char('K'))
 }
 
-fn is_nine_prefix_move_down_key(code: &KeyCode) -> bool {
+fn is_count_prefix_move_down_key(code: &KeyCode) -> bool {
     matches!(code, KeyCode::Char('j') | KeyCode::Char('J'))
 }
 
-fn flush_pending_nine_prefix_if_timed_out(
+fn keycode_digit(code: &KeyCode) -> Option<u32> {
+    match code {
+        KeyCode::Char(c @ '0'..='9') => c.to_digit(10),
+        _ => None,
+    }
+}
+
+fn extend_count_prefix(current: usize, digit: u32) -> usize {
+    current
+        .saturating_mul(10)
+        .saturating_add(usize::try_from(digit).unwrap())
+}
+
+fn start_count_prefix(digit: u32, apply_wait_fallback: bool) -> PendingCountPrefix {
+    PendingCountPrefix {
+        started_at: std::time::Instant::now(),
+        count: usize::try_from(digit).unwrap(),
+        wait_fallback_ms: apply_wait_fallback.then_some(digit),
+    }
+}
+
+fn append_count_prefix_digit(prefix: &mut PendingCountPrefix, digit: u32) {
+    prefix.started_at = std::time::Instant::now();
+    prefix.count = extend_count_prefix(prefix.count, digit);
+    if prefix.wait_fallback_ms.is_some() {
+        prefix.wait_fallback_ms = Some(digit);
+    }
+}
+
+fn flush_pending_count_prefix_if_timed_out(
     app: &mut App,
-    pending_nine_prefix: &mut Option<PendingNinePrefix>,
+    pending_count_prefix: &mut Option<PendingCountPrefix>,
 ) {
-    if pending_nine_prefix
+    if pending_count_prefix
         .as_ref()
-        .is_some_and(|prefix| prefix.started_at.elapsed() >= NINE_PREFIX_TIMEOUT)
+        .is_some_and(|prefix| prefix.started_at.elapsed() >= COUNT_PREFIX_TIMEOUT)
     {
-        if pending_nine_prefix
+        if let Some(wait) = pending_count_prefix
             .as_ref()
-            .is_some_and(|prefix| prefix.apply_wait_on_timeout)
+            .and_then(|prefix| prefix.wait_fallback_ms)
         {
-            app.set_wait_time_ms(9);
+            app.set_wait_time_ms(wait);
         }
-        *pending_nine_prefix = None;
+        *pending_count_prefix = None;
     }
 }
 
@@ -176,10 +205,10 @@ fn run_app<B: ratatui::backend::Backend>(
     terminal: &mut Terminal<B>,
     app: &mut App,
 ) -> io::Result<()> {
-    let mut pending_nine_prefix: Option<PendingNinePrefix> = None;
+    let mut pending_count_prefix: Option<PendingCountPrefix> = None;
 
     loop {
-        flush_pending_nine_prefix_if_timed_out(app, &mut pending_nine_prefix);
+        flush_pending_count_prefix_if_timed_out(app, &mut pending_count_prefix);
 
         terminal.draw(|f| ui::render(f, app))?;
 
@@ -189,7 +218,7 @@ fn run_app<B: ratatui::backend::Backend>(
                 // This prevents double-triggering on Windows
                 if key.kind == KeyEventKind::Press {
                     if app.help_visible() {
-                        pending_nine_prefix = None;
+                        pending_count_prefix = None;
                         match key.code {
                             KeyCode::Char('?') | KeyCode::Esc => {
                                 app.hide_help();
@@ -202,21 +231,27 @@ fn run_app<B: ratatui::backend::Backend>(
                         continue;
                     }
 
-                    flush_pending_nine_prefix_if_timed_out(app, &mut pending_nine_prefix);
-                    let active_nine_prefix = pending_nine_prefix.take();
+                    flush_pending_count_prefix_if_timed_out(app, &mut pending_count_prefix);
+                    let active_count_prefix = pending_count_prefix.take();
 
-                    if let Some(prefix) = active_nine_prefix {
-                        if is_nine_prefix_move_up_key(&key.code) {
-                            app.move_up_by(NINE_PREFIX_MOVE_AMOUNT);
+                    if let Some(mut prefix) = active_count_prefix {
+                        if is_count_prefix_move_up_key(&key.code) {
+                            app.move_up_by(prefix.count);
                             continue;
                         }
-                        if is_nine_prefix_move_down_key(&key.code) {
-                            app.move_down_by(NINE_PREFIX_MOVE_AMOUNT);
+                        if is_count_prefix_move_down_key(&key.code) {
+                            app.move_down_by(prefix.count);
                             continue;
                         }
 
-                        if prefix.apply_wait_on_timeout {
-                            app.set_wait_time_ms(9);
+                        if let Some(digit) = keycode_digit(&key.code) {
+                            append_count_prefix_digit(&mut prefix, digit);
+                            pending_count_prefix = Some(prefix);
+                            continue;
+                        }
+
+                        if let Some(wait) = prefix.wait_fallback_ms {
+                            app.set_wait_time_ms(wait);
                         }
                     }
 
@@ -252,18 +287,14 @@ fn run_app<B: ratatui::backend::Backend>(
                         KeyCode::Char('l') | KeyCode::Char('L') => {
                             app.toggle_loop();
                         }
-                        KeyCode::Char('9') => {
-                            // Delay bare '9' briefly so it can act as the prefix for 9j/9k.
-                            pending_nine_prefix = Some(PendingNinePrefix {
-                                started_at: std::time::Instant::now(),
-                                apply_wait_on_timeout: app.time_mode
-                                    == crate::time_display::TimeDisplayMode::Cumulative,
-                            });
+                        KeyCode::Char(c @ '1'..='9') => {
+                            pending_count_prefix = Some(start_count_prefix(
+                                c.to_digit(10).unwrap(),
+                                app.time_mode == crate::time_display::TimeDisplayMode::Cumulative,
+                            ));
                         }
-                        KeyCode::Char(c @ '0'..='8') => {
-                            // Map '0'-'8' to 0-8ms immediately.
-                            let milliseconds = c.to_digit(10).unwrap();
-                            app.set_wait_time_ms(milliseconds);
+                        KeyCode::Char('0') => {
+                            app.set_wait_time_ms(0);
                         }
                         code if is_move_up_key(&code) => {
                             app.move_up();

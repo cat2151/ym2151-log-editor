@@ -1,4 +1,4 @@
-use crate::{app::App, models::Ym2151Event, PendingNinePrefix, NINE_PREFIX_TIMEOUT};
+use crate::{app::App, models::Ym2151Event, PendingCountPrefix, COUNT_PREFIX_TIMEOUT};
 use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
 use std::time::{Duration, Instant};
 
@@ -51,7 +51,7 @@ fn ctrl_u_and_ctrl_d_trigger_ten_line_navigation() {
 }
 
 #[test]
-fn nine_prefix_is_not_treated_as_ten_line_shortcut() {
+fn count_prefix_is_not_treated_as_ten_line_shortcut() {
     assert!(!crate::is_fast_move_up_key(&KeyEvent::new(
         KeyCode::Char('k'),
         KeyModifiers::NONE
@@ -63,21 +63,34 @@ fn nine_prefix_is_not_treated_as_ten_line_shortcut() {
 }
 
 #[test]
-fn nine_prefix_only_consumes_j_and_k() {
-    assert!(crate::is_nine_prefix_move_up_key(&KeyCode::Char('k')));
-    assert!(crate::is_nine_prefix_move_down_key(&KeyCode::Char('j')));
-    assert!(!crate::is_nine_prefix_move_up_key(&KeyCode::PageUp));
-    assert!(!crate::is_nine_prefix_move_down_key(&KeyCode::PageDown));
+fn count_prefix_only_consumes_j_and_k() {
+    assert!(crate::is_count_prefix_move_up_key(&KeyCode::Char('k')));
+    assert!(crate::is_count_prefix_move_down_key(&KeyCode::Char('j')));
+    assert!(!crate::is_count_prefix_move_up_key(&KeyCode::PageUp));
+    assert!(!crate::is_count_prefix_move_down_key(&KeyCode::PageDown));
 }
 
 #[test]
-fn nine_prefix_uses_vim_numeric_count() {
-    assert_eq!(crate::NINE_PREFIX_MOVE_AMOUNT, 9);
+fn count_prefix_accumulates_multiple_digits() {
+    let mut prefix = crate::start_count_prefix(1, true);
+    crate::append_count_prefix_digit(&mut prefix, 1);
+
+    assert_eq!(prefix.count, 11);
     assert_eq!(crate::FAST_MOVE_AMOUNT, 10);
+    assert_eq!(prefix.wait_fallback_ms, Some(1));
 }
 
 #[test]
-fn timed_out_nine_prefix_clears_without_applying_wait_in_timestamp_mode() {
+fn count_prefix_allows_zero_after_first_digit() {
+    let mut prefix = crate::start_count_prefix(1, true);
+    crate::append_count_prefix_digit(&mut prefix, 0);
+
+    assert_eq!(prefix.count, 10);
+    assert_eq!(prefix.wait_fallback_ms, Some(0));
+}
+
+#[test]
+fn timed_out_count_prefix_clears_without_applying_wait_in_timestamp_mode() {
     let mut app = App::new();
     app.toggle_time_mode();
     app.log.events = vec![
@@ -94,19 +107,20 @@ fn timed_out_nine_prefix_clears_without_applying_wait_in_timestamp_mode() {
     ];
     app.navigation.selected_index = 1;
 
-    let mut pending = Some(PendingNinePrefix {
-        started_at: Instant::now() - NINE_PREFIX_TIMEOUT - Duration::from_millis(1),
-        apply_wait_on_timeout: false,
+    let mut pending = Some(PendingCountPrefix {
+        started_at: Instant::now() - COUNT_PREFIX_TIMEOUT - Duration::from_millis(1),
+        count: 11,
+        wait_fallback_ms: None,
     });
 
-    crate::flush_pending_nine_prefix_if_timed_out(&mut app, &mut pending);
+    crate::flush_pending_count_prefix_if_timed_out(&mut app, &mut pending);
 
     assert!(pending.is_none());
     assert!((app.log.events[1].time - 0.02).abs() < f64::EPSILON);
 }
 
 #[test]
-fn timed_out_nine_prefix_applies_wait_in_cumulative_mode() {
+fn timed_out_count_prefix_applies_last_digit_wait_in_cumulative_mode() {
     let mut app = App::new();
     app.log.events = vec![
         Ym2151Event {
@@ -122,13 +136,21 @@ fn timed_out_nine_prefix_applies_wait_in_cumulative_mode() {
     ];
     app.navigation.selected_index = 1;
 
-    let mut pending = Some(PendingNinePrefix {
-        started_at: Instant::now() - NINE_PREFIX_TIMEOUT - Duration::from_millis(1),
-        apply_wait_on_timeout: true,
+    let mut pending = Some(PendingCountPrefix {
+        started_at: Instant::now() - COUNT_PREFIX_TIMEOUT - Duration::from_millis(1),
+        count: 12,
+        wait_fallback_ms: Some(2),
     });
 
-    crate::flush_pending_nine_prefix_if_timed_out(&mut app, &mut pending);
+    crate::flush_pending_count_prefix_if_timed_out(&mut app, &mut pending);
 
     assert!(pending.is_none());
-    assert!((app.log.events[1].time - 0.009).abs() < f64::EPSILON);
+    assert!((app.log.events[1].time - 0.002).abs() < f64::EPSILON);
+}
+
+#[test]
+fn digit_key_parsing_extracts_numeric_prefix_digits() {
+    assert_eq!(crate::keycode_digit(&KeyCode::Char('0')), Some(0));
+    assert_eq!(crate::keycode_digit(&KeyCode::Char('9')), Some(9));
+    assert_eq!(crate::keycode_digit(&KeyCode::Char('j')), None);
 }

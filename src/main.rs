@@ -13,12 +13,25 @@ mod tests;
 
 use app::App;
 use crossterm::{
-    event::{self, DisableMouseCapture, EnableMouseCapture, Event, KeyCode, KeyEventKind},
+    event::{
+        self, DisableMouseCapture, EnableMouseCapture, Event, KeyCode, KeyEvent, KeyEventKind,
+        KeyModifiers,
+    },
     execute,
     terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
 };
 use ratatui::{backend::CrosstermBackend, Terminal};
 use std::{io, time::Duration};
+
+const FAST_MOVE_AMOUNT: usize = 10;
+const COUNT_PREFIX_TIMEOUT: Duration = Duration::from_millis(250);
+
+#[derive(Clone, Copy, Debug)]
+struct PendingCountPrefix {
+    started_at: std::time::Instant,
+    count: usize,
+    wait_fallback_ms: Option<u32>,
+}
 
 fn is_move_up_key(code: &KeyCode) -> bool {
     matches!(*code, KeyCode::Up | KeyCode::Char('k') | KeyCode::Char('K'))
@@ -29,6 +42,73 @@ fn is_move_down_key(code: &KeyCode) -> bool {
         *code,
         KeyCode::Down | KeyCode::Char('j') | KeyCode::Char('J')
     )
+}
+
+fn is_fast_move_up_key(key: &KeyEvent) -> bool {
+    matches!(key.code, KeyCode::PageUp)
+        || (key.modifiers.contains(KeyModifiers::CONTROL)
+            && matches!(key.code, KeyCode::Char('u') | KeyCode::Char('U')))
+}
+
+fn is_fast_move_down_key(key: &KeyEvent) -> bool {
+    matches!(key.code, KeyCode::PageDown)
+        || (key.modifiers.contains(KeyModifiers::CONTROL)
+            && matches!(key.code, KeyCode::Char('d') | KeyCode::Char('D')))
+}
+
+fn is_count_prefix_move_up_key(code: &KeyCode) -> bool {
+    matches!(code, KeyCode::Char('k') | KeyCode::Char('K'))
+}
+
+fn is_count_prefix_move_down_key(code: &KeyCode) -> bool {
+    matches!(code, KeyCode::Char('j') | KeyCode::Char('J'))
+}
+
+fn keycode_digit(code: &KeyCode) -> Option<u32> {
+    match code {
+        KeyCode::Char(c @ '0'..='9') => c.to_digit(10),
+        _ => None,
+    }
+}
+
+fn extend_count_prefix(current: usize, digit: u32) -> usize {
+    current
+        .saturating_mul(10)
+        .saturating_add(usize::try_from(digit).unwrap())
+}
+
+fn start_count_prefix(digit: u32, apply_wait_fallback: bool) -> PendingCountPrefix {
+    PendingCountPrefix {
+        started_at: std::time::Instant::now(),
+        count: usize::try_from(digit).unwrap(),
+        wait_fallback_ms: apply_wait_fallback.then_some(digit),
+    }
+}
+
+fn append_count_prefix_digit(prefix: &mut PendingCountPrefix, digit: u32) {
+    prefix.started_at = std::time::Instant::now();
+    prefix.count = extend_count_prefix(prefix.count, digit);
+    if prefix.wait_fallback_ms.is_some() {
+        prefix.wait_fallback_ms = Some(digit);
+    }
+}
+
+fn flush_pending_count_prefix_if_timed_out(
+    app: &mut App,
+    pending_count_prefix: &mut Option<PendingCountPrefix>,
+) {
+    if pending_count_prefix
+        .as_ref()
+        .is_some_and(|prefix| prefix.started_at.elapsed() >= COUNT_PREFIX_TIMEOUT)
+    {
+        if let Some(wait) = pending_count_prefix
+            .as_ref()
+            .and_then(|prefix| prefix.wait_fallback_ms)
+        {
+            app.set_wait_time_ms(wait);
+        }
+        *pending_count_prefix = None;
+    }
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -125,7 +205,11 @@ fn run_app<B: ratatui::backend::Backend>(
     terminal: &mut Terminal<B>,
     app: &mut App,
 ) -> io::Result<()> {
+    let mut pending_count_prefix: Option<PendingCountPrefix> = None;
+
     loop {
+        flush_pending_count_prefix_if_timed_out(app, &mut pending_count_prefix);
+
         terminal.draw(|f| ui::render(f, app))?;
 
         if event::poll(Duration::from_millis(50))? {
@@ -134,6 +218,7 @@ fn run_app<B: ratatui::backend::Backend>(
                 // This prevents double-triggering on Windows
                 if key.kind == KeyEventKind::Press {
                     if app.help_visible() {
+                        pending_count_prefix = None;
                         match key.code {
                             KeyCode::Char('?') | KeyCode::Esc => {
                                 app.hide_help();
@@ -143,6 +228,40 @@ fn run_app<B: ratatui::backend::Backend>(
                             }
                             _ => {}
                         }
+                        continue;
+                    }
+
+                    flush_pending_count_prefix_if_timed_out(app, &mut pending_count_prefix);
+                    let active_count_prefix = pending_count_prefix.take();
+
+                    if let Some(mut prefix) = active_count_prefix {
+                        if is_count_prefix_move_up_key(&key.code) {
+                            app.move_up_by(prefix.count);
+                            continue;
+                        }
+                        if is_count_prefix_move_down_key(&key.code) {
+                            app.move_down_by(prefix.count);
+                            continue;
+                        }
+
+                        if let Some(digit) = keycode_digit(&key.code) {
+                            append_count_prefix_digit(&mut prefix, digit);
+                            pending_count_prefix = Some(prefix);
+                            continue;
+                        }
+
+                        if let Some(wait) = prefix.wait_fallback_ms {
+                            app.set_wait_time_ms(wait);
+                        }
+                    }
+
+                    if is_fast_move_up_key(&key) {
+                        app.move_up_by(FAST_MOVE_AMOUNT);
+                        continue;
+                    }
+
+                    if is_fast_move_down_key(&key) {
+                        app.move_down_by(FAST_MOVE_AMOUNT);
                         continue;
                     }
 
@@ -168,10 +287,14 @@ fn run_app<B: ratatui::backend::Backend>(
                         KeyCode::Char('l') | KeyCode::Char('L') => {
                             app.toggle_loop();
                         }
-                        KeyCode::Char(c @ '0'..='9') => {
-                            // Map '0'-'9' to 0-9ms
-                            let milliseconds = c.to_digit(10).unwrap();
-                            app.set_wait_time_ms(milliseconds);
+                        KeyCode::Char(c @ '1'..='9') => {
+                            pending_count_prefix = Some(start_count_prefix(
+                                c.to_digit(10).unwrap(),
+                                app.time_mode == crate::time_display::TimeDisplayMode::Cumulative,
+                            ));
+                        }
+                        KeyCode::Char('0') => {
+                            app.set_wait_time_ms(0);
                         }
                         code if is_move_up_key(&code) => {
                             app.move_up();

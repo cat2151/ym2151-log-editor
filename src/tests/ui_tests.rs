@@ -34,6 +34,9 @@ fn help_overlay_renders_clipboard_hint() {
     assert!(rendered.contains("Help (? / Esc to close)"));
     assert!(rendered.contains("Esc / q: Quit editor"));
     assert!(rendered.contains("↑/↓ or k/j: Navigate"));
+    assert!(rendered.contains("PgUp / PgDn: Jump 10 lines"));
+    assert!(rendered.contains("Ctrl+U / Ctrl+D: Jump 10 lines"));
+    assert!(rendered.contains("[count]k / [count]j: Move by count (vim style)"));
 }
 
 #[test]

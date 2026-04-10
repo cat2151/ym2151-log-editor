@@ -78,9 +78,19 @@ impl App {
         self.navigation.move_up();
     }
 
+    /// Move selection up by a specific amount
+    pub fn move_up_by(&mut self, amount: usize) {
+        self.navigation.move_up_by(amount);
+    }
+
     /// Move selection down
     pub fn move_down(&mut self) {
         self.navigation.move_down(self.log.events.len());
+    }
+
+    /// Move selection down by a specific amount
+    pub fn move_down_by(&mut self, amount: usize) {
+        self.navigation.move_down_by(amount, self.log.events.len());
     }
 
     /// Update scroll offset to keep selected item visible

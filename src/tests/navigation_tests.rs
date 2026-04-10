@@ -46,3 +46,39 @@ fn test_move_down_empty_log() {
     app.move_down();
     assert_eq!(app.navigation.selected_index, 0);
 }
+
+#[test]
+fn test_move_down_by_ten_stops_at_empty_line() {
+    let mut app = App::new();
+    app.log.events = (0..5)
+        .map(|i| Ym2151Event {
+            time: i as f64 * 0.01,
+            addr: "20".to_string(),
+            data: "4F".to_string(),
+        })
+        .collect();
+
+    app.navigation.selected_index = 0;
+
+    app.move_down_by(10);
+
+    assert_eq!(app.navigation.selected_index, app.log.events.len());
+}
+
+#[test]
+fn test_move_up_by_ten_stops_at_first_line() {
+    let mut app = App::new();
+    app.log.events = (0..20)
+        .map(|i| Ym2151Event {
+            time: i as f64 * 0.01,
+            addr: "20".to_string(),
+            data: "4F".to_string(),
+        })
+        .collect();
+
+    app.navigation.selected_index = 3;
+
+    app.move_up_by(10);
+
+    assert_eq!(app.navigation.selected_index, 0);
+}

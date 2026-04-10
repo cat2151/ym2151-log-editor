@@ -186,11 +186,14 @@ fn render_help_overlay(f: &mut Frame) {
     f.render_widget(Paragraph::new(text).block(block), popup);
 }
 
-fn help_lines() -> [&'static str; 13] {
+fn help_lines() -> [&'static str; 16] {
     [
         "Help (? / Esc to close)",
         "",
         "↑/↓ or k/j: Navigate",
+        "PgUp / PgDn: Jump 10 lines",
+        "Ctrl+U / Ctrl+D: Jump 10 lines",
+        "[count]k / [count]j: Move by count (vim style)",
         "0-9: Set Wait(ms) in cumulative mode",
         "/ or ENTER: Insert event before cursor",
         "DEL: Delete selected event",

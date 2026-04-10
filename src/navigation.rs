@@ -23,8 +23,13 @@ impl NavigationState {
 
     /// Move selection up
     pub fn move_up(&mut self) {
+        self.move_up_by(1);
+    }
+
+    /// Move selection up by a specific amount
+    pub fn move_up_by(&mut self, amount: usize) {
         if self.selected_index > 0 {
-            self.selected_index -= 1;
+            self.selected_index = self.selected_index.saturating_sub(amount);
             if self.selected_index < self.scroll_offset {
                 self.scroll_offset = self.selected_index;
             }
@@ -34,8 +39,14 @@ impl NavigationState {
     /// Move selection down
     /// Allow cursor to move to one position beyond the last event (for future insertion)
     pub fn move_down(&mut self, max_events: usize) {
+        self.move_down_by(1, max_events);
+    }
+
+    /// Move selection down by a specific amount
+    /// Allow cursor to move to one position beyond the last event (for future insertion)
+    pub fn move_down_by(&mut self, amount: usize, max_events: usize) {
         if self.selected_index < max_events {
-            self.selected_index += 1;
+            self.selected_index = self.selected_index.saturating_add(amount).min(max_events);
         }
     }
 

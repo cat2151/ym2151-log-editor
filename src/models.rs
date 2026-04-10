@@ -72,6 +72,11 @@ impl Ym2151Event {
     }
 
     fn parse_hex_byte(&self, value: &str) -> Option<u8> {
+        let value = value.trim();
+        let value = value
+            .strip_prefix("0x")
+            .or_else(|| value.strip_prefix("0X"))
+            .unwrap_or(value);
         u8::from_str_radix(value, 16).ok()
     }
 

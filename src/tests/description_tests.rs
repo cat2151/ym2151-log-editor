@@ -43,3 +43,14 @@ fn description_formats_operator_register_range() {
 
     assert_eq!(event.description(), "ch0 c1 detune1 / multiple");
 }
+
+#[test]
+fn description_formats_prefixed_hex_values() {
+    let event = Ym2151Event {
+        time: 0.0,
+        addr: "0xA8".to_string(),
+        data: "0x05".to_string(),
+    };
+
+    assert_eq!(event.description(), "ch0 c1 am enable / decay1 rate");
+}

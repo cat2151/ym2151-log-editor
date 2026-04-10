@@ -10,7 +10,7 @@ const VALID_JSON: &str = r#"{
 const VALID_JSON_WITH_PREFIXED_HEX: &str = r#"{
     "events": [
         { "time": 0.0, "addr": "0x20", "data": "0xD7" },
-        { "time": 0.0, "addr": "0xA8", "data": "0x05" },
+        { "time": 0.0, "addr": "0XA8", "data": "0X05" },
         { "time": 0.25, "addr": "0x08", "data": "0x00" }
     ]
 }"#;

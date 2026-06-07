@@ -42,8 +42,9 @@ impl App {
 
     /// Load a JSON file
     pub fn load_file(&mut self, path: &str) -> Result<(), Box<dyn std::error::Error>> {
+        let log = crate::file_io::load_file(path)?;
         self.disable_loop();
-        self.log = crate::file_io::load_file(path)?;
+        self.log = log;
         self.file_path = Some(path.to_string());
         self.navigation.reset();
         Ok(())
@@ -51,8 +52,9 @@ impl App {
 
     /// Load from a JSON string (e.g. clipboard content)
     pub fn load_from_str(&mut self, content: &str) -> Result<(), Box<dyn std::error::Error>> {
+        let log = serde_json::from_str(content)?;
         self.disable_loop();
-        self.log = serde_json::from_str(content)?;
+        self.log = log;
         self.file_path = None;
         self.navigation.reset();
         Ok(())

@@ -65,6 +65,28 @@ fn test_load_from_str_invalid_json() {
 }
 
 #[test]
+fn test_load_from_str_invalid_json_preserves_current_state() {
+    let mut app = App::new();
+    app.log.events = vec![crate::models::Ym2151Event {
+        time: 0.25,
+        addr: "20".to_string(),
+        data: "4F".to_string(),
+    }];
+    app.file_path = Some("current.json".to_string());
+    app.navigation.selected_index = 1;
+    app.navigation.scroll_offset = 1;
+
+    let result = app.load_from_str("not valid json {{{");
+
+    assert!(result.is_err());
+    assert_eq!(app.log.events.len(), 1);
+    assert_eq!(app.log.events[0].addr, "20");
+    assert_eq!(app.file_path.as_deref(), Some("current.json"));
+    assert_eq!(app.navigation.selected_index, 1);
+    assert_eq!(app.navigation.scroll_offset, 1);
+}
+
+#[test]
 fn test_load_from_str_wrong_schema() {
     let mut app = App::new();
     // Valid JSON but not a Ym2151Log schema

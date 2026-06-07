@@ -56,6 +56,12 @@ fn is_fast_move_down_key(key: &KeyEvent) -> bool {
             && matches!(key.code, KeyCode::Char('d') | KeyCode::Char('D')))
 }
 
+fn is_import_clipboard_key(key: &KeyEvent) -> bool {
+    matches!(key.code, KeyCode::Char('i') | KeyCode::Char('I'))
+        && !key.modifiers.contains(KeyModifiers::CONTROL)
+        && !key.modifiers.contains(KeyModifiers::ALT)
+}
+
 fn is_count_prefix_move_up_key(code: &KeyCode) -> bool {
     matches!(code, KeyCode::Char('k') | KeyCode::Char('K'))
 }
@@ -131,10 +137,7 @@ fn run_editor(
     // Read clipboard content BEFORE terminal initialization so that on error
     // we can simply return without needing to restore the terminal.
     let clipboard_content = if use_clipboard {
-        let text = arboard::Clipboard::new()
-            .and_then(|mut cb| cb.get_text())
-            .map_err(|e| format!("Failed to read clipboard: {}", e))?;
-        Some(text)
+        Some(read_clipboard_text()?)
     } else {
         None
     };
@@ -183,6 +186,18 @@ fn run_editor(
     }
 
     Ok(())
+}
+
+fn read_clipboard_text() -> Result<String, Box<dyn std::error::Error>> {
+    let text = arboard::Clipboard::new()
+        .and_then(|mut cb| cb.get_text())
+        .map_err(|e| format!("Failed to read clipboard: {}", e))?;
+    Ok(text)
+}
+
+fn import_clipboard_into_app(app: &mut App) -> Result<(), Box<dyn std::error::Error>> {
+    let content = read_clipboard_text()?;
+    app.load_from_str(&content)
 }
 
 /// Restore the terminal to its original state.
@@ -262,6 +277,13 @@ fn run_app<B: ratatui::backend::Backend>(
 
                     if is_fast_move_down_key(&key) {
                         app.move_down_by(FAST_MOVE_AMOUNT);
+                        continue;
+                    }
+
+                    if is_import_clipboard_key(&key) {
+                        if let Err(e) = import_clipboard_into_app(app) {
+                            eprintln!("Error importing from clipboard: {}", e);
+                        }
                         continue;
                     }
 

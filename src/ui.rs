@@ -168,7 +168,7 @@ fn render_help_overlay(f: &mut Frame) {
                     .fg(MONOKAI_ORANGE)
                     .bg(MONOKAI_BG)
                     .add_modifier(Modifier::BOLD)
-            } else if line.contains("--clipboard") {
+            } else if line.contains("clipboard") {
                 Style::default().fg(MONOKAI_CYAN).bg(MONOKAI_BG)
             } else {
                 Style::default().fg(MONOKAI_FG).bg(MONOKAI_BG)
@@ -186,7 +186,7 @@ fn render_help_overlay(f: &mut Frame) {
     f.render_widget(Paragraph::new(text).block(block), popup);
 }
 
-fn help_lines() -> [&'static str; 16] {
+fn help_lines() -> [&'static str; 17] {
     [
         "Help (? / Esc to close)",
         "",
@@ -199,6 +199,7 @@ fn help_lines() -> [&'static str; 16] {
         "DEL: Delete selected event",
         "P: Preview current JSON",
         "L: Toggle loop playback",
+        "I: Import JSON from clipboard",
         "T: Toggle time display mode",
         "S: Save file",
         "Esc / q: Quit editor",

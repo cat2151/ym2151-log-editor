@@ -53,6 +53,30 @@ fn ctrl_u_and_ctrl_d_trigger_ten_line_navigation() {
 }
 
 #[test]
+fn i_imports_json_from_clipboard_without_using_terminal_paste_keys() {
+    assert!(crate::is_import_clipboard_key(&KeyEvent::new(
+        KeyCode::Char('i'),
+        KeyModifiers::NONE
+    )));
+    assert!(crate::is_import_clipboard_key(&KeyEvent::new(
+        KeyCode::Char('I'),
+        KeyModifiers::SHIFT
+    )));
+    assert!(!crate::is_import_clipboard_key(&KeyEvent::new(
+        KeyCode::Char('v'),
+        KeyModifiers::CONTROL
+    )));
+    assert!(!crate::is_import_clipboard_key(&KeyEvent::new(
+        KeyCode::Char('i'),
+        KeyModifiers::CONTROL
+    )));
+    assert!(!crate::is_import_clipboard_key(&KeyEvent::new(
+        KeyCode::Char('i'),
+        KeyModifiers::ALT
+    )));
+}
+
+#[test]
 fn count_prefix_is_not_treated_as_ten_line_shortcut() {
     assert!(!crate::is_fast_move_up_key(&KeyEvent::new(
         KeyCode::Char('k'),

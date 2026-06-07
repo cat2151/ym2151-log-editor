@@ -37,6 +37,7 @@ fn help_overlay_renders_clipboard_hint() {
     assert!(rendered.contains("PgUp / PgDn: Jump 10 lines"));
     assert!(rendered.contains("Ctrl+U / Ctrl+D: Jump 10 lines"));
     assert!(rendered.contains("[count]k / [count]j: Move by count (vim style)"));
+    assert!(rendered.contains("I: Import JSON from clipboard"));
 }
 
 #[test]

@@ -23,3 +23,4 @@ cargo check --all-targets --target x86_64-pc-windows-gnu
   - DRY原則に準拠し、「codeやbuild scriptと同じことを、documentに書いたせいで、そのdocumentが陳腐化してハルシネーションやuserレビューコスト増大や混乱ほか様々なトラブル原因になる」を防止する
   - なおissue-notes/は、userがissueごとの意図を記録する用途で使う
 - cat2151のライブラリはrev固定禁止
+- README.mdは編集禁止（README.ja.mdから自動生成されるので）

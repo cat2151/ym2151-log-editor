@@ -1,6 +1,10 @@
 use crate::app::App;
 use crate::models::Ym2151Event;
-use ratatui::{backend::TestBackend, style::Color, Terminal};
+use ratatui::{
+    backend::TestBackend,
+    style::{Color, Modifier},
+    Terminal,
+};
 
 fn render_to_string(terminal: &Terminal<TestBackend>) -> String {
     let buffer = terminal.backend().buffer();
@@ -12,6 +16,20 @@ fn render_to_string(terminal: &Terminal<TestBackend>) -> String {
         rendered.push('\n');
     }
     rendered
+}
+
+fn find_text_position(terminal: &Terminal<TestBackend>, needle: &str) -> Option<(u16, u16)> {
+    let buffer = terminal.backend().buffer();
+    for y in 0..buffer.area.height {
+        let mut row = String::new();
+        for x in 0..buffer.area.width {
+            row.push_str(buffer[(x, y)].symbol());
+        }
+        if let Some(byte_index) = row.find(needle) {
+            return Some((row[..byte_index].chars().count() as u16, y));
+        }
+    }
+    None
 }
 
 #[test]
@@ -100,6 +118,50 @@ fn event_list_renders_description_column_content() {
     let rendered = render_to_string(&terminal);
 
     assert!(rendered.contains("0.000000  08  78  ch0 keyon"));
+}
+
+#[test]
+fn event_list_highlights_keyon_as_strongest_monokai_token() {
+    let backend = TestBackend::new(120, 10);
+    let mut terminal = Terminal::new(backend).unwrap();
+    let mut app = App::new();
+    app.log.events = vec![Ym2151Event {
+        time: 0.0,
+        addr: "08".to_string(),
+        data: "78".to_string(),
+    }];
+
+    terminal.draw(|f| crate::ui::render(f, &mut app)).unwrap();
+
+    let buffer = terminal.backend().buffer();
+    let (x, y) = find_text_position(&terminal, "keyon").unwrap();
+    let keyon_cell = &buffer[(x, y)];
+
+    assert_eq!(keyon_cell.fg, Color::Rgb(249, 38, 114));
+    assert_eq!(keyon_cell.bg, Color::Rgb(73, 72, 62));
+    assert!(keyon_cell.modifier.contains(Modifier::BOLD));
+    assert!(keyon_cell.modifier.contains(Modifier::UNDERLINED));
+}
+
+#[test]
+fn event_list_does_not_apply_keyon_highlight_to_keyoff() {
+    let backend = TestBackend::new(120, 10);
+    let mut terminal = Terminal::new(backend).unwrap();
+    let mut app = App::new();
+    app.log.events = vec![Ym2151Event {
+        time: 0.0,
+        addr: "08".to_string(),
+        data: "00".to_string(),
+    }];
+
+    terminal.draw(|f| crate::ui::render(f, &mut app)).unwrap();
+
+    let buffer = terminal.backend().buffer();
+    let (x, y) = find_text_position(&terminal, "keyoff").unwrap();
+    let keyoff_cell = &buffer[(x, y)];
+
+    assert_ne!(keyoff_cell.fg, Color::Rgb(249, 38, 114));
+    assert!(!keyoff_cell.modifier.contains(Modifier::UNDERLINED));
 }
 
 #[test]
